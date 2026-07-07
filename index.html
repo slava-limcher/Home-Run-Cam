@@ -144,14 +144,33 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
 #hrOverlay.show{display:flex;opacity:1}
 #hrVideo{width:100%;height:100%;object-fit:cover}
-.hrname{position:absolute;left:0;right:0;bottom:8%;text-align:center;z-index:2;
-  pointer-events:none;opacity:0;transition:opacity .5s}
-.hrname.show{opacity:1}
-.hrname .who{display:inline-block;background:rgba(4,14,34,.72);backdrop-filter:blur(4px);
-  border:2px solid var(--gold);border-radius:14px;padding:14px 34px}
-.hrname .who .k{color:var(--gold);font-weight:900;letter-spacing:4px;font-size:16px;display:block}
-.hrname .who .v{font-weight:900;font-size:clamp(26px,4.5vw,48px);line-height:1.1}
-.hrname .who .d{color:var(--dim);font-size:14px;margin-top:4px}
+.hrname{position:absolute;left:0;right:0;bottom:6%;display:flex;justify-content:center;z-index:2;
+  pointer-events:none;opacity:0;transform:translateY(24px);transition:opacity .5s,transform .5s}
+.hrname.show{opacity:1;transform:translateY(0)}
+.hrcard{display:flex;align-items:flex-end;gap:20px;
+  background:linear-gradient(180deg,rgba(4,14,34,.78),rgba(4,14,34,.92));backdrop-filter:blur(6px);
+  border:2px solid var(--gold);border-radius:18px;padding:16px 30px 16px 20px;max-width:92vw;
+  box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.hrshotwrap{position:relative;width:clamp(88px,11vw,132px);height:clamp(88px,11vw,132px);
+  border-radius:50%;flex:0 0 auto;
+  background:radial-gradient(circle at 50% 35%, var(--hrteamc,#0a2a5c), #04122a 75%);
+  border:3px solid var(--gold);box-shadow:0 0 24px rgba(255,203,46,.45);overflow:hidden}
+.hrshot{position:absolute;left:50%;bottom:-4%;transform:translateX(-50%);
+  width:130%;height:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.hrinfo{text-align:left;padding-bottom:4px;min-width:0}
+.hrkick{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.hrkick img{width:26px;height:26px;object-fit:contain}
+.hrkick span{color:var(--gold);font-weight:900;letter-spacing:5px;font-size:clamp(13px,1.6vw,18px)}
+.hrplayer{font-weight:900;font-size:clamp(28px,4.6vw,52px);line-height:1;
+  text-shadow:0 3px 12px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrmeta{display:flex;align-items:baseline;gap:12px;margin-top:6px}
+.hrnum{font-weight:900;font-size:clamp(20px,2.8vw,32px);color:var(--gold);
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,203,46,.5);border-radius:8px;padding:0 10px}
+.hrnum:empty{display:none}
+.hrteam{color:#cfe0ff;font-weight:800;font-size:clamp(14px,1.8vw,20px)}
+.hrdesc{color:var(--dim);font-size:clamp(12px,1.4vw,15px);margin-top:6px;max-width:46ch;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrdesc:empty{display:none}
 .skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
 
@@ -255,7 +274,15 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   <video id="hrVideo" playsinline preload="auto" src="homerun.mp4"></video>
   <button class="skip" id="skipBtn">Skip ⏭</button>
   <div class="hrname" id="hrName">
-    <div class="who"><span class="k">HOME RUN</span><span class="v" id="hrWho">—</span><span class="d" id="hrDesc"></span></div>
+    <div class="hrcard">
+      <div class="hrshotwrap"><img class="hrshot" id="hrShot" alt=""></div>
+      <div class="hrinfo">
+        <div class="hrkick"><img id="hrTeamLogo" alt=""><span>HOME RUN</span></div>
+        <div class="hrplayer" id="hrWho">—</div>
+        <div class="hrmeta"><span class="hrnum" id="hrNum"></span><span class="hrteam" id="hrTeam"></span></div>
+        <div class="hrdesc" id="hrDesc"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -269,6 +296,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 const $=s=>document.querySelector(s);
 const API="https://statsapi.mlb.com/api";
 const logoURL=id=>`https://www.mlbstatic.com/team-logos/${id}.svg`;
+const shotURL=id=>`https://midfield.mlbstatic.com/v1/people/${id}/spots/240`; // transparent cutout
+async function fetchNumber(id){
+  try{const r=await fetch(`${API}/v1/people/${id}`);const j=await r.json();
+    return (j.people&&j.people[0]&&j.people[0].primaryNumber)||"";}catch(e){return "";}
+}
 const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
@@ -450,8 +482,11 @@ async function tickLive(first){
     if(first){ lastHRIndex=maxIdx; }          // don't replay HRs that happened before we tuned in
     else if(newest && maxIdx>lastHRIndex){
       lastHRIndex=maxIdx;
-      const batter=(newest.matchup&&newest.matchup.batter&&newest.matchup.batter.fullName)||"";
-      playHomeRun(batter, newest.result.description||"");
+      const b=(newest.matchup&&newest.matchup.batter)||{};
+      const half=(newest.about&&newest.about.halfInning)||"";
+      const team=(half==="bottom")?G.home:G.away;   // top=away bats, bottom=home bats
+      triggerHR({id:b.id,name:b.fullName||"",number:"",team:team,desc:newest.result.description||""});
+      if(b.id)fetchNumber(b.id).then(n=>{if(n)$("#hrNum").textContent="#"+n;});
     }
   }catch(e){
     $("#statusTxt").textContent="RECONNECTING…";
@@ -478,8 +513,22 @@ function startDemo(){
   showBoard(); renderBoard();
   demoTimer=setInterval(demoTick,3200);
 }
-const DEMO_BATTERS=["Aaron Judge","Mookie Betts","Juan Soto","Shohei Ohtani","Giancarlo Stanton",
-  "Freddie Freeman","Anthony Volpe","Teoscar Hernández","Jazz Chisholm Jr.","Will Smith"];
+// Real players on the demo teams so the headshot + number match the logo shown.
+const DEMO_ROSTER={
+  away:[ // Yankees (147)
+    {id:592450,name:"Aaron Judge",number:"99"},
+    {id:519317,name:"Giancarlo Stanton",number:"27"},
+    {id:683011,name:"Anthony Volpe",number:"11"},
+    {id:665862,name:"Jazz Chisholm Jr.",number:"13"}
+  ],
+  home:[ // Dodgers (119)
+    {id:660271,name:"Shohei Ohtani",number:"17"},
+    {id:605141,name:"Mookie Betts",number:"50"},
+    {id:518692,name:"Freddie Freeman",number:"5"},
+    {id:669257,name:"Will Smith",number:"16"},
+    {id:606192,name:"Teoscar Hernández",number:"37"}
+  ]
+};
 function battingTeam(){return G.battingHome?G.home:G.away;}
 function demoTick(){
   // simple weighted at-bat sim to keep the board alive
@@ -525,29 +574,41 @@ function nextHalf(){
    ============================================================ */
 const ov=$("#hrOverlay"), vid=$("#hrVideo");
 let hrPlaying=false;
-function playHomeRun(batterName, desc){
+/* info = {id, name, number, team:{id,name,abbr}, desc} — any field optional */
+function triggerHR(info){
   if(hrPlaying)return; hrPlaying=true;
+  info=info||{};
   // in demo, actually score the HR on the board
   if(MODE==="demo"){
-    if(!batterName)batterName=DEMO_BATTERS[Math.floor(Math.random()*DEMO_BATTERS.length)];
     const onBase=G.bases.filter(Boolean).length;
     resetCount(); G.bases=[false,false,false];
     const runs=onBase+1;
     if(G.battingHome)G.home.score+=runs; else G.away.score+=runs;
-    desc=desc||`${batterName} homers${onBase?` (${runs}-run shot)`:""}!`;
+    if(!info.desc)info.desc=`${info.name||"Batter"} homers${runs>1?` — ${runs}-run shot`:""}!`;
     renderBoard();
   }
-  // name card
-  $("#hrWho").textContent=batterName||"HOME RUN!";
-  $("#hrDesc").textContent=desc||"";
+  buildHRCard(info);
   ov.classList.add("show");
   vid.currentTime=0;
   vid.muted=false;
   const p=vid.play();
   if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play().catch(()=>{});});}
-  // reveal the name once the "HOME RUN" text hits (~6.5s in)
-  clearTimeout(playHomeRun._n);
-  playHomeRun._n=setTimeout(()=>$("#hrName").classList.add("show"),6200);
+  // reveal the batter card once the "HOME RUN" text hits (~6.2s in)
+  clearTimeout(triggerHR._n);
+  triggerHR._n=setTimeout(()=>$("#hrName").classList.add("show"),6200);
+}
+function buildHRCard(info){
+  const team=info.team||{};
+  document.documentElement.style.setProperty('--hrteamc',teamColor(team.id||0));
+  const shot=$("#hrShot"), logo=$("#hrTeamLogo");
+  if(info.id){shot.src=shotURL(info.id);shot.style.display="";}
+  else{shot.removeAttribute("src");shot.style.display="none";}
+  shot.onerror=()=>{shot.style.display="none";};
+  if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
+  $("#hrWho").textContent=info.name||"HOME RUN!";
+  $("#hrNum").textContent=info.number?("#"+info.number):"";
+  $("#hrTeam").textContent=team.name||"";
+  $("#hrDesc").textContent=info.desc||"";
 }
 function endHomeRun(){
   vid.pause();
@@ -564,8 +625,13 @@ $("#skipBtn").onclick=endHomeRun;
 $("#demoBtn").onclick=startDemo;
 $("#backBtn").onclick=showSetup;
 $("#hrBtn").onclick=()=>{
-  if(MODE==="demo")playHomeRun();
-  else playHomeRun("","Home run cinematic — preview");
+  if(MODE==="demo"){
+    const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
+    const p=roster[Math.floor(Math.random()*roster.length)];
+    triggerHR({id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away)});
+  }else{
+    triggerHR({id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),desc:"Preview — home run cinematic"});
+  }
 };
 
 // preload the video quietly
