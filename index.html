@@ -144,33 +144,61 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
 #hrOverlay.show{display:flex;opacity:1}
 #hrVideo{width:100%;height:100%;object-fit:cover}
-.hrname{position:absolute;left:0;right:0;bottom:6%;display:flex;justify-content:center;z-index:2;
-  pointer-events:none;opacity:0;transform:translateY(24px);transition:opacity .5s,transform .5s}
-.hrname.show{opacity:1;transform:translateY(0)}
-.hrcard{display:flex;align-items:flex-end;gap:20px;
-  background:linear-gradient(180deg,rgba(4,14,34,.78),rgba(4,14,34,.92));backdrop-filter:blur(6px);
-  border:2px solid var(--gold);border-radius:18px;padding:16px 30px 16px 20px;max-width:92vw;
-  box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.hrshotwrap{position:relative;width:clamp(88px,11vw,132px);height:clamp(88px,11vw,132px);
-  border-radius:50%;flex:0 0 auto;
-  background:radial-gradient(circle at 50% 35%, var(--hrteamc,#0a2a5c), #04122a 75%);
-  border:3px solid var(--gold);box-shadow:0 0 24px rgba(255,203,46,.45);overflow:hidden}
-.hrshot{position:absolute;left:50%;bottom:-4%;transform:translateX(-50%);
-  width:130%;height:auto;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
-.hrinfo{text-align:left;padding-bottom:4px;min-width:0}
-.hrkick{display:flex;align-items:center;gap:10px;margin-bottom:2px}
-.hrkick img{width:26px;height:26px;object-fit:contain}
-.hrkick span{color:var(--gold);font-weight:900;letter-spacing:5px;font-size:clamp(13px,1.6vw,18px)}
-.hrplayer{font-weight:900;font-size:clamp(28px,4.6vw,52px);line-height:1;
-  text-shadow:0 3px 12px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hrmeta{display:flex;align-items:baseline;gap:12px;margin-top:6px}
-.hrnum{font-weight:900;font-size:clamp(20px,2.8vw,32px);color:var(--gold);
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,203,46,.5);border-radius:8px;padding:0 10px}
-.hrnum:empty{display:none}
-.hrteam{color:#cfe0ff;font-weight:800;font-size:clamp(14px,1.8vw,20px)}
-.hrdesc{color:var(--dim);font-size:clamp(12px,1.4vw,15px);margin-top:6px;max-width:46ch;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hrdesc:empty{display:none}
+/* ---- per-player cinematic overlay (over the whole clip) ---- */
+.hrfx{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.hrfx-glow{position:absolute;inset:0;opacity:0;transition:opacity 1s;
+  background:
+    radial-gradient(65% 95% at 0% 100%, color-mix(in srgb, var(--hrteamc,#0a2a5c) 58%, transparent), transparent 70%),
+    radial-gradient(55% 65% at 100% 0%, color-mix(in srgb, var(--hrteamc,#0a2a5c) 32%, transparent), transparent 72%)}
+.hrfx.show .hrfx-glow{opacity:1}
+
+/* hero player cutout rising from bottom-left */
+.hrfx-hero{position:absolute;left:2vw;bottom:0;height:min(80vh,680px);width:min(44vw,560px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transform:translateY(70px) scale(.95);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:.55s}
+.hrfx.show .hrfx-hero{opacity:1;transform:none}
+.hrfx-spot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:118%;height:90%;
+  border-radius:50% 50% 42% 42%;filter:blur(8px);opacity:.92;
+  background:radial-gradient(closest-side, color-mix(in srgb,var(--hrteamc,#0a2a5c) 90%, #000), transparent 70%)}
+.hrfx-silo{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom;
+  filter:drop-shadow(0 14px 34px rgba(0,0,0,.65))}
+
+/* nameplate over the hero base */
+.hrfx-plate{position:absolute;left:2.5vw;bottom:4.5vh;max-width:min(52vw,640px);
+  opacity:0;transform:translateY(26px);transition:opacity .6s,transform .6s;transition-delay:1.5s}
+.hrfx.show .hrfx-plate{opacity:1;transform:none}
+.hrfx-kick{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.hrfx-kick img{width:clamp(28px,3vw,40px);height:clamp(28px,3vw,40px);object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.7))}
+.hrfx-kick span{color:var(--gold);font-weight:900;letter-spacing:7px;font-size:clamp(15px,2.1vw,26px);text-shadow:0 2px 10px rgba(0,0,0,.8)}
+.hrfx-name{font-weight:900;font-size:clamp(34px,6.2vw,84px);line-height:.92;letter-spacing:-1px;
+  text-shadow:0 5px 22px rgba(0,0,0,.8)}
+.hrfx-sub{display:flex;align-items:baseline;gap:14px;margin-top:10px;flex-wrap:wrap}
+.hrfx-num{font-weight:900;font-size:clamp(22px,3vw,42px);color:var(--gold);
+  background:rgba(0,0,0,.42);border:2px solid rgba(255,203,46,.6);border-radius:10px;padding:2px 14px;
+  text-shadow:0 2px 6px rgba(0,0,0,.7)}
+.hrfx-num:empty{display:none}
+.hrfx-team{font-weight:800;color:#e2edff;font-size:clamp(16px,2vw,28px);text-shadow:0 2px 10px rgba(0,0,0,.8)}
+
+/* stat tiles bottom-right, staggered in */
+.hrfx-stats{position:absolute;right:2.6vw;bottom:5vh;display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;max-width:46vw}
+.hrfx-stat{background:linear-gradient(180deg,rgba(4,14,34,.82),rgba(4,14,34,.95));
+  border:1px solid rgba(255,255,255,.16);border-top:3px solid var(--gold);border-radius:14px;
+  padding:12px 22px;text-align:center;min-width:118px;box-shadow:0 12px 30px rgba(0,0,0,.55);
+  opacity:0;transform:translateY(20px) scale(.9);transition:opacity .45s,transform .45s}
+.hrfx.show .hrfx-stat{opacity:1;transform:none}
+.hrfx.show .hrfx-stat:nth-child(1){transition-delay:2.7s}
+.hrfx.show .hrfx-stat:nth-child(2){transition-delay:3.0s}
+.hrfx.show .hrfx-stat:nth-child(3){transition-delay:3.3s}
+.hrfx.show .hrfx-stat:nth-child(4){transition-delay:3.6s}
+.hrfx-stat .v{font-weight:900;font-size:clamp(24px,3.6vw,44px);line-height:1;color:#fff}
+.hrfx-stat .v small{font-size:.5em;font-weight:800;color:var(--dim);margin-left:3px}
+.hrfx-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(10px,1.1vw,13px);margin-top:6px}
+@media (max-width:680px){
+  .hrfx-hero{height:54vh;width:56vw;left:auto;right:2vw}
+  .hrfx-plate{bottom:auto;top:9%}
+  .hrfx-stats{right:50%;transform:translateX(50%);bottom:4vh;max-width:96vw}
+  .hrfx-stat{min-width:92px;padding:8px 14px}
+}
 .skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
 
@@ -273,16 +301,18 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 <div id="hrOverlay">
   <video id="hrVideo" playsinline preload="auto" src="homerun.mp4"></video>
   <button class="skip" id="skipBtn">Skip ⏭</button>
-  <div class="hrname" id="hrName">
-    <div class="hrcard">
-      <div class="hrshotwrap"><img class="hrshot" id="hrShot" alt=""></div>
-      <div class="hrinfo">
-        <div class="hrkick"><img id="hrTeamLogo" alt=""><span>HOME RUN</span></div>
-        <div class="hrplayer" id="hrWho">—</div>
-        <div class="hrmeta"><span class="hrnum" id="hrNum"></span><span class="hrteam" id="hrTeam"></span></div>
-        <div class="hrdesc" id="hrDesc"></div>
-      </div>
+  <div class="hrfx" id="hrName">
+    <div class="hrfx-glow" id="hrGlow"></div>
+    <div class="hrfx-hero">
+      <div class="hrfx-spot"></div>
+      <img class="hrfx-silo" id="hrShot" alt="">
     </div>
+    <div class="hrfx-plate">
+      <div class="hrfx-kick"><img id="hrTeamLogo" alt=""><span>HOME&nbsp;RUN</span></div>
+      <div class="hrfx-name" id="hrWho">—</div>
+      <div class="hrfx-sub"><span class="hrfx-num" id="hrNum"></span><span class="hrfx-team" id="hrTeam"></span></div>
+    </div>
+    <div class="hrfx-stats" id="hrStats"></div>
   </div>
 </div>
 
@@ -296,7 +326,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 const $=s=>document.querySelector(s);
 const API="https://statsapi.mlb.com/api";
 const logoURL=id=>`https://www.mlbstatic.com/team-logos/${id}.svg`;
-const shotURL=id=>`https://midfield.mlbstatic.com/v1/people/${id}/spots/240`; // transparent cutout
+const shotURL=id=>`https://midfield.mlbstatic.com/v1/people/${id}/spots/240`; // transparent head cutout (fallback)
+const siloURL=id=>`https://img.mlbstatic.com/mlb-photos/image/upload/w_640,q_auto:best/v1/people/${id}/headshot/silo/current.png`; // big chest-up cutout
 async function fetchNumber(id){
   try{const r=await fetch(`${API}/v1/people/${id}`);const j=await r.json();
     return (j.people&&j.people[0]&&j.people[0].primaryNumber)||"";}catch(e){return "";}
@@ -485,7 +516,10 @@ async function tickLive(first){
       const b=(newest.matchup&&newest.matchup.batter)||{};
       const half=(newest.about&&newest.about.halfInning)||"";
       const team=(half==="bottom")?G.home:G.away;   // top=away bats, bottom=home bats
-      triggerHR({id:b.id,name:b.fullName||"",number:"",team:team,desc:newest.result.description||""});
+      const hd=hitDataOf(newest);
+      const stats={distance:hd.distance,exitVelo:hd.exitVelo,
+                   seasonHR:seasonHRof(newest.result.description),rbi:newest.result.rbi||0};
+      triggerHR({id:b.id,name:b.fullName||"",number:"",team:team,stats:stats,desc:newest.result.description||""});
       if(b.id)fetchNumber(b.id).then(n=>{if(n)$("#hrNum").textContent="#"+n;});
     }
   }catch(e){
@@ -593,23 +627,48 @@ function triggerHR(info){
   vid.muted=false;
   const p=vid.play();
   if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play().catch(()=>{});});}
-  // reveal the batter card once the "HOME RUN" text hits (~6.2s in)
+  // bring the player overlay in early so they're featured across the whole clip;
+  // the plate + stat tiles stagger in via CSS transition-delays.
+  $("#hrName").classList.remove("show");
   clearTimeout(triggerHR._n);
-  triggerHR._n=setTimeout(()=>$("#hrName").classList.add("show"),6200);
+  triggerHR._n=setTimeout(()=>$("#hrName").classList.add("show"),260);
 }
 function buildHRCard(info){
   const team=info.team||{};
   document.documentElement.style.setProperty('--hrteamc',teamColor(team.id||0));
-  const shot=$("#hrShot"), logo=$("#hrTeamLogo");
-  if(info.id){shot.src=shotURL(info.id);shot.style.display="";}
-  else{shot.removeAttribute("src");shot.style.display="none";}
-  shot.onerror=()=>{shot.style.display="none";};
+  const shot=$("#hrShot"), logo=$("#hrTeamLogo"), hero=shot.parentElement;
+  if(info.id){
+    hero.style.display="";
+    // try the big silo cutout; fall back to the head cutout; then hide the hero
+    shot.onerror=()=>{ if(shot.src.indexOf('midfield')<0) shot.src=shotURL(info.id); else hero.style.display="none"; };
+    shot.src=siloURL(info.id);
+  }else{ hero.style.display="none"; shot.removeAttribute("src"); }
   if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
   $("#hrWho").textContent=info.name||"HOME RUN!";
   $("#hrNum").textContent=info.number?("#"+info.number):"";
   $("#hrTeam").textContent=team.name||"";
-  $("#hrDesc").textContent=info.desc||"";
+  buildStats(info.stats||{});
 }
+function buildStats(s){
+  const box=$("#hrStats"); box.innerHTML="";
+  const tiles=[];
+  if(s.distance)  tiles.push(["DISTANCE", s.distance+'<small>FT</small>']);
+  if(s.exitVelo)  tiles.push(["EXIT VELO", s.exitVelo+'<small>MPH</small>']);
+  if(s.seasonHR)  tiles.push(["SEASON HR", String(s.seasonHR)]);
+  if(s.rbi)       tiles.push(["RBI", String(s.rbi)]);
+  tiles.forEach(([k,v])=>{const d=document.createElement("div");d.className="hrfx-stat";
+    d.innerHTML=`<div class="v">${v}</div><div class="k">${k}</div>`;box.appendChild(d);});
+}
+/* pull the final batted-ball measurements off a play */
+function hitDataOf(play){
+  const evs=((play&&play.playEvents)||[]).filter(e=>e.hitData);
+  const hd=evs.length?evs[evs.length-1].hitData:null;
+  if(!hd)return {};
+  return {distance:hd.totalDistance?Math.round(hd.totalDistance):null,
+          exitVelo:hd.launchSpeed?Math.round(hd.launchSpeed*10)/10:null};
+}
+/* "Aaron Judge homers (37) on a fly ball..." -> 37 (season HR total) */
+function seasonHRof(desc){const m=(desc||"").match(/homers?\s*\((\d+)\)/i);return m?+m[1]:null;}
 function endHomeRun(){
   vid.pause();
   ov.classList.remove("show");
@@ -624,13 +683,21 @@ $("#skipBtn").onclick=endHomeRun;
    ============================================================ */
 $("#demoBtn").onclick=startDemo;
 $("#backBtn").onclick=showSetup;
+function demoStats(){
+  const onBase=G.bases.filter(Boolean).length;
+  return {distance:380+Math.floor(Math.random()*90),          // 380–469 ft
+          exitVelo:Math.round((100+Math.random()*15)*10)/10,   // 100.0–115.0 mph
+          seasonHR:8+Math.floor(Math.random()*40),             // 8–47
+          rbi:onBase+1};                                        // solo..grand slam
+}
 $("#hrBtn").onclick=()=>{
   if(MODE==="demo"){
     const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
     const p=roster[Math.floor(Math.random()*roster.length)];
-    triggerHR({id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away)});
+    triggerHR({id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()});
   }else{
-    triggerHR({id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),desc:"Preview — home run cinematic"});
+    triggerHR({id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),
+               stats:{distance:441,exitVelo:112.3,seasonHR:37,rbi:2},desc:"Preview — home run cinematic"});
   }
 };
 
