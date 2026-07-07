@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOME RUN CAM — MLB</title>
+<style>
+:root{
+  --navy:#041e42; --navy2:#0a2a5c; --red:#bf0d3e; --red2:#e01843;
+  --ink:#0a1122; --white:#f6f8ff; --dim:#9fb0d0; --line:rgba(255,255,255,.12);
+  --gold:#ffcb2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #123a72 0%, #071a38 55%, #030c1e 100%);
+  color:var(--white); overflow:hidden; -webkit-font-smoothing:antialiased;
+}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit}
+
+/* ---------- stadium field texture behind everything ---------- */
+.fieldbg{position:fixed;inset:0;z-index:0;opacity:.10;pointer-events:none;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 40px, transparent 40px 80px);
+}
+
+/* =================== SETUP / GAME PICKER =================== */
+#setup{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;
+  padding:min(5vh,48px) 20px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+.brandmark{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--red),var(--red2));
+  display:grid;place-items:center;box-shadow:0 8px 30px rgba(191,13,62,.5);position:relative}
+.brandmark svg{width:40px;height:40px}
+.brand h1{font-size:clamp(28px,5vw,56px);font-weight:900;letter-spacing:2px;
+  background:linear-gradient(180deg,#fff,#bcd0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand .sub{color:var(--gold);font-weight:800;letter-spacing:6px;font-size:clamp(10px,1.4vw,15px)}
+.tag{color:var(--dim);margin:2px 0 26px;font-size:clamp(13px,1.6vw,17px);text-align:center;max-width:640px}
+
+.datebar{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.datebar button{background:var(--navy2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 16px;font-weight:800;font-size:16px}
+.datebar button:hover{background:#153a78}
+.datebar .dlabel{min-width:220px;text-align:center;font-weight:800;font-size:18px}
+
+.demoCard{width:min(760px,94vw);margin-bottom:16px}
+.demobtn{width:100%;background:linear-gradient(135deg,var(--red),var(--red2));
+  border-radius:16px;padding:22px 26px;display:flex;align-items:center;gap:18px;
+  box-shadow:0 12px 40px rgba(191,13,62,.35);transition:transform .12s}
+.demobtn:hover{transform:translateY(-2px)}
+.demobtn .ball{font-size:40px}
+.demobtn .txt{text-align:left}
+.demobtn .txt b{display:block;font-size:22px;font-weight:900;letter-spacing:.5px}
+.demobtn .txt span{color:rgba(255,255,255,.85);font-size:14px}
+.demobtn .go{margin-left:auto;font-weight:900;font-size:22px}
+
+.games{width:min(760px,94vw);display:flex;flex-direction:column;gap:10px}
+.gcard{background:linear-gradient(180deg,rgba(20,45,92,.9),rgba(10,26,58,.9));
+  border:1px solid var(--line);border-radius:14px;padding:14px 18px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;transition:.12s}
+.gcard:hover{border-color:var(--red2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.gteam{display:flex;align-items:center;gap:12px;min-width:0}
+.gteam.home{justify-content:flex-end;text-align:right}
+.gteam img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.gteam .nm{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gteam .rec{color:var(--dim);font-size:12px}
+.gmid{text-align:center;min-width:96px}
+.gmid .st{font-weight:900;font-size:14px}
+.gmid .st.live{color:#39e07f}
+.gmid .st.final{color:var(--dim)}
+.gmid .tm{color:var(--gold);font-size:13px;font-weight:800}
+.gmid .sc{font-size:22px;font-weight:900}
+.gmid .vs{color:var(--dim);font-weight:800}
+.empty{color:var(--dim);text-align:center;padding:40px;font-size:16px}
+.loading{color:var(--dim);text-align:center;padding:30px}
+
+.foot{margin-top:26px;color:var(--dim);font-size:12px;text-align:center;max-width:620px;line-height:1.6}
+.foot code{color:#bcd0ff}
+
+/* =================== SCOREBOARD (TV) =================== */
+#board{position:fixed;inset:0;z-index:4;display:none;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;
+  background:linear-gradient(90deg,rgba(4,30,66,.95),rgba(4,30,66,.4));border-bottom:1px solid var(--line)}
+.topbar .back{background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-weight:800}
+.topbar .back:hover{background:#153a78}
+.topbar .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:2px}
+.topbar .logo svg{width:26px;height:26px}
+.topbar .status{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--dim);font-size:13px;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:#39e07f;box-shadow:0 0 10px #39e07f;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+.scorewrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:20px}
+.scoreboard{width:min(1100px,96vw);background:linear-gradient(180deg,rgba(9,26,58,.92),rgba(4,14,34,.96));
+  border:1px solid var(--line);border-radius:22px;padding:min(4vh,34px) min(4vw,40px);
+  box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative;overflow:hidden}
+.scoreboard::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(600px 200px at 50% 0,rgba(191,13,62,.18),transparent 70%);pointer-events:none}
+.matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:min(3vw,30px)}
+.team{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:0}
+.team .crest{width:min(16vw,120px);height:min(16vw,120px);object-fit:contain;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.6))}
+.team .abbr{font-weight:900;letter-spacing:2px;font-size:clamp(16px,2.4vw,26px)}
+.team .full{color:var(--dim);font-size:clamp(11px,1.3vw,15px);font-weight:700}
+.team .score{font-size:clamp(56px,12vw,140px);font-weight:900;line-height:.9;
+  text-shadow:0 6px 24px rgba(0,0,0,.5)}
+.team.batting .score{color:var(--gold)}
+.centercol{display:flex;flex-direction:column;align-items:center;gap:14px}
+.inning{display:flex;flex-direction:column;align-items:center;gap:2px}
+.inning .half{font-size:20px;color:var(--gold);line-height:1}
+.inning .num{font-size:clamp(22px,3.2vw,40px);font-weight:900;line-height:1}
+.inning .lbl{font-size:11px;color:var(--dim);letter-spacing:2px}
+
+/* bases diamond */
+.diamond{position:relative;width:96px;height:96px}
+.base{position:absolute;width:30px;height:30px;background:rgba(255,255,255,.12);
+  border:2px solid rgba(255,255,255,.35);transform:rotate(45deg);transition:.2s}
+.base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 18px var(--gold)}
+.base.b2{top:2px;left:33px}
+.base.b3{top:33px;left:2px}
+.base.b1{top:33px;right:2px}
+/* count */
+.count{display:flex;gap:20px;color:var(--dim);font-weight:800;font-size:14px}
+.count b{color:var(--white);font-size:18px}
+.outs{display:flex;gap:6px;align-items:center}
+.outdot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid var(--line)}
+.outdot.on{background:var(--red2);box-shadow:0 0 8px var(--red2)}
+
+.linescore{margin-top:6px;color:var(--dim);font-size:13px;font-weight:700;text-align:center}
+.controls{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.hrbtn{background:linear-gradient(135deg,var(--red),var(--red2));border-radius:14px;
+  padding:16px 30px;font-size:20px;font-weight:900;letter-spacing:1px;
+  box-shadow:0 12px 34px rgba(191,13,62,.45);transition:transform .1s}
+.hrbtn:hover{transform:translateY(-2px)}
+.hrbtn:active{transform:translateY(0)}
+.ghostbtn{background:var(--navy2);border:1px solid var(--line);border-radius:14px;
+  padding:16px 24px;font-size:16px;font-weight:800}
+.ghostbtn:hover{background:#153a78}
+.hint{color:var(--dim);font-size:13px;text-align:center;max-width:640px}
+
+/* =================== HOME RUN VIDEO OVERLAY =================== */
+#hrOverlay{position:fixed;inset:0;z-index:50;background:#000;display:none;
+  align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
+#hrOverlay.show{display:flex;opacity:1}
+#hrVideo{width:100%;height:100%;object-fit:cover}
+.hrname{position:absolute;left:0;right:0;bottom:8%;text-align:center;z-index:2;
+  pointer-events:none;opacity:0;transition:opacity .5s}
+.hrname.show{opacity:1}
+.hrname .who{display:inline-block;background:rgba(4,14,34,.72);backdrop-filter:blur(4px);
+  border:2px solid var(--gold);border-radius:14px;padding:14px 34px}
+.hrname .who .k{color:var(--gold);font-weight:900;letter-spacing:4px;font-size:16px;display:block}
+.hrname .who .v{font-weight:900;font-size:clamp(26px,4.5vw,48px);line-height:1.1}
+.hrname .who .d{color:var(--dim);font-size:14px;margin-top:4px}
+.skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
+
+/* toast */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
+  background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
+  font-weight:700;opacity:0;transition:.3s;pointer-events:none}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="fieldbg"></div>
+
+<!-- ============ SETUP ============ -->
+<div id="setup">
+  <div class="brand">
+    <div class="brandmark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 4c3 2 5 6 5 8s-2 6-5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M18 4c-3 2-5 6-5 8s2 6 5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.6"/></svg>
+    </div>
+    <div>
+      <div class="sub">MLB • BARBOARDS</div>
+      <h1>HOME RUN CAM</h1>
+    </div>
+  </div>
+  <p class="tag">Pick tonight's game. We'll follow the live scoreboard on your TV — and the instant someone goes deep, the Home Run cinematic takes over the screen. 💥</p>
+
+  <div class="datebar">
+    <button id="prevDay">◀</button>
+    <div class="dlabel" id="dlabel">Today</div>
+    <button id="nextDay">▶</button>
+  </div>
+
+  <div class="demoCard">
+    <button class="demobtn" id="demoBtn">
+      <span class="ball">⚾</span>
+      <span class="txt"><b>Run the Demo Game</b><span>Simulated game + a big “Hit a Home Run” button — no live game needed</span></span>
+      <span class="go">▶</span>
+    </button>
+  </div>
+
+  <div class="games" id="games"><div class="loading">Loading games…</div></div>
+
+  <div class="foot">
+    Live data from the free, key-less <code>statsapi.mlb.com</code> feed. Home runs are detected from live play-by-play and trigger automatically. Best on a big screen.
+  </div>
+</div>
+
+<!-- ============ SCOREBOARD ============ -->
+<div id="board">
+  <div class="topbar">
+    <button class="back" id="backBtn">◀ Games</button>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.6"/><path d="M6 4c3 2 5 6 5 8s-2 6-5 8M18 4c-3 2-5 6-5 8s2 6 5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+      HOME RUN CAM
+    </div>
+    <div class="status"><span class="dot" id="liveDot"></span><span id="statusTxt">DEMO</span></div>
+  </div>
+
+  <div class="scorewrap">
+    <div class="scoreboard">
+      <div class="matchup">
+        <div class="team" id="teamAway">
+          <img class="crest" id="awayCrest" alt="">
+          <div class="abbr" id="awayAbbr">AWAY</div>
+          <div class="full" id="awayFull">Away Team</div>
+          <div class="score" id="awayScore">0</div>
+        </div>
+        <div class="centercol">
+          <div class="inning">
+            <div class="half" id="inHalf">▲</div>
+            <div class="num" id="inNum">1</div>
+            <div class="lbl">INNING</div>
+          </div>
+          <div class="diamond">
+            <div class="base b2" id="base2"></div>
+            <div class="base b3" id="base3"></div>
+            <div class="base b1" id="base1"></div>
+          </div>
+          <div class="count"><span>B <b id="balls">0</b></span><span>S <b id="strikes">0</b></span></div>
+          <div class="outs" id="outs"></div>
+        </div>
+        <div class="team" id="teamHome">
+          <img class="crest" id="homeCrest" alt="">
+          <div class="abbr" id="homeAbbr">HOME</div>
+          <div class="full" id="homeFull">Home Team</div>
+          <div class="score" id="homeScore">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="linescore" id="lineTxt"></div>
+    <div class="controls">
+      <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
+      <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
+    </div>
+    <div class="hint" id="boardHint"></div>
+  </div>
+</div>
+
+<!-- ============ HR VIDEO OVERLAY ============ -->
+<div id="hrOverlay">
+  <video id="hrVideo" playsinline preload="auto" src="homerun.mp4"></video>
+  <button class="skip" id="skipBtn">Skip ⏭</button>
+  <div class="hrname" id="hrName">
+    <div class="who"><span class="k">HOME RUN</span><span class="v" id="hrWho">—</span><span class="d" id="hrDesc"></span></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   HOME RUN CAM — MLB TV home-run cinematic
+   Data: statsapi.mlb.com (key-less, CORS-open)
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const API="https://statsapi.mlb.com/api";
+const logoURL=id=>`https://www.mlbstatic.com/team-logos/${id}.svg`;
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
+
+/* ---------- team brand colors (fallback = MLB navy) ---------- */
+const TEAM_COLOR={108:"#ba0021",109:"#a71930",110:"#df4601",111:"#bd3039",112:"#0e3386",
+113:"#c6011f",114:"#00385d",115:"#333366",116:"#0c2340",117:"#002d62",118:"#004687",
+119:"#005a9c",120:"#ab0003",121:"#002d72",133:"#003831",134:"#27251f",135:"#2f241d",
+136:"#0c2c56",137:"#fd5a1e",138:"#c41e3a",139:"#092c5c",140:"#003278",141:"#134a8e",
+142:"#002b5c",143:"#e81828",144:"#ce1141",145:"#27251f",146:"#00a3e0",147:"#003087",
+158:"#12284b"};
+const teamColor=id=>TEAM_COLOR[id]||"#0a2a5c";
+
+/* ============================================================
+   SETUP: date nav + schedule
+   ============================================================ */
+let curDate=new Date();
+function dateLabel(d){
+  const t=new Date(); t.setHours(0,0,0,0);
+  const x=new Date(d); x.setHours(0,0,0,0);
+  const diff=Math.round((x-t)/86400000);
+  const nice=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+  if(diff===0)return "Today · "+nice;
+  if(diff===1)return "Tomorrow · "+nice;
+  if(diff===-1)return "Yesterday · "+nice;
+  return nice;
+}
+async function loadSchedule(){
+  $("#dlabel").textContent=dateLabel(curDate);
+  const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
+  try{
+    const r=await fetch(`${API}/v1/schedule?sportId=1&date=${ymd(curDate)}&hydrate=team`);
+    const j=await r.json();
+    const games=(j.dates&&j.dates[0]&&j.dates[0].games)||[];
+    if(!games.length){box.innerHTML='<div class="empty">No MLB games on this date.<br>Try another day, or run the Demo Game above.</div>';return;}
+    box.innerHTML="";
+    games.forEach(g=>box.appendChild(gameCard(g)));
+  }catch(e){
+    box.innerHTML='<div class="empty">Couldn\'t reach the MLB feed.<br>Check your connection, or run the Demo Game above.</div>';
+  }
+}
+function gameCard(g){
+  const a=g.teams.away, h=g.teams.home;
+  const state=g.status.abstractGameState; // Preview / Live / Final
+  const el=document.createElement("button"); el.className="gcard";
+  let mid;
+  if(state==="Live"){
+    const ls=g.linescore||{};
+    mid=`<div class="gmid"><div class="st live">● LIVE</div>
+      <div class="sc">${a.score??0} - ${h.score??0}</div>
+      <div class="tm">${(ls.inningState||"")} ${ls.currentInning||""}</div></div>`;
+  }else if(state==="Final"){
+    mid=`<div class="gmid"><div class="st final">FINAL</div>
+      <div class="sc">${a.score??0} - ${h.score??0}</div></div>`;
+  }else{
+    const t=new Date(g.gameDate).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    mid=`<div class="gmid"><div class="vs">@</div><div class="tm">${t}</div></div>`;
+  }
+  el.innerHTML=`
+    <div class="gteam away">
+      <img src="${logoURL(a.team.id)}" alt="">
+      <div><div class="nm">${a.team.teamName||a.team.name}</div>
+        <div class="rec">${a.leagueRecord?a.leagueRecord.wins+"-"+a.leagueRecord.losses:""}</div></div>
+    </div>
+    ${mid}
+    <div class="gteam home">
+      <div><div class="nm">${h.team.teamName||h.team.name}</div>
+        <div class="rec">${h.leagueRecord?h.leagueRecord.wins+"-"+h.leagueRecord.losses:""}</div></div>
+      <img src="${logoURL(h.team.id)}" alt="">
+    </div>`;
+  el.onclick=()=>startLiveGame(g);
+  return el;
+}
+$("#prevDay").onclick=()=>{curDate.setDate(curDate.getDate()-1);loadSchedule();};
+$("#nextDay").onclick=()=>{curDate.setDate(curDate.getDate()+1);loadSchedule();};
+
+/* ============================================================
+   BOARD state + render
+   ============================================================ */
+let MODE="demo";       // "demo" | "live"
+let poll=null, demoTimer=null;
+let G={ away:{id:0,abbr:"AWY",name:"Away",score:0},
+        home:{id:0,abbr:"HOM",name:"Home",score:0},
+        inning:1, half:"Top", balls:0, strikes:0, outs:0,
+        bases:[false,false,false], battingHome:false };
+let lastHRIndex=-1;    // highest atBatIndex of a home run we've already shown
+
+function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
+function showSetup(){
+  stopAll();
+  $("#board").style.display="none"; $("#setup").classList.remove("hidden");
+  loadSchedule();
+}
+function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;} }
+
+function renderBoard(){
+  $("#awayCrest").src=G.away.id?logoURL(G.away.id):transparentPx();
+  $("#homeCrest").src=G.home.id?logoURL(G.home.id):transparentPx();
+  $("#awayAbbr").textContent=G.away.abbr;   $("#homeAbbr").textContent=G.home.abbr;
+  $("#awayFull").textContent=G.away.name;    $("#homeFull").textContent=G.home.name;
+  $("#awayScore").textContent=G.away.score;  $("#homeScore").textContent=G.home.score;
+  $("#teamAway").classList.toggle("batting",!G.battingHome);
+  $("#teamHome").classList.toggle("batting", G.battingHome);
+  // color glow per team
+  $("#teamAway").style.filter=`drop-shadow(0 0 0 transparent)`;
+  document.documentElement.style.setProperty('--awayc',teamColor(G.away.id));
+  document.documentElement.style.setProperty('--homec',teamColor(G.home.id));
+  $("#inHalf").textContent=G.half==="Bottom"?"▼":"▲";
+  $("#inNum").textContent=G.inning;
+  $("#balls").textContent=G.balls; $("#strikes").textContent=G.strikes;
+  $("#base1").classList.toggle("on",!!G.bases[0]);
+  $("#base2").classList.toggle("on",!!G.bases[1]);
+  $("#base3").classList.toggle("on",!!G.bases[2]);
+  const outs=$("#outs"); outs.innerHTML="";
+  for(let i=0;i<3;i++){const d=document.createElement("div");d.className="outdot"+(i<G.outs?" on":"");outs.appendChild(d);}
+}
+function transparentPx(){return "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";}
+
+/* ============================================================
+   LIVE GAME
+   ============================================================ */
+function startLiveGame(g){
+  MODE="live"; stopAll();
+  const a=g.teams.away.team, h=g.teams.home.team;
+  G.away={id:a.id,abbr:a.abbreviation||abbr3(a.teamName||a.name),name:a.teamName||a.name,score:g.teams.away.score||0};
+  G.home={id:h.id,abbr:h.abbreviation||abbr3(h.teamName||h.name),name:h.teamName||h.name,score:g.teams.home.score||0};
+  G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
+  lastHRIndex=-1;
+  $("#hrBtn").classList.remove("hidden");
+  $("#hrBtn").textContent="💥 TEST HOME RUN";
+  $("#statusTxt").textContent="CONNECTING…";
+  $("#boardHint").textContent="Following the live feed. Home runs trigger the cinematic automatically. (The test button previews it any time.)";
+  showBoard(); renderBoard();
+  livePk=g.gamePk;
+  tickLive(true);
+  poll=setInterval(()=>tickLive(false),15000);
+}
+let livePk=null;
+function abbr3(name){return (name||"").replace(/[^A-Za-z]/g,"").slice(0,3).toUpperCase()||"TM";}
+
+async function tickLive(first){
+  if(MODE!=="live"||!livePk)return;
+  try{
+    const r=await fetch(`${API}/v1.1/game/${livePk}/feed/live`);
+    const j=await r.json();
+    const gd=j.gameData, ld=j.liveData;
+    const a=gd.teams.away, h=gd.teams.home;
+    G.away.id=a.id;G.away.abbr=a.abbreviation||G.away.abbr;G.away.name=a.teamName||a.name;
+    G.home.id=h.id;G.home.abbr=h.abbreviation||G.home.abbr;G.home.name=h.teamName||h.name;
+    const ls=ld.linescore||{};
+    G.away.score=(ls.teams&&ls.teams.away&&ls.teams.away.runs)||0;
+    G.home.score=(ls.teams&&ls.teams.home&&ls.teams.home.runs)||0;
+    G.inning=ls.currentInning||1;
+    const half=(ls.inningState||"Top");
+    G.half=(half==="Bottom"||half==="End")?"Bottom":"Top";
+    G.battingHome=(G.half==="Bottom");
+    G.balls=ls.balls||0;G.strikes=ls.strikes||0;G.outs=ls.outs||0;
+    const off=ls.offense||{};
+    G.bases=[!!off.first,!!off.second,!!off.third];
+    // status
+    const st=gd.status.abstractGameState;
+    const dot=$("#liveDot");
+    if(st==="Live"){$("#statusTxt").textContent="● LIVE";dot.style.display="inline-block";}
+    else if(st==="Final"){$("#statusTxt").textContent="FINAL";dot.style.display="none";}
+    else {$("#statusTxt").textContent=(gd.status.detailedState||"PRE-GAME").toUpperCase();dot.style.display="none";}
+    $("#lineTxt").textContent=`${G.away.name} ${G.away.score} — ${G.home.score} ${G.home.name}`;
+    renderBoard();
+    // ---- home run detection ----
+    const plays=(ld.plays&&ld.plays.allPlays)||[];
+    let newest=null, maxIdx=lastHRIndex;
+    for(const p of plays){
+      if(p.result&&p.result.eventType==="home_run"&&p.about&&p.about.isComplete){
+        const idx=p.about.atBatIndex;
+        if(idx>maxIdx){maxIdx=idx; newest=p;}
+      }
+    }
+    if(first){ lastHRIndex=maxIdx; }          // don't replay HRs that happened before we tuned in
+    else if(newest && maxIdx>lastHRIndex){
+      lastHRIndex=maxIdx;
+      const batter=(newest.matchup&&newest.matchup.batter&&newest.matchup.batter.fullName)||"";
+      playHomeRun(batter, newest.result.description||"");
+    }
+  }catch(e){
+    $("#statusTxt").textContent="RECONNECTING…";
+  }
+}
+
+/* ============================================================
+   DEMO GAME  (self-running sim + manual HR)
+   ============================================================ */
+const DEMO_TEAMS=[
+  {id:147,abbr:"NYY",name:"Yankees"},
+  {id:119,abbr:"LAD",name:"Dodgers"}
+];
+function startDemo(){
+  MODE="demo"; stopAll();
+  G.away={...DEMO_TEAMS[0],score:0};
+  G.home={...DEMO_TEAMS[1],score:0};
+  G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
+  $("#hrBtn").classList.remove("hidden");
+  $("#hrBtn").textContent="💥 HIT A HOME RUN";
+  $("#statusTxt").textContent="DEMO";
+  $("#liveDot").style.display="none";
+  $("#boardHint").textContent="This is a simulated game. Tap “HIT A HOME RUN” to fire the cinematic — it returns to the game when it's done.";
+  showBoard(); renderBoard();
+  demoTimer=setInterval(demoTick,3200);
+}
+const DEMO_BATTERS=["Aaron Judge","Mookie Betts","Juan Soto","Shohei Ohtani","Giancarlo Stanton",
+  "Freddie Freeman","Anthony Volpe","Teoscar Hernández","Jazz Chisholm Jr.","Will Smith"];
+function battingTeam(){return G.battingHome?G.home:G.away;}
+function demoTick(){
+  // simple weighted at-bat sim to keep the board alive
+  const roll=Math.random();
+  if(roll<0.34){ // strike/foul or strikeout
+    G.strikes++; if(G.strikes>=3){outEvent();}
+  }else if(roll<0.55){ // ball / walk
+    G.balls++; if(G.balls>=4){walk();}
+  }else if(roll<0.72){ // out in play
+    outEvent();
+  }else if(roll<0.90){ // single -> advance
+    hit(1);
+  }else{ // double
+    hit(2);
+  }
+  renderBoard();
+}
+function resetCount(){G.balls=0;G.strikes=0;}
+function outEvent(){G.outs++;resetCount(); if(G.outs>=3)nextHalf();}
+function walk(){resetCount();advance(1,0);} // walk forces runners minimally
+function hit(bases){resetCount();advance(bases,bases);}
+function advance(runnerBases,batterTo){
+  // move runners; count runs that cross the plate
+  let runs=0;
+  // shift existing runners
+  const b=[...G.bases];
+  const nb=[false,false,false];
+  for(let i=2;i>=0;i--){ if(b[i]){ const dest=i+runnerBases; if(dest>=3)runs++; else nb[dest]=true; } }
+  // place batter
+  const bd=batterTo-1;
+  if(batterTo>=4)runs++; else if(bd>=0&&bd<3)nb[bd]=true;
+  G.bases=nb;
+  if(runs){ if(G.battingHome)G.home.score+=runs; else G.away.score+=runs; }
+}
+function nextHalf(){
+  G.outs=0;resetCount();G.bases=[false,false,false];
+  if(G.half==="Top"){G.half="Bottom";G.battingHome=true;}
+  else{G.half="Top";G.battingHome=false;G.inning++;if(G.inning>9)G.inning=1;}
+}
+
+/* ============================================================
+   HOME RUN CINEMATIC
+   ============================================================ */
+const ov=$("#hrOverlay"), vid=$("#hrVideo");
+let hrPlaying=false;
+function playHomeRun(batterName, desc){
+  if(hrPlaying)return; hrPlaying=true;
+  // in demo, actually score the HR on the board
+  if(MODE==="demo"){
+    if(!batterName)batterName=DEMO_BATTERS[Math.floor(Math.random()*DEMO_BATTERS.length)];
+    const onBase=G.bases.filter(Boolean).length;
+    resetCount(); G.bases=[false,false,false];
+    const runs=onBase+1;
+    if(G.battingHome)G.home.score+=runs; else G.away.score+=runs;
+    desc=desc||`${batterName} homers${onBase?` (${runs}-run shot)`:""}!`;
+    renderBoard();
+  }
+  // name card
+  $("#hrWho").textContent=batterName||"HOME RUN!";
+  $("#hrDesc").textContent=desc||"";
+  ov.classList.add("show");
+  vid.currentTime=0;
+  vid.muted=false;
+  const p=vid.play();
+  if(p&&p.catch){p.catch(()=>{vid.muted=true;vid.play().catch(()=>{});});}
+  // reveal the name once the "HOME RUN" text hits (~6.5s in)
+  clearTimeout(playHomeRun._n);
+  playHomeRun._n=setTimeout(()=>$("#hrName").classList.add("show"),6200);
+}
+function endHomeRun(){
+  vid.pause();
+  ov.classList.remove("show");
+  $("#hrName").classList.remove("show");
+  hrPlaying=false;
+}
+vid.addEventListener("ended",endHomeRun);
+$("#skipBtn").onclick=endHomeRun;
+
+/* ============================================================
+   WIRE-UP
+   ============================================================ */
+$("#demoBtn").onclick=startDemo;
+$("#backBtn").onclick=showSetup;
+$("#hrBtn").onclick=()=>{
+  if(MODE==="demo")playHomeRun();
+  else playHomeRun("","Home run cinematic — preview");
+};
+
+// preload the video quietly
+window.addEventListener("load",()=>{ try{vid.load();}catch(e){} });
+
+// initial
+loadSchedule();
+</script>
+</body>
+</html>
