@@ -710,45 +710,93 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .st-sub{color:#17406b;font-weight:800;font-size:clamp(15px,2.1vw,25px);opacity:0}
 #stretchOverlay.show .st-sub{animation:anFade .6s 1.25s both}
 
-/* =================== LATE-GAME RALLY — RALLY CAP FLIP ===================
-   comic halftone in the batting team's color; the cap flips upside down   */
+/* =================== LATE-GAME RALLY — RALLY CAP FRENZY ===================
+   comic halftone in the batting team's color; the cap flips upside down and
+   the whole scene beats like a jumbotron hype card                          */
 #rallyOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .4s;overflow:hidden;
   background-image:
     radial-gradient(rgba(255,255,255,.16) 2.2px, transparent 2.9px),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 3px, transparent 3px 52px),
     linear-gradient(135deg, color-mix(in srgb,var(--rc,#bf0d3e) 92%,#000), color-mix(in srgb,var(--rc,#bf0d3e) 52%,#000));
-  background-size:26px 26px,100% 100%}
-#rallyOverlay.show{display:block;opacity:1;animation:rcDots 16s linear infinite}
-@keyframes rcDots{from{background-position:0 0,0 0}to{background-position:260px 260px,0 0}}
+  background-size:26px 26px,100% 100%,100% 100%}
+#rallyOverlay.show{display:block;opacity:1;animation:rcDots 5s linear infinite}
+@keyframes rcDots{from{background-position:0 0,0 0,0 0}to{background-position:260px 260px,480px 0,0 0}}
+/* gold edge glow beating with the crowd */
+#rallyOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  box-shadow:inset 0 0 150px rgba(255,203,46,0)}
+#rallyOverlay.show::before{animation:rcEdge 1.1s ease-in-out 2.2s infinite}
+@keyframes rcEdge{0%,100%{box-shadow:inset 0 0 150px rgba(255,203,46,0)}
+  18%{box-shadow:inset 0 0 190px rgba(255,203,46,.4)}
+  36%{box-shadow:inset 0 0 150px rgba(255,203,46,.08)}
+  52%{box-shadow:inset 0 0 180px rgba(255,203,46,.3)}}
+/* light band sweeping across again and again */
+#rallyOverlay::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-30%;width:24%;pointer-events:none;z-index:1;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.12) 45%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.12) 55%,transparent);
+  transform:skewX(-14deg);opacity:0}
+#rallyOverlay.show::after{animation:rcSweep 1.9s ease-in-out .5s infinite}
+@keyframes rcSweep{0%{left:-30%;opacity:1}55%,100%{left:120%;opacity:1}}
+/* white flash when the cap lands its flip */
+.rc-flash{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:0;
+  background:radial-gradient(circle at 50% 38%, #fff, rgba(255,255,255,.3) 35%, transparent 65%)}
+#rallyOverlay.show .rc-flash{animation:rcFlash .55s ease-out 1.95s both}
+@keyframes rcFlash{0%{opacity:0}15%{opacity:.8}100%{opacity:0}}
+/* heartbeat on the whole card once the cap is flipped */
 .rc-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.8vh,16px);text-align:center;padding:20px}
+#rallyOverlay.show .rc-inner{animation:rcPunch .45s cubic-bezier(.2,.9,.3,1) 1.95s both,
+  rcBeat 1.1s ease-in-out 2.6s infinite}
+@keyframes rcPunch{0%{transform:scale(1)}35%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes rcBeat{0%,100%{transform:scale(1)}7%{transform:scale(1.028)}14%{transform:scale(1)}
+  21%{transform:scale(1.02)}30%{transform:scale(1)}}
 .rc-kick{color:#fff;font-weight:900;letter-spacing:8px;font-size:clamp(13px,1.8vw,22px);
   text-shadow:0 2px 10px rgba(0,0,0,.5);opacity:0}
 #rallyOverlay.show .rc-kick{animation:anFade .5s .25s both}
-.rc-capwrap{width:min(26vh,240px);opacity:0}
+/* the cap: drops in, flips upside down with a bang, then keeps hopping */
+.rc-capwrap{position:relative;width:min(26vh,240px);opacity:0}
 #rallyOverlay.show .rc-capwrap{animation:rcDrop .55s cubic-bezier(.2,1.2,.4,1) .3s both}
 @keyframes rcDrop{from{opacity:0;transform:translateY(-80px)}to{opacity:1;transform:none}}
+/* shockwave rings radiating off the flipped cap */
+.rc-capwrap::before,.rc-capwrap::after{content:"";position:absolute;left:50%;top:50%;
+  width:110%;height:110%;border:4px solid rgba(255,255,255,.9);border-radius:50%;
+  transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none}
+.rc-capwrap::after{border-color:var(--gold)}
+#rallyOverlay.show .rc-capwrap::before{animation:rcRing 1.6s ease-out 2.05s infinite}
+#rallyOverlay.show .rc-capwrap::after{animation:rcRing 1.6s ease-out 2.85s infinite}
+@keyframes rcRing{0%{opacity:.85;transform:translate(-50%,-50%) scale(.3)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
 .rc-cap{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 26px rgba(0,0,0,.45))}
 #rallyOverlay.show .rc-cap{animation:rcFlip 1s cubic-bezier(.3,1.3,.4,1) 1.05s both,
-  rcWobble 3s ease-in-out 2.3s infinite}
+  rcHop 1.5s ease-in-out 2.2s infinite}
 @keyframes rcFlip{0%{transform:rotate(0)}55%{transform:rotate(198deg)}
   72%{transform:rotate(171deg)}86%{transform:rotate(185deg)}100%{transform:rotate(180deg)}}
-@keyframes rcWobble{0%,100%{transform:rotate(180deg)}50%{transform:rotate(173deg)}}
+@keyframes rcHop{0%,100%{transform:rotate(180deg) translateY(0)}
+  14%{transform:rotate(185deg) translateY(-12px)}28%{transform:rotate(177deg) translateY(0)}
+  40%{transform:rotate(182deg) translateY(-6px)}52%{transform:rotate(180deg) translateY(0)}}
 .rc-cap .brim{fill:color-mix(in srgb,var(--rc,#bf0d3e) 62%,#000)}
+/* title bounces harder and never sits still */
 .rc-title{font-weight:900;line-height:.95;font-size:clamp(42px,8.5vw,112px);color:#fff;
   -webkit-text-stroke:2px rgba(0,0,0,.28);text-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0}
 #rallyOverlay.show .rc-title{animation:rcTitleIn .5s cubic-bezier(.2,1.2,.4,1) .55s both,
-  rcTilt 2.4s ease-in-out 1.3s infinite}
+  rcJive .9s ease-in-out 1.3s infinite}
 @keyframes rcTitleIn{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
-@keyframes rcTilt{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+@keyframes rcJive{0%,100%{transform:rotate(-2.2deg) scale(1)}25%{transform:rotate(0deg) scale(1.03)}
+  50%{transform:rotate(2.2deg) scale(1)}75%{transform:rotate(0deg) scale(1.03)}}
 .r-diamond{position:relative;width:110px;height:110px;opacity:0}
 #rallyOverlay.show .r-diamond{animation:anFade .5s .95s both}
 .r-base{position:absolute;width:30px;height:30px;background:rgba(255,255,255,.2);
   border:2px solid rgba(255,255,255,.65);transform:rotate(45deg)}
 .r-base.b2{top:6px;left:40px}.r-base.b3{top:40px;left:6px}.r-base.b1{top:40px;right:6px}
-.r-base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 20px var(--gold)}
+.r-base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 20px var(--gold);
+  animation:rcBaseGlow 1.1s ease-in-out infinite}
+@keyframes rcBaseGlow{0%,100%{box-shadow:0 0 14px var(--gold)}50%{box-shadow:0 0 30px var(--gold)}}
 .rc-sub{background:rgba(0,0,0,.38);color:#fff;font-weight:800;letter-spacing:1px;
   font-size:clamp(14px,1.9vw,22px);padding:10px 26px;border-radius:999px;opacity:0}
 #rallyOverlay.show .rc-sub{animation:anFade .5s 1.15s both}
+/* jumbotron classic */
+.rc-noise{color:var(--gold);font-weight:900;letter-spacing:7px;font-size:clamp(20px,3vw,40px);
+  text-shadow:0 0 18px rgba(255,203,46,.75),0 4px 14px rgba(0,0,0,.5);opacity:0}
+#rallyOverlay.show .rc-noise{animation:anFade .4s 2.3s both, rcBlink .75s steps(1) 2.7s infinite}
+@keyframes rcBlink{0%{opacity:1}55%{opacity:.12}100%{opacity:1}}
 
 /* =================== FINAL / WALK-OFF — CHAMPAGNE GOLD ===================
    black + metallic gold: engraved medallion, self-drawing laurels, plaque  */
@@ -1059,8 +1107,9 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- ============ LATE-GAME RALLY — RALLY CAP FLIP ============ -->
+<!-- ============ LATE-GAME RALLY — RALLY CAP FRENZY ============ -->
 <div id="rallyOverlay">
+  <div class="rc-flash"></div>
   <div class="rc-inner">
     <div class="rc-kick" id="rKick">LATE INNINGS</div>
     <div class="rc-capwrap">
@@ -1076,6 +1125,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="rc-title">RALLY&nbsp;CAP&nbsp;TIME</div>
     <div class="r-diamond"><div class="r-base b2" id="rB2"></div><div class="r-base b3" id="rB3"></div><div class="r-base b1" id="rB1"></div></div>
     <div class="rc-sub" id="rSub"></div>
+    <div class="rc-noise">MAKE SOME NOISE!</div>
   </div>
 </div>
 
@@ -1926,7 +1976,7 @@ function triggerRally(info){
     .filter(Boolean).join(" • ");
   rOv.classList.remove("show"); void rOv.offsetWidth; rOv.classList.add("show");
   clearTimeout(triggerRally._t);
-  triggerRally._t=setTimeout(endRally, info.dur||6000);
+  triggerRally._t=setTimeout(endRally, info.dur||7500);
 }
 function endRally(){ clearTimeout(triggerRally._t); rOv.classList.remove("show"); rallyPlaying=false; }
 
