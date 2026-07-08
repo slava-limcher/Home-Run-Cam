@@ -215,6 +215,15 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   background:
     radial-gradient(60% 85% at 0% 100%, color-mix(in srgb,var(--anAwayc,#0a2a5c) 55%,transparent),transparent 70%),
     radial-gradient(60% 85% at 100% 100%, color-mix(in srgb,var(--anHomec,#bf0d3e) 55%,transparent),transparent 70%)}
+/* fireworks canvas + sweeping stadium searchlights */
+#anthemFx{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.anthem-beam{position:absolute;bottom:-14vh;left:50%;width:15vw;height:135vh;z-index:1;pointer-events:none;
+  transform-origin:50% 100%;mix-blend-mode:screen;opacity:.45;filter:blur(7px);
+  background:linear-gradient(to top, rgba(255,255,255,.30), rgba(170,200,255,.06) 60%, transparent);
+  clip-path:polygon(43% 100%,57% 100%,100% 0,0 0)}
+.anthem-beam.b1{margin-left:-32vw;animation:beamSweep 5.4s ease-in-out infinite}
+.anthem-beam.b2{margin-left:16vw;animation:beamSweep 6.3s ease-in-out infinite reverse}
+@keyframes beamSweep{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(15deg)}}
 /* stars & stripes shimmer bar */
 .anthem-flag{position:absolute;top:0;left:0;right:0;height:8px;z-index:1;
   background:repeating-linear-gradient(90deg,var(--red2) 0 56px,#fff 56px 112px,var(--navy2) 112px 168px,#fff 168px 224px);
@@ -223,6 +232,9 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 @keyframes flagslide{to{background-position:224px 0}}
 .anthem-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
   gap:min(3vh,24px);text-align:center;padding:24px}
+/* slow "camera push" for a filmed feel */
+#anthemOverlay.show .anthem-inner{animation:anthemZoom 7s cubic-bezier(.3,.5,.6,1) forwards}
+@keyframes anthemZoom{from{transform:scale(1)}to{transform:scale(1.08)}}
 .anthem-kick{color:var(--gold);font-weight:900;letter-spacing:10px;font-size:clamp(14px,2.2vw,26px);
   opacity:0;transform:translateY(-16px);transition:.6s;text-shadow:0 2px 12px rgba(0,0,0,.7)}
 #anthemOverlay.show .anthem-kick{opacity:1;transform:none;transition-delay:.2s}
@@ -231,12 +243,19 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   filter:drop-shadow(0 10px 30px rgba(0,0,0,.7));opacity:0;transition:.8s cubic-bezier(.2,.7,.2,1)}
 .anthem-crest.a{transform:translateX(-90px) scale(.8)}
 .anthem-crest.h{transform:translateX(90px) scale(.8)}
-#anthemOverlay.show .anthem-crest{opacity:1;transform:none;transition-delay:.35s}
+#anthemOverlay.show .anthem-crest{opacity:1;transform:none;transition-delay:.35s;
+  animation:crestFloat 3.6s ease-in-out 1.6s infinite}
+#anthemOverlay.show .anthem-crest.h{animation-delay:2.5s}
+@keyframes crestFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .anthem-at{font-weight:900;font-size:clamp(28px,5vw,58px);color:#fff;opacity:.55}
 .anthem-ball{font-weight:900;letter-spacing:2px;line-height:.9;font-size:clamp(52px,12vw,150px);
-  background:linear-gradient(180deg,#fff,#bcd0ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+  background:linear-gradient(110deg,#fff 25%,#93b4ef 40%,#fff 50%,#93b4ef 60%,#fff 75%);
+  background-size:250% 100%;background-position:0% 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
   text-shadow:0 8px 40px rgba(0,0,0,.5);opacity:0;transform:scale(.7);transition:.7s cubic-bezier(.2,.9,.2,1)}
-#anthemOverlay.show .anthem-ball{opacity:1;transform:none;transition-delay:.9s}
+#anthemOverlay.show .anthem-ball{opacity:1;transform:none;transition-delay:.9s;
+  animation:ballShine 2.3s linear 1.7s infinite}
+@keyframes ballShine{from{background-position:0% 0}to{background-position:250% 0}}
 .anthem-sub{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.8vw,22px);opacity:0;transition:.6s}
 #anthemOverlay.show .anthem-sub{opacity:1;transition-delay:1.3s}
 
@@ -245,23 +264,44 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   pointer-events:none;transform:translateX(-118%);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 #walkupCard.show{transform:translateX(0)}
 .wu-shot{position:relative;width:min(19vw,176px);height:min(24vw,216px);align-self:flex-end;
-  margin-right:-16px;z-index:2;display:flex;align-items:flex-end;justify-content:center}
+  margin-right:-16px;z-index:2;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transform:translateY(30px);transition:.5s cubic-bezier(.2,.8,.2,1);transition-delay:.2s}
+#walkupCard.show .wu-shot{opacity:1;transform:none}
+/* subtle "camera breathing" on the player so he's never frozen */
+#walkupCard.show .wu-shot img{animation:wuBreathe 4.5s ease-in-out .8s infinite alternate;transform-origin:bottom center}
+@keyframes wuBreathe{from{transform:scale(1)}to{transform:scale(1.05)}}
 .wu-shot .spot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;height:78%;border-radius:50%;
   filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--wuc,#0a2a5c) 90%,#000),transparent 70%)}
 .wu-shot img{position:relative;height:100%;width:auto;object-fit:contain;object-position:bottom center;
   filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
-.wu-panel{background:linear-gradient(90deg,rgba(4,14,34,.96),rgba(9,26,58,.9));
+.wu-panel{position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(4,14,34,.96),rgba(9,26,58,.9));
   border-top:4px solid var(--wuc,#bf0d3e);border-right:1px solid var(--line);
   border-radius:0 16px 16px 0;padding:16px 32px 18px 26px;min-width:min(44vw,500px);
   box-shadow:0 18px 50px rgba(0,0,0,.6)}
+/* repeating light sweep across the panel — the "broadcast graphics" shimmer */
+.wu-panel::after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:34%;pointer-events:none;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.13) 45%,rgba(255,255,255,.32) 50%,rgba(255,255,255,.13) 55%,transparent);
+  transform:skewX(-18deg);animation:wuSweep 2.8s ease-in-out .9s infinite}
+@keyframes wuSweep{0%{left:-45%}55%,100%{left:130%}}
+/* team-color glow pulse so the card feels lit, not printed */
+#walkupCard.show .wu-panel{animation:wuGlow 2.4s ease-in-out infinite}
+@keyframes wuGlow{0%,100%{box-shadow:0 18px 50px rgba(0,0,0,.6)}
+  50%{box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 36px color-mix(in srgb,var(--wuc,#bf0d3e) 50%,transparent)}}
 .wu-kick{display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:900;
   letter-spacing:5px;font-size:clamp(11px,1.4vw,16px)}
 .wu-kick img{width:26px;height:26px;object-fit:contain}
-.wu-name{font-weight:900;font-size:clamp(26px,4vw,52px);line-height:1;margin:6px 0 4px;letter-spacing:-.5px}
+.wu-name{font-weight:900;font-size:clamp(26px,4vw,52px);line-height:1;margin:6px 0 4px;letter-spacing:-.5px;
+  clip-path:inset(0 100% 0 0);transition:clip-path .55s cubic-bezier(.2,.8,.2,1) .3s}
+#walkupCard.show .wu-name{clip-path:inset(0 -5% 0 0)}
 .wu-meta{color:#cfe0ff;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 .wu-meta .num{color:var(--gold);font-weight:900}
 .wu-meta .dot{opacity:.4}
 .wu-stats{display:flex;gap:26px;margin-top:12px}
+.wu-stat{opacity:0;transform:translateY(14px);transition:.4s}
+#walkupCard.show .wu-stat{opacity:1;transform:none}
+#walkupCard.show .wu-stat:nth-child(1){transition-delay:.45s}
+#walkupCard.show .wu-stat:nth-child(2){transition-delay:.6s}
+#walkupCard.show .wu-stat:nth-child(3){transition-delay:.75s}
 .wu-stat .v{font-weight:900;font-size:clamp(20px,2.6vw,32px);line-height:1}
 .wu-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
 @media (max-width:760px){
@@ -393,6 +433,9 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   <div class="anthem-flag"></div>
   <div class="anthem-flag bot"></div>
   <div class="anthem-glow"></div>
+  <div class="anthem-beam b1"></div>
+  <div class="anthem-beam b2"></div>
+  <canvas id="anthemFx"></canvas>
   <button class="skip" id="anthemSkip">Skip ⏭</button>
   <div class="anthem-inner">
     <div class="anthem-kick" id="anthemKick">FIRST PITCH</div>
@@ -839,11 +882,60 @@ function triggerAnthem(opts){
   $("#anthemSub").textContent=opts.sub||`${G.away.name} at ${G.home.name}`;
   anthemOv.classList.remove("show"); void anthemOv.offsetWidth;  // restart the entrance
   anthemOv.classList.add("show");
+  anColors=[teamColor(G.away.id),teamColor(G.home.id),"#ffcb2e","#ffffff"];
+  anthemFxStart();
   clearTimeout(triggerAnthem._t);
-  triggerAnthem._t=setTimeout(endAnthem, opts.dur||5400);
+  triggerAnthem._t=setTimeout(endAnthem, opts.dur||6800);
 }
-function endAnthem(){ clearTimeout(triggerAnthem._t); anthemOv.classList.remove("show"); anthemPlaying=false; }
+function endAnthem(){ clearTimeout(triggerAnthem._t); anthemFxStop(); anthemOv.classList.remove("show"); anthemPlaying=false; }
 $("#anthemSkip").onclick=endAnthem;
+
+/* ---- fireworks engine (canvas, runs only while the anthem is up) ---- */
+const anFx=$("#anthemFx"), anCtx=anFx.getContext("2d");
+let anRAF=null, anRockets=[], anSparks=[], anColors=["#ffcb2e","#ffffff"], anLast=0, anNext=0;
+function anthemFxStart(){
+  anRockets=[];anSparks=[];anNext=0;
+  cancelAnimationFrame(anRAF);
+  anLast=performance.now();
+  const loop=t=>{
+    anRAF=requestAnimationFrame(loop);
+    const dt=Math.min(40,t-anLast)/16.7; anLast=t;
+    const w=anFx.clientWidth,h=anFx.clientHeight;
+    if(anFx.width!==w||anFx.height!==h){anFx.width=w;anFx.height=h;}
+    anCtx.clearRect(0,0,w,h);
+    if(t>anNext){ anNext=t+420+Math.random()*520;
+      anRockets.push({x:w*(0.12+Math.random()*0.76),y:h+8,vx:(Math.random()-.5)*1.2,
+        vy:-(h*0.012)*(0.85+Math.random()*0.5),fuse:h*(0.22+Math.random()*0.32),
+        c:anColors[Math.floor(Math.random()*anColors.length)]});
+    }
+    anCtx.globalCompositeOperation="lighter";
+    for(let i=anRockets.length-1;i>=0;i--){const r=anRockets[i];
+      r.x+=r.vx*dt; r.y+=r.vy*dt;
+      anCtx.fillStyle="rgba(255,240,200,.9)"; anCtx.fillRect(r.x-1.2,r.y,2.4,7);
+      if(r.y<r.fuse){anRockets.splice(i,1);anBoom(r.x,r.y,r.c);}
+    }
+    for(let i=anSparks.length-1;i>=0;i--){const s=anSparks[i];
+      s.vy+=0.045*dt; s.x+=s.vx*dt; s.y+=s.vy*dt; s.a-=s.d*dt;
+      if(s.a<=0){anSparks.splice(i,1);continue;}
+      anCtx.globalAlpha=Math.max(0,s.a); anCtx.fillStyle=s.c;
+      anCtx.beginPath(); anCtx.arc(s.x,s.y,s.r,0,7); anCtx.fill();
+    }
+    anCtx.globalAlpha=1; anCtx.globalCompositeOperation="source-over";
+  };
+  anRAF=requestAnimationFrame(loop);
+}
+function anBoom(x,y,c){
+  const n=42+Math.floor(Math.random()*26);
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2, sp=1+Math.random()*3.4;
+    anSparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+      r:1.4+Math.random()*1.8,a:1,d:0.012+Math.random()*0.012,
+      c:Math.random()<.25?"#ffffff":c});
+  }
+}
+function anthemFxStop(){
+  cancelAnimationFrame(anRAF); anRAF=null; anRockets=[]; anSparks=[];
+  try{anCtx.clearRect(0,0,anFx.width,anFx.height);}catch(e){}
+}
 
 /* ============================================================
    WALK-UP (NEW BATTER) LOWER THIRD
@@ -877,14 +969,30 @@ function triggerWalkup(info){
   if(info.avg!=null&&info.avg!=="")tiles.push(["AVG",fmtAvg(info.avg)]);
   if(info.hr!=null&&info.hr!=="")tiles.push(["HR",String(info.hr)]);
   if(info.rbi!=null&&info.rbi!=="")tiles.push(["RBI",String(info.rbi)]);
-  tiles.forEach(([k,v])=>{const d=document.createElement("div");d.className="wu-stat";
-    d.innerHTML=`<div class="v">${v}</div><div class="k">${k}</div>`;st.appendChild(d);});
+  tiles.forEach(([k,v],i)=>{const d=document.createElement("div");d.className="wu-stat";
+    d.innerHTML=`<div class="v"></div><div class="k">${k}</div>`;st.appendChild(d);
+    const vd=d.querySelector(".v");
+    setTimeout(()=>countUp(vd,v),450+i*150);   // numbers roll up as each tile lands
+  });
   wuCard.classList.remove("show"); void wuCard.offsetWidth;
   wuCard.classList.add("show");
   clearTimeout(wuHideT);
   wuHideT=setTimeout(()=>wuCard.classList.remove("show"), info.dur||6000);
 }
 function fmtAvg(a){a=String(a); return a.charAt(0)==="0"?a.slice(1):a;}  // .287 not 0.287
+/* animate a stat value 0 -> final (handles ".297", "38", etc.) */
+function countUp(el,txt){
+  const m=String(txt).match(/^(\.)?(\d+)(.*)$/);
+  if(!m){el.textContent=txt;return;}
+  const dot=m[1]||"", num=+m[2], rest=m[3]||"", pad=m[2].length;
+  const t0=performance.now(), dur=900;
+  (function step(t){
+    const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3);   // ease-out cubic
+    const v=Math.round(num*e);
+    el.textContent=dot+(dot?String(v).padStart(pad,"0"):v)+rest;
+    if(p<1)requestAnimationFrame(step);
+  })(t0);
+}
 /* season hitting line for the walk-up card */
 async function fetchBatter(id){
   try{
