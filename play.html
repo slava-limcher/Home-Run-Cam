@@ -1468,8 +1468,16 @@ function hitDataOf(play){
   const evs=((play&&play.playEvents)||[]).filter(e=>e.hitData);
   const hd=evs.length?evs[evs.length-1].hitData:null;
   if(!hd)return {};
+  const c=hd.coordinates||{};
   return {distance:hd.totalDistance?Math.round(hd.totalDistance):null,
-          exitVelo:hd.launchSpeed?Math.round(hd.launchSpeed*10)/10:null};
+          exitVelo:hd.launchSpeed?Math.round(hd.launchSpeed*10)/10:null,
+          coordX:(c.coordX!=null)?c.coordX:null, coordY:(c.coordY!=null)?c.coordY:null};
+}
+/* Statcast hit coordinates -> spray angle in degrees (-45 = LF line, 0 = CF, +45 = RF line).
+   Home plate sits at ~(125.42, 198.27) in the hc coordinate space. */
+function sprayDegOf(hd){
+  if(!hd||hd.coordX==null||hd.coordY==null)return null;
+  return Math.atan2(hd.coordX-125.42, 198.27-hd.coordY)*180/Math.PI;
 }
 /* "Aaron Judge homers (37) on a fly ball..." -> 37 (season HR total) */
 function seasonHRof(desc){const m=(desc||"").match(/homers?\s*\((\d+)\)/i);return m?+m[1]:null;}
@@ -1613,6 +1621,35 @@ function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlayi
    ============================================================ */
 const hr2Ov=$("#hr2Overlay");
 let hr2Playing=false;
+/* map spray angle (deg, -45 LF … +45 RF) + distance (ft) onto the diagram.
+   Diagram space: home plate (200,350), foul poles (70,220)/(330,220), CF fence (200,145). */
+const H2_DEFAULT_D="M200 345 Q150 200 128 132", H2_DEFAULT_X=128, H2_DEFAULT_Y=132;
+function h2LandingPath(sprayDeg,distFt){
+  const a=Math.max(-45,Math.min(45,sprayDeg)), rad=a*Math.PI/180;
+  const pxFence=205-21*Math.pow(Math.abs(a)/45,1.2);   // px from plate to the wall at this angle
+  const ftFence=400-70*Math.abs(a)/45;                 // ~400ft CF wall, ~330ft at the lines
+  let r=pxFence*((distFt||400)/ftFence);
+  r=Math.max(120,Math.min(235,r));                     // keep the pin on the card
+  let lx=200+r*Math.sin(rad), ly=350-r*Math.cos(rad);
+  lx=Math.max(25,Math.min(375,lx)); ly=Math.max(40,ly);
+  // slight stylistic bow, perpendicular to the travel line
+  const mx=200+(lx-200)*.55, my=350+(ly-350)*.55;
+  const dx=(lx-200)/r, dy=(ly-350)/r;
+  const qx=mx+dy*r*.18, qy=my-dx*r*.18;
+  return {d:`M200 345 Q${Math.round(qx)} ${Math.round(qy)} ${Math.round(lx)} ${Math.round(ly)}`,
+          lx:Math.round(lx), ly:Math.round(ly)};
+}
+/* point the diagram's arc + landing pin at the REAL landing spot */
+function h2AimDiagram(s){
+  const L=(s&&s.sprayDeg!=null)
+    ? h2LandingPath(s.sprayDeg,s.distance)
+    : {d:H2_DEFAULT_D,lx:H2_DEFAULT_X,ly:H2_DEFAULT_Y};   // no Statcast coords -> default look
+  document.getElementById("h2trail").setAttribute("d",L.d);
+  document.getElementById("h2motion").setAttribute("path",L.d);
+  document.querySelectorAll("#h2pin circle").forEach(c=>{
+    c.setAttribute("cx",L.lx); c.setAttribute("cy",L.ly);
+  });
+}
 function triggerHR2(info){
   info=info||{};
   if(takeoverBusy())return;
@@ -1657,6 +1694,7 @@ function triggerHR2(info){
     +`${s.distance?` • ${s.distance} FT`:""}${s.exitVelo?` • ${s.exitVelo} MPH`:""}`
     +`${s.seasonHR?` • NO. ${s.seasonHR} THIS SEASON`:""}  •  `;
   $("#h2Ticker").textContent=tick.repeat(8);
+  h2AimDiagram(s);   // aim the arc + pin at the real landing spot
   hr2Ov.classList.remove("show"); void hr2Ov.offsetWidth;
   hr2Ov.classList.add("show");
   // launch the comet across the sky, then the ball along the field-card arc
@@ -1692,7 +1730,8 @@ function hrInfoFromPlay(p){
   const hd=hitDataOf(p);
   return {id:b.id,name:b.fullName||"",number:"",team,
     stats:{distance:hd.distance,exitVelo:hd.exitVelo,
-           seasonHR:seasonHRof(p.result.description),rbi:p.result.rbi||0},
+           seasonHR:seasonHRof(p.result.description),rbi:p.result.rbi||0,
+           sprayDeg:sprayDegOf(hd)},                // real landing direction from Statcast
     desc:p.result.description||""};
 }
 function kInfoFromPlay(p){
@@ -1817,7 +1856,8 @@ function demoStats(){
   return {distance:380+Math.floor(Math.random()*90),          // 380–469 ft
           exitVelo:Math.round((100+Math.random()*15)*10)/10,   // 100.0–115.0 mph
           seasonHR:8+Math.floor(Math.random()*40),             // 8–47
-          rbi:onBase+1};                                        // solo..grand slam
+          rbi:onBase+1,                                         // solo..grand slam
+          sprayDeg:Math.round(-38+Math.random()*76)};           // random field direction
 }
 $("#anthemBtn").onclick=()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`});
 /* in LIVE mode every button replays the latest REAL moment from the feed */
