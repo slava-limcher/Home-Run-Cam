@@ -361,9 +361,15 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     linear-gradient(120deg, rgba(2,8,26,.30), rgba(2,8,26,.85)),
     linear-gradient(180deg, color-mix(in srgb,var(--kc,#0a2a5c) 80%,#000), color-mix(in srgb,var(--kc,#0a2a5c) 36%,#000))}
 #kOverlay.show{display:block;opacity:1}
-#kOverlay::before{content:"";position:absolute;inset:-25%;opacity:.08;pointer-events:none;
-  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
-  animation:anStripes 2.6s linear infinite}
+#kOverlay::before{content:"";position:absolute;inset:-25%;opacity:.10;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 2px,transparent 2px 70px);
+  animation:anStripes 1.1s linear infinite}
+/* one big light band races across as the K's land */
+#kOverlay::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-30%;width:26%;pointer-events:none;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.10) 45%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.10) 55%,transparent);
+  transform:skewX(-14deg);opacity:0}
+#kOverlay.show::after{animation:kSweepBig .9s ease-out .45s both}
+@keyframes kSweepBig{0%{left:-30%;opacity:1}100%{left:120%;opacity:1}}
 /* pitcher cutout, bottom-left like the walk-up */
 .k-hero{position:absolute;left:0;bottom:0;height:min(74vh,640px);width:min(30vw,380px);
   display:flex;align-items:flex-end;opacity:0;transform:translateY(40px);
@@ -375,23 +381,37 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   filter:drop-shadow(0 14px 30px rgba(0,0,0,.65))}
 .k-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.6vh,14px);text-align:center;padding-left:min(26vw,340px)}
-/* the three K's: two ghosts, the third reveals in gold with a shine */
-.k-row{display:flex;gap:min(2.4vw,26px);line-height:.9}
-.kk{font-weight:900;font-size:clamp(64px,15vh,150px);color:#fff;opacity:0}
-#kOverlay.show .kk:nth-child(1){animation:kGhost .3s .15s both}
-#kOverlay.show .kk:nth-child(2){animation:kGhost .3s .32s both}
+/* camera "punch" — the whole card kicks on each K hit */
+#kOverlay.show .k-inner{animation:kPunch 1.3s linear .1s both}
+@keyframes kPunch{0%,8%{transform:scale(1)}11%{transform:scale(1.03)}17%{transform:scale(1)}
+  24%{transform:scale(1.03)}30%{transform:scale(1)}42%{transform:scale(1)}
+  47%{transform:scale(1.06)}62%{transform:scale(1)}100%{transform:scale(1)}}
+/* the three K's: two slam in and recede to ghosts, the third slams in HUGE in gold */
+.k-row{position:relative;display:flex;gap:min(2.4vw,26px);line-height:.9}
+.kk{font-weight:900;font-size:clamp(70px,17vh,170px);color:#fff;opacity:0;transform:skewX(-7deg)}
+#kOverlay.show .kk:nth-child(1){animation:kSlamGhost .45s .12s both}
+#kOverlay.show .kk:nth-child(2){animation:kSlamGhost .45s .32s both}
 .kk.k3{background:
     linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
     linear-gradient(180deg,#fff,var(--gold));
   background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
   -webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
-#kOverlay.show .kk.k3{animation:kReveal .4s cubic-bezier(.2,.8,.2,1) .55s both, kShine 2.6s linear 1.7s infinite}
-@keyframes kGhost{from{opacity:0;transform:translateY(16px)}to{opacity:.3;transform:none}}
+#kOverlay.show .kk.k3{animation:kSlam3 .5s cubic-bezier(.2,1.1,.3,1) .58s both, kShine 2.2s linear 1.5s infinite}
+@keyframes kSlamGhost{0%{opacity:0;transform:skewX(-7deg) scale(2.6)}
+  45%{opacity:1;transform:skewX(-7deg) scale(1)}100%{opacity:.28;transform:skewX(-7deg) scale(1)}}
+@keyframes kSlam3{0%{opacity:0;transform:skewX(-7deg) scale(3.2)}
+  55%{opacity:1;transform:skewX(-7deg) scale(.95)}100%{opacity:1;transform:skewX(-7deg) scale(1)}}
 @keyframes kReveal{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 -6% 0 0)}}
 @keyframes kShine{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
-.k-title{font-weight:900;letter-spacing:6px;font-size:clamp(22px,3.4vw,44px);clip-path:inset(0 100% 0 0)}
-#kOverlay.show .k-title{animation:kReveal .5s cubic-bezier(.2,.8,.2,1) .85s both}
+/* shockwave ring on the big K's impact */
+.k-row::after{content:"";position:absolute;left:50%;top:50%;width:min(34vh,320px);height:min(34vh,320px);
+  border:4px solid var(--gold);border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(.25);pointer-events:none}
+#kOverlay.show .k-row::after{animation:kRing .65s ease-out .66s both}
+@keyframes kRing{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.9)}}
+.k-title{font-weight:900;font-style:italic;letter-spacing:4px;font-size:clamp(26px,4.2vw,54px);clip-path:inset(0 100% 0 0)}
+#kOverlay.show .k-title{animation:kReveal .4s cubic-bezier(.2,.8,.2,1) .8s both}
 .k-sub{color:var(--gold);font-weight:900;letter-spacing:4px;font-size:clamp(12px,1.6vw,19px);opacity:0}
 #kOverlay.show .k-sub{animation:anFade .5s 1.1s both}
 .k-name{font-weight:900;font-size:clamp(24px,3.4vw,46px);opacity:0;margin-top:min(1.6vh,14px)}
@@ -407,6 +427,84 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .k-stat .v{font-weight:900;font-size:clamp(22px,3vw,36px);line-height:1}
 .k-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
 @media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
+
+/* =================== HOME RUN V2 — FULLY ANIMATED TAKEOVER (video alternative) =================== */
+#hr2Overlay{position:fixed;inset:0;z-index:49;display:none;opacity:0;transition:opacity .35s;
+  overflow:hidden;background:#02081a}
+#hr2Overlay.show{display:block;opacity:1}
+.h2-wipe{position:absolute;inset:0;
+  background:
+    linear-gradient(120deg, rgba(2,8,26,.25), rgba(2,8,26,.82)),
+    linear-gradient(180deg, color-mix(in srgb,var(--h2c,#0a2a5c) 85%,#000), color-mix(in srgb,var(--h2c,#0a2a5c) 38%,#000));
+  clip-path:inset(0 100% 0 0)}
+#hr2Overlay.show .h2-wipe{animation:h2wipe .5s cubic-bezier(.3,.7,.2,1) both}
+@keyframes h2wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.h2-wipe::before{content:"";position:absolute;inset:-25%;opacity:.09;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
+  animation:anStripes 1.6s linear infinite}
+#hr2Overlay::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-30%;width:26%;pointer-events:none;z-index:4;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.10) 45%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.10) 55%,transparent);
+  transform:skewX(-14deg);opacity:0}
+#hr2Overlay.show::after{animation:kSweepBig .9s ease-out .95s both}
+/* the ball flight: SVG streak drawn across the sky, ball rides it */
+.h2-sky{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+#h2trail{stroke-dasharray:100;stroke-dashoffset:100;opacity:.9}
+#hr2Overlay.show #h2trail{animation:h2draw 1.15s ease-out .15s both, h2fadeout 1s ease 1.6s both}
+@keyframes h2draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes h2fadeout{from{opacity:.9}to{opacity:0}}
+#h2ball{opacity:0;filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 24px rgba(255,203,46,.8))}
+#hr2Overlay.show #h2ball{animation:h2ballLife 1.6s .15s both}
+@keyframes h2ballLife{0%{opacity:0}6%{opacity:1}72%{opacity:1}100%{opacity:0}}
+/* batter cutout */
+.h2-hero{position:absolute;left:0;bottom:0;height:min(80vh,700px);width:min(34vw,430px);z-index:3;
+  display:flex;align-items:flex-end;opacity:0;transform:translateY(50px);
+  transition:.6s cubic-bezier(.2,.8,.2,1);transition-delay:1.15s}
+#hr2Overlay.show .h2-hero{opacity:1;transform:none}
+.h2-spot{position:absolute;bottom:0;left:45%;transform:translateX(-50%);width:115%;height:85%;border-radius:50%;
+  filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--h2c,#0a2a5c) 90%,#000),transparent 70%)}
+.h2-hero img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom left;
+  filter:drop-shadow(0 14px 30px rgba(0,0,0,.65))}
+/* center content with a punch on the title slam */
+.h2-inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.5vh,13px);text-align:center;padding-left:min(28vw,380px)}
+#hr2Overlay.show .h2-inner{animation:h2punch .45s 1s both}
+@keyframes h2punch{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+.h2-kick{display:flex;align-items:center;gap:12px;color:var(--gold);font-weight:900;letter-spacing:7px;
+  font-size:clamp(13px,1.8vw,22px);opacity:0}
+.h2-kick img{width:clamp(26px,2.6vw,38px);height:clamp(26px,2.6vw,38px);object-fit:contain}
+#hr2Overlay.show .h2-kick{animation:anFade .4s .75s both}
+.h2-title{position:relative;font-weight:900;line-height:.92;letter-spacing:1px;font-size:clamp(52px,10.5vw,150px);
+  background:
+    linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
+    linear-gradient(180deg,#fff,#bcd0ff);
+  background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 28px rgba(0,0,0,.6));opacity:0}
+#hr2Overlay.show .h2-title{animation:h2slam .5s cubic-bezier(.2,1.1,.3,1) .9s both, anShine2 2.8s linear 1.9s infinite}
+@keyframes h2slam{0%{opacity:0;transform:scale(1.9)}60%{opacity:1;transform:scale(.97)}100%{opacity:1;transform:scale(1)}}
+.h2-title::after{content:"";position:absolute;left:50%;top:50%;width:min(34vh,340px);height:min(34vh,340px);
+  border:4px solid var(--gold);border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(.25);pointer-events:none}
+#hr2Overlay.show .h2-title::after{animation:kRing .7s ease-out 1s both}
+.h2-name{font-weight:900;font-size:clamp(24px,3.4vw,46px);opacity:0}
+#hr2Overlay.show .h2-name{animation:anFade .5s 1.25s both}
+.h2-meta{color:#cfe0ff;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
+.h2-meta .num{color:var(--gold);font-weight:900}
+#hr2Overlay.show .h2-meta{animation:anFade .5s 1.35s both}
+/* the hero stat: distance counts up HUGE */
+.h2-dist{display:flex;align-items:baseline;gap:10px;margin-top:min(1vh,8px);opacity:0}
+#hr2Overlay.show .h2-dist{animation:anFade .5s 1.45s both}
+.h2-dist .v{font-weight:900;line-height:1;font-size:clamp(58px,9vw,120px);color:var(--gold);
+  text-shadow:0 6px 24px rgba(0,0,0,.55)}
+.h2-dist .u{font-weight:900;color:#cfe0ff;font-size:clamp(18px,2.4vw,30px);letter-spacing:2px}
+.h2-stats{display:flex;gap:24px;margin-top:min(1vh,8px)}
+.h2-stat{opacity:0;transform:translateY(14px);transition:.4s}
+#hr2Overlay.show .h2-stat{opacity:1;transform:none}
+#hr2Overlay.show .h2-stat:nth-child(1){transition-delay:1.6s}
+#hr2Overlay.show .h2-stat:nth-child(2){transition-delay:1.75s}
+#hr2Overlay.show .h2-stat:nth-child(3){transition-delay:1.9s}
+.h2-stat .v{font-weight:900;font-size:clamp(22px,3vw,36px);line-height:1}
+.h2-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
+@media (max-width:760px){ .h2-hero{display:none} .h2-inner{padding-left:0} }
 
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
@@ -497,6 +595,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="linescore" id="lineTxt"></div>
     <div class="controls">
       <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
+      <button class="hrbtn" id="hr2Btn">💥 HOME RUN V2</button>
       <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
       <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
       <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
@@ -574,6 +673,35 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <div class="k-stat"><div class="v" id="kSO">—</div><div class="k">SEASON K</div></div>
       <div class="k-stat"><div class="v" id="kERA">—</div><div class="k">ERA</div></div>
     </div>
+  </div>
+</div>
+
+<!-- ============ HOME RUN V2 — FULLY ANIMATED TAKEOVER ============ -->
+<div id="hr2Overlay">
+  <div class="h2-wipe"></div>
+  <svg class="h2-sky" viewBox="0 0 1600 900" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="h2grad" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="rgba(255,255,255,0)"/>
+        <stop offset=".7" stop-color="rgba(255,255,255,.85)"/>
+        <stop offset="1" stop-color="#ffcb2e"/>
+      </linearGradient>
+    </defs>
+    <path id="h2trail" pathLength="100" d="M -60 820 Q 780 80 1660 260" fill="none"
+      stroke="url(#h2grad)" stroke-width="6" stroke-linecap="round"/>
+    <circle id="h2ball" r="11" fill="#fff">
+      <animateMotion id="h2motion" dur="1.15s" begin="indefinite" fill="freeze" path="M -60 820 Q 780 80 1660 260"/>
+    </circle>
+  </svg>
+  <button class="skip" id="hr2Skip">Skip ⏭</button>
+  <div class="h2-hero"><div class="h2-spot"></div><img id="h2Shot" alt=""></div>
+  <div class="h2-inner">
+    <div class="h2-kick"><img id="h2Logo" alt=""><span>GONE!</span></div>
+    <div class="h2-title">HOME RUN</div>
+    <div class="h2-name" id="h2Name">—</div>
+    <div class="h2-meta"><span class="num" id="h2Num"></span><span id="h2Team"></span></div>
+    <div class="h2-dist"><span class="v" id="h2Dist">0</span><span class="u">FT</span></div>
+    <div class="h2-stats" id="h2Stats"></div>
   </div>
 </div>
 
@@ -694,6 +822,7 @@ function showSetup(){
 function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
   if(typeof endAnthem==="function")endAnthem();
   if(typeof endK==="function")endK();
+  if(typeof endHR2==="function")endHR2();
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
 
 function renderBoard(){
@@ -957,7 +1086,7 @@ const ov=$("#hrOverlay"), vid=$("#hrVideo");
 let hrPlaying=false;
 /* info = {id, name, number, team:{id,name,abbr}, desc} — any field optional */
 function triggerHR(info){
-  if(hrPlaying)return; hrPlaying=true;
+  if(hrPlaying||hr2Playing)return; hrPlaying=true;
   info=info||{};
   // in demo, actually score the HR on the board
   if(MODE==="demo"){
@@ -1034,7 +1163,7 @@ let anthemPlaying=false, anTimers=[];
    -> p3 clash + PLAY BALL stamp + fireworks (5.8s–end)                */
 function triggerAnthem(opts){
   opts=opts||{};
-  if(hrPlaying||anthemPlaying)return;
+  if(hrPlaying||hr2Playing||anthemPlaying)return;
   anthemPlaying=true;
   document.documentElement.style.setProperty('--anAwayc',teamColor(G.away.id));
   document.documentElement.style.setProperty('--anHomec',teamColor(G.home.id));
@@ -1069,7 +1198,7 @@ const wuCard=$("#walkupCard");
 let wuHideT=null;
 function triggerWalkup(info){
   info=info||{};
-  if(hrPlaying||anthemPlaying||kPlaying)return;   // never stack over a takeover
+  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;   // never stack over a takeover
   document.documentElement.style.setProperty('--wuc',teamColor((info.team&&info.team.id)||0));
   const shot=$("#wuShot"), shotWrap=shot.parentElement;
   if(info.id){
@@ -1125,7 +1254,7 @@ const kOv=$("#kOverlay");
 let kPlaying=false;
 function triggerK(info){
   info=info||{};
-  if(hrPlaying||anthemPlaying||kPlaying)return;
+  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;
   kPlaying=true;
   wuCard.classList.remove("show"); clearTimeout(wuHideT);   // clear the walk-up if it's up
   const team=info.team||{};
@@ -1149,6 +1278,63 @@ function triggerK(info){
   triggerK._t=setTimeout(endK, info.dur||6500);
 }
 function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
+
+/* ============================================================
+   HOME RUN V2 — fully animated takeover (alternative to the video;
+   both kept so they can be compared side by side)
+   info = same shape as triggerHR: {id,name,number,team,stats,dur}
+   ============================================================ */
+const hr2Ov=$("#hr2Overlay");
+let hr2Playing=false;
+function triggerHR2(info){
+  info=info||{};
+  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;
+  hr2Playing=true;
+  wuCard.classList.remove("show"); clearTimeout(wuHideT);
+  // in demo, score it on the board just like the video version does
+  if(MODE==="demo"){
+    const onBase=G.bases.filter(Boolean).length;
+    resetCount(); G.bases=[false,false,false];
+    const runs=onBase+1;
+    if(G.battingHome)G.home.score+=runs; else G.away.score+=runs;
+    renderBoard();
+  }
+  const team=info.team||{};
+  document.documentElement.style.setProperty('--h2c',teamColor(team.id||0));
+  const shot=$("#h2Shot"), hero=shot.parentElement;
+  if(info.id){
+    hero.style.display="";
+    shot.onerror=()=>{ if(shot.src.indexOf('midfield')<0) shot.src=shotURL(info.id); else hero.style.display="none"; };
+    shot.src=siloURL(info.id);
+  }else{ hero.style.display="none"; shot.removeAttribute("src"); }
+  const logo=$("#h2Logo");
+  if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
+  $("#h2Name").textContent=info.name||"—";
+  $("#h2Num").textContent=info.number?("#"+info.number):"";
+  $("#h2Team").textContent=team.name||"";
+  const s=info.stats||{};
+  const distWrap=document.querySelector(".h2-dist");
+  if(s.distance){ distWrap.style.display=""; $("#h2Dist").textContent="0";
+    setTimeout(()=>countUp($("#h2Dist"),String(s.distance)),1500);
+  }else distWrap.style.display="none";
+  const box=$("#h2Stats"); box.innerHTML="";
+  const tiles=[];
+  if(s.exitVelo)  tiles.push(["EXIT VELO · MPH",String(s.exitVelo)]);
+  if(s.seasonHR)  tiles.push(["SEASON HR",String(s.seasonHR)]);
+  if(s.rbi)       tiles.push(["RBI",String(s.rbi)]);
+  tiles.forEach(([k,v],i)=>{const d=document.createElement("div");d.className="h2-stat";
+    d.innerHTML=`<div class="v"></div><div class="k">${k}</div>`;box.appendChild(d);
+    setTimeout(()=>countUp(d.querySelector(".v"),v),1650+i*160);
+  });
+  hr2Ov.classList.remove("show"); void hr2Ov.offsetWidth;
+  hr2Ov.classList.add("show");
+  // launch the ball along its arc, synced with the trail draw
+  setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},150);
+  clearTimeout(triggerHR2._t);
+  triggerHR2._t=setTimeout(endHR2, info.dur||8500);
+}
+function endHR2(){ clearTimeout(triggerHR2._t); hr2Ov.classList.remove("show"); hr2Playing=false; }
+$("#hr2Skip").onclick=endHR2;
 /* season pitching line for the K card */
 async function fetchPitcher(id){
   try{
@@ -1207,16 +1393,17 @@ $("#kBtn").onclick=()=>{
     team:(pitchSide==="away"?G.away:G.home), ...demoKStats(),
     inningTxt:(G.half==="Top"?"MIDDLE ":"END ")+G.inning});
 };
-$("#hrBtn").onclick=()=>{
+function hrPreviewInfo(){  // shared by both HR buttons
   if(MODE==="demo"){
     const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
     const p=roster[Math.floor(Math.random()*roster.length)];
-    triggerHR({id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()});
-  }else{
-    triggerHR({id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),
-               stats:{distance:441,exitVelo:112.3,seasonHR:37,rbi:2},desc:"Preview — home run cinematic"});
+    return {id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()};
   }
-};
+  return {id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),
+          stats:{distance:441,exitVelo:112.3,seasonHR:37,rbi:2},desc:"Preview — home run cinematic"};
+}
+$("#hrBtn").onclick=()=>triggerHR(hrPreviewInfo());
+$("#hr2Btn").onclick=()=>triggerHR2(hrPreviewInfo());
 
 // preload the video quietly
 window.addEventListener("load",()=>{ try{vid.load();}catch(e){} });
