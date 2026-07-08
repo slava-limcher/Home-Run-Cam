@@ -446,120 +446,233 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .k-stat .k{color:#7fe0ff;font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
 @media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
 
-/* =================== HOME RUN V2 — FIREBALL RED ===================
-   molten black→ember palette; a white-hot comet burns a glowing crack
-   across the screen that STAYS lit; scorched-metal HOME RUN with heat
-   shimmer; the (user-favorite) field diagram card kept, in dark ember  */
-#hr2Overlay{position:fixed;inset:0;z-index:49;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
-  background:radial-gradient(1200px 700px at 50% 115%, #4a0d05 0%, #200604 45%, #070101 100%)}
+/* =================== HOME RUN V2 — DISTANCE-TIERED TRIPLE STYLE ===================
+   theme class set from the REAL distance in triggerHR2:
+   .fire = Fireball Red (440+ ft) · .lights = Night Game Lights (380–439 ft)
+   · .paper = Ticker-Tape Broadcast (<380 ft)                                    */
+#hr2Overlay{position:fixed;inset:0;z-index:49;display:none;opacity:0;transition:opacity .35s;overflow:hidden}
 #hr2Overlay.show{display:block;opacity:1}
-/* breathing ember floor glow */
-#hr2Overlay::before{content:"";position:absolute;inset:0;pointer-events:none;
+#hr2Overlay.fire{background:radial-gradient(1200px 700px at 50% 115%, #4a0d05 0%, #200604 45%, #070101 100%)}
+#hr2Overlay.lights{background:radial-gradient(1100px 680px at 50% -10%, #0d1523 0%, #070b13 50%, #030509 100%)}
+#hr2Overlay.paper{background:linear-gradient(180deg,#fdfcf7 0%,#f2eddd 100%)}
+/* per-theme backdrop layer */
+#hr2Overlay.fire::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(900px 420px at 50% 108%, rgba(232,50,12,.38), transparent 70%);
   animation:h2heat 3.2s ease-in-out infinite}
 @keyframes h2heat{0%,100%{opacity:.65}50%{opacity:1}}
-.h2-topbar{position:absolute;top:0;left:0;right:0;height:10px;z-index:3;
-  background:linear-gradient(90deg,#a1170a,#ff6a1f,#ffb347,#ff6a1f,#a1170a)}
-/* orange flash at the title slam */
-.h2-flash{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;
-  background:radial-gradient(circle at 50% 45%, #ffd28a, rgba(255,106,31,.4) 35%, transparent 65%)}
-#hr2Overlay.show .h2-flash{animation:h2flash .8s ease-out .55s both}
-@keyframes h2flash{0%{opacity:0}15%{opacity:.75}100%{opacity:0}}
-/* the comet + burning crack across the whole sky */
-.h2-sky{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#hr2Overlay.paper::before{content:"";position:absolute;inset:0;opacity:.55;pointer-events:none;
+  background:
+    linear-gradient(rgba(12,35,64,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(12,35,64,.07) 1px,transparent 1px);
+  background-size:44px 44px}
+.h2-topbar{position:absolute;top:0;left:0;right:0;height:10px;z-index:6}
+.fire .h2-topbar{background:linear-gradient(90deg,#a1170a,#ff6a1f,#ffb347,#ff6a1f,#a1170a)}
+.lights .h2-topbar{background:linear-gradient(90deg,#131c2b,#31445f,#131c2b)}
+.paper .h2-topbar{background:linear-gradient(90deg,#ffcb2e,#e8a90c)}
+/* ---- FIRE-only pieces: comet + burning crack + flash ---- */
+.h2-sky,.h2-flash{display:none}
+#hr2Overlay.fire .h2-sky{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 #h2crack{stroke-dasharray:100;stroke-dashoffset:100;
   filter:drop-shadow(0 0 8px rgba(255,106,31,.9)) drop-shadow(0 0 22px rgba(232,50,12,.6))}
-#hr2Overlay.show #h2crack{animation:h2draw 1.15s ease-out .15s both, h2flicker 2.2s ease-in-out 1.4s infinite}
+#hr2Overlay.fire.show #h2crack{animation:h2draw 1.15s ease-out .15s both, h2flicker 2.2s ease-in-out 1.4s infinite}
 @keyframes h2flicker{0%,100%{opacity:1}30%{opacity:.72}55%{opacity:.95}75%{opacity:.8}}
 #h2comet{opacity:0;filter:drop-shadow(0 0 10px #fff7e6) drop-shadow(0 0 26px #ff6a1f)}
-#hr2Overlay.show #h2comet{animation:h2cometLife 1.5s .15s both}
+#hr2Overlay.fire.show #h2comet{animation:h2cometLife 1.5s .15s both}
 @keyframes h2cometLife{0%{opacity:0}8%{opacity:1}78%{opacity:1}100%{opacity:0}}
-/* batter cutout on an ember spotlight */
+#hr2Overlay.fire .h2-flash{display:block;position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;
+  background:radial-gradient(circle at 50% 45%, #ffd28a, rgba(255,106,31,.4) 35%, transparent 65%)}
+#hr2Overlay.fire.show .h2-flash{animation:h2flash .8s ease-out .55s both}
+@keyframes h2flash{0%{opacity:0}15%{opacity:.75}100%{opacity:0}}
+/* ---- LIGHTS-only pieces: ambient + three flicking light banks ---- */
+.h2-ambient,.h2-bank{display:none}
+#hr2Overlay.lights .h2-ambient{display:block;position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;
+  background:radial-gradient(1100px 760px at 50% 0%, rgba(170,200,240,.32), transparent 68%)}
+#hr2Overlay.lights.show .h2-ambient{animation:h2ambient 1.5s ease-out .3s both}
+@keyframes h2ambient{0%{opacity:0}25%{opacity:.3}27%{opacity:.18}50%{opacity:.5}
+  55%{opacity:.4}78%{opacity:.75}100%{opacity:.85}}
+#hr2Overlay.lights .h2-bank{display:block;position:absolute;top:-4px;z-index:2;width:min(16vw,210px);pointer-events:none}
+#hr2Overlay.lights .h2-bank.b1{left:7%;transform:rotate(-5deg)}
+#hr2Overlay.lights .h2-bank.b2{left:50%;transform:translateX(-50%)}
+#hr2Overlay.lights .h2-bank.b3{right:7%;transform:rotate(5deg)}
+.h2-bank .lamps{height:min(4.6vw,58px);border-radius:0 0 12px 12px;background-color:#10151f;
+  border:2px solid #1d2735;border-top:none;opacity:.12;
+  background-image:radial-gradient(circle, #f4f8ff 0 30%, rgba(244,248,255,.12) 40%, transparent 46%);
+  background-size:25% 50%}
+#hr2Overlay.lights.show .b1 .lamps{animation:h2bankOn .5s .30s both}
+#hr2Overlay.lights.show .b2 .lamps{animation:h2bankOn .5s .70s both}
+#hr2Overlay.lights.show .b3 .lamps{animation:h2bankOn .5s 1.10s both}
+@keyframes h2bankOn{0%,45%{opacity:.12;filter:none}
+  52%{opacity:1;filter:drop-shadow(0 0 18px rgba(220,235,255,.95)) drop-shadow(0 6px 40px rgba(160,200,255,.6))}
+  62%{opacity:.22;filter:none}
+  72%,100%{opacity:1;filter:drop-shadow(0 0 18px rgba(220,235,255,.95)) drop-shadow(0 6px 40px rgba(160,200,255,.6))}}
+.h2-bank .cone{position:absolute;top:100%;left:50%;transform:translateX(-50%);width:340%;height:64vh;
+  clip-path:polygon(39% 0,61% 0,100% 100%,0 100%);filter:blur(14px);mix-blend-mode:screen;opacity:0;
+  background:linear-gradient(to bottom, rgba(205,228,255,.5), rgba(205,228,255,.07) 68%, transparent)}
+#hr2Overlay.lights.show .b1 .cone{animation:h2coneOn .3s .62s both}
+#hr2Overlay.lights.show .b2 .cone{animation:h2coneOn .3s 1.02s both}
+#hr2Overlay.lights.show .b3 .cone{animation:h2coneOn .3s 1.42s both}
+@keyframes h2coneOn{from{opacity:0}to{opacity:.55}}
+/* ---- shared: batter cutout ---- */
 .h2-hero{position:absolute;left:0;bottom:52px;height:min(74vh,640px);width:min(30vw,390px);z-index:3;
   display:flex;align-items:flex-end;opacity:0;transform:translateY(40px);
-  transition:.6s cubic-bezier(.2,.8,.2,1);transition-delay:.9s}
+  transition:.6s cubic-bezier(.2,.8,.2,1)}
+:is(#hr2Overlay.fire,#hr2Overlay.paper) .h2-hero{transition-delay:.9s}
+#hr2Overlay.lights .h2-hero{transition-delay:1.3s}
 #hr2Overlay.show .h2-hero{opacity:1;transform:none}
 .h2-spot{position:absolute;bottom:0;left:45%;transform:translateX(-50%);width:115%;height:70%;border-radius:50%;
-  filter:blur(12px);background:radial-gradient(closest-side,rgba(232,50,12,.55),transparent 70%)}
+  filter:blur(12px)}
+.fire .h2-spot{background:radial-gradient(closest-side,rgba(232,50,12,.55),transparent 70%)}
+.lights .h2-spot{background:radial-gradient(closest-side,rgba(150,190,235,.38),transparent 70%)}
+.paper .h2-spot{height:26%;width:110%;background:rgba(12,35,64,.22)}
 .h2-hero img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom left;
   filter:drop-shadow(0 14px 30px rgba(0,0,0,.7))}
-/* the field diagram card, molten dark edition */
+/* ---- shared: the field diagram card ---- */
 .h2-field{position:absolute;right:3vw;top:47%;transform:translateY(-50%);width:min(26vw,340px);z-index:3;
-  background:#150707;border:1px solid rgba(255,106,31,.35);border-radius:18px;
-  box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 34px rgba(232,50,12,.25);padding:16px;opacity:0}
-#hr2Overlay.show .h2-field{animation:h2cardIn .5s cubic-bezier(.2,.9,.3,1) .55s both}
+  border-radius:18px;padding:16px;opacity:0}
+.fire .h2-field{background:#150707;border:1px solid rgba(255,106,31,.35);
+  box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 34px rgba(232,50,12,.25)}
+.lights .h2-field{background:#0d1420;border:1px solid rgba(174,203,232,.32);
+  box-shadow:0 18px 50px rgba(0,0,0,.65),0 0 34px rgba(120,165,215,.18)}
+.paper .h2-field{background:#fff;box-shadow:0 18px 50px rgba(12,35,64,.20)}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-field{animation:h2cardIn .5s cubic-bezier(.2,.9,.3,1) .55s both}
+#hr2Overlay.lights.show .h2-field{animation:h2cardIn .5s cubic-bezier(.2,.9,.3,1) 1.25s both}
 @keyframes h2cardIn{from{opacity:0;transform:translateY(-46%) scale(.9)}to{opacity:1;transform:translateY(-50%) scale(1)}}
 .h2-field svg{display:block;width:100%;height:auto}
-.h2f{stroke:#ff8a4a}
+.fire .h2f{stroke:#ff8a4a}
+.lights .h2f{stroke:#9fc0e0}
+.paper .h2f{stroke:#0c2340}
 .h2f path{stroke-dasharray:100;stroke-dashoffset:100}
 #hr2Overlay.show .h2f path{animation:h2draw .7s ease-out both}
-#hr2Overlay.show .h2f path:nth-child(1){animation-delay:.65s}
-#hr2Overlay.show .h2f path:nth-child(2){animation-delay:.75s}
-#hr2Overlay.show .h2f path:nth-child(3){animation-delay:.85s}
-#hr2Overlay.show .h2f path:nth-child(4){animation-delay:.95s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2f path:nth-child(1){animation-delay:.65s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2f path:nth-child(2){animation-delay:.75s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2f path:nth-child(3){animation-delay:.85s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2f path:nth-child(4){animation-delay:.95s}
+#hr2Overlay.lights.show .h2f path:nth-child(1){animation-delay:1.35s}
+#hr2Overlay.lights.show .h2f path:nth-child(2){animation-delay:1.45s}
+#hr2Overlay.lights.show .h2f path:nth-child(3){animation-delay:1.55s}
+#hr2Overlay.lights.show .h2f path:nth-child(4){animation-delay:1.65s}
 @keyframes h2draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
-#h2trail{stroke:#ffd28a;stroke-dasharray:100;stroke-dashoffset:100;
-  filter:drop-shadow(0 0 5px rgba(255,106,31,.9))}
-#hr2Overlay.show #h2trail{animation:h2draw 1.1s ease-out .8s both}
-#h2ball{fill:#fff7e6;stroke:#ff6a1f;opacity:0}
-#hr2Overlay.show #h2ball{animation:h2ballLife 1.5s .8s both}
+#h2trail{stroke-dasharray:100;stroke-dashoffset:100}
+.fire #h2trail{stroke:#ffd28a;filter:drop-shadow(0 0 5px rgba(255,106,31,.9))}
+.lights #h2trail{stroke:#f4f8ff;filter:drop-shadow(0 0 5px rgba(190,220,255,.9))}
+.paper #h2trail{stroke:#e8a90c}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show #h2trail{animation:h2draw 1.1s ease-out .8s both}
+#hr2Overlay.lights.show #h2trail{animation:h2draw 1.1s ease-out 1.5s both}
+#h2ball{opacity:0}
+.fire #h2ball{fill:#fff7e6;stroke:#ff6a1f}
+.lights #h2ball{fill:#f4f8ff;stroke:#7fa8d0}
+.paper #h2ball{fill:#fff;stroke:#0c2340}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show #h2ball{animation:h2ballLife 1.5s .8s both}
+#hr2Overlay.lights.show #h2ball{animation:h2ballLife 1.5s 1.5s both}
 @keyframes h2ballLife{0%{opacity:0}8%{opacity:1}80%{opacity:1}100%{opacity:0}}
 #h2pin{opacity:0}
-#h2pin circle{fill:#ff6a1f;stroke:#ffd28a}
-#h2pin .h2ring{fill:none;stroke:#ff6a1f}
-#hr2Overlay.show #h2pin{animation:anFade2 .3s 1.9s both}
-#hr2Overlay.show .h2ring{animation:h2ringPulse 1.4s ease-out 1.95s infinite}
+.fire #h2pin circle{fill:#ff6a1f;stroke:#ffd28a}
+.fire #h2pin .h2ring{fill:none;stroke:#ff6a1f}
+.lights #h2pin circle{fill:#aecbe8;stroke:#f4f8ff}
+.lights #h2pin .h2ring{fill:none;stroke:#aecbe8}
+.paper #h2pin circle{fill:#e8a90c;stroke:#fff}
+.paper #h2pin .h2ring{fill:none;stroke:#e8a90c}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show #h2pin{animation:anFade2 .3s 1.9s both}
+#hr2Overlay.lights.show #h2pin{animation:anFade2 .3s 2.6s both}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2ring{animation:h2ringPulse 1.4s ease-out 1.95s infinite}
+#hr2Overlay.lights.show .h2ring{animation:h2ringPulse 1.4s ease-out 2.65s infinite}
 @keyframes h2ringPulse{from{r:8;opacity:.9}to{r:34;opacity:0}}
-/* center content: scorched metal on black */
+/* ---- shared: center content ---- */
 .h2-inner{position:relative;z-index:4;height:calc(100% - 52px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.5vh,13px);text-align:center;
   padding-left:min(26vw,340px);padding-right:min(26vw,340px)}
-#hr2Overlay.show .h2-inner{animation:h2punch .45s .55s both}
+#hr2Overlay.fire.show .h2-inner{animation:h2punch .45s .55s both}
 @keyframes h2punch{0%{transform:scale(1)}35%{transform:scale(1.045)}100%{transform:scale(1)}}
-.h2-kick{display:inline-flex;align-items:center;gap:10px;background:#2a0a05;color:#ffb347;font-weight:900;
-  letter-spacing:6px;font-size:clamp(12px,1.6vw,19px);padding:8px 20px;border-radius:999px;
-  border:1px solid rgba(255,106,31,.5);opacity:0}
+.h2-kick{display:inline-flex;align-items:center;gap:10px;font-weight:900;
+  letter-spacing:6px;font-size:clamp(12px,1.6vw,19px);padding:8px 20px;border-radius:999px;opacity:0}
+.fire .h2-kick{background:#2a0a05;color:#ffb347;border:1px solid rgba(255,106,31,.5)}
+.lights .h2-kick{background:#101826;color:#cfe3fa;border:1px solid rgba(160,200,255,.4)}
+.paper .h2-kick{background:#0c2340;color:#ffcb2e}
 .h2-kick img{width:clamp(22px,2.2vw,32px);height:clamp(22px,2.2vw,32px);object-fit:contain}
-#hr2Overlay.show .h2-kick{animation:anFade .4s .3s both}
-.h2-title{font-weight:900;line-height:.92;letter-spacing:0;font-size:clamp(52px,10vw,146px);
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-kick{animation:anFade .4s .3s both}
+#hr2Overlay.lights.show .h2-kick{animation:anFade .4s 1.55s both}
+.h2-title{position:relative;font-weight:900;line-height:.92;opacity:0}
+.fire .h2-title{letter-spacing:0;font-size:clamp(52px,10vw,146px);
   background:linear-gradient(180deg,#fff7e6 8%,#ffd28a 30%,#ff6a1f 55%,#a1170a 85%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 0 18px rgba(255,106,31,.6)) drop-shadow(0 8px 26px rgba(0,0,0,.85));opacity:0}
-#hr2Overlay.show .h2-title{animation:h2slam .45s cubic-bezier(.2,1.1,.3,1) .5s both,
+  filter:drop-shadow(0 0 18px rgba(255,106,31,.6)) drop-shadow(0 8px 26px rgba(0,0,0,.85))}
+#hr2Overlay.fire.show .h2-title{animation:h2slam .45s cubic-bezier(.2,1.1,.3,1) .5s both,
   h2shimmer 2.8s ease-in-out 1.4s infinite}
 @keyframes h2slam{0%{opacity:0;transform:scale(2.1)}60%{opacity:1;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
 @keyframes h2shimmer{0%,100%{transform:scale(1) skewX(0)}25%{transform:scale(1.012,.988) skewX(.6deg)}
   50%{transform:scale(.99,1.012) skewX(-.5deg)}75%{transform:scale(1.006,.995) skewX(.3deg)}}
-.h2-name{font-weight:900;color:#fff7e6;font-size:clamp(24px,3.2vw,44px);margin-top:10px;opacity:0;
-  text-shadow:0 4px 16px rgba(0,0,0,.7)}
-#hr2Overlay.show .h2-name{animation:anFade .5s 1.05s both}
-.h2-meta{color:#d8a58c;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
-.h2-meta .num{color:#ffb347;font-weight:900}
-#hr2Overlay.show .h2-meta{animation:anFade .5s 1.15s both}
-/* hero stat: molten distance counter */
-.h2-dist{display:flex;align-items:baseline;gap:10px;background:linear-gradient(180deg,#2a0a05,#160404);
-  border:1px solid rgba(255,106,31,.5);border-radius:16px;padding:10px 30px;margin-top:min(1vh,10px);
-  box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 26px rgba(232,50,12,.3);opacity:0}
-#hr2Overlay.show .h2-dist{animation:anFade .5s 1.35s both}
-.h2-dist .v{font-weight:900;line-height:1;font-size:clamp(50px,7.5vw,104px);
-  background:linear-gradient(180deg,#fff7e6,#ffb347 55%,#ff6a1f);
+.lights .h2-title{letter-spacing:4px;font-size:clamp(50px,9.6vw,142px);
+  background:linear-gradient(180deg,#ffffff,#c3d8ef 60%,#8fb0d4);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 22px rgba(190,220,255,.55)) drop-shadow(0 8px 30px rgba(0,0,0,.85))}
+#hr2Overlay.lights.show .h2-title{animation:h2titleOn .6s 1.15s both}
+@keyframes h2titleOn{0%{opacity:0}18%{opacity:1}30%{opacity:.15}45%{opacity:1}
+  58%{opacity:.7}100%{opacity:1}}
+.paper .h2-title{letter-spacing:0;font-size:clamp(50px,9.5vw,140px);color:#0c2340}
+#hr2Overlay.paper.show .h2-title{animation:h2in .5s cubic-bezier(.2,.8,.2,1) .4s both}
+@keyframes h2in{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
+.paper .h2-title::after{content:"";position:absolute;left:0;right:100%;bottom:-12px;height:9px;border-radius:5px;
+  background:linear-gradient(90deg,#ffcb2e,#e8a90c)}
+#hr2Overlay.paper.show .h2-title::after{animation:h2under .5s cubic-bezier(.2,.8,.2,1) .75s both}
+@keyframes h2under{from{right:100%}to{right:0}}
+.h2-name{font-weight:900;font-size:clamp(24px,3.2vw,44px);margin-top:10px;opacity:0}
+.fire .h2-name{color:#fff7e6;text-shadow:0 4px 16px rgba(0,0,0,.7)}
+.lights .h2-name{color:#eaf2fc;text-shadow:0 4px 16px rgba(0,0,0,.75)}
+.paper .h2-name{color:#0c2340}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-name{animation:anFade .5s 1.05s both}
+#hr2Overlay.lights.show .h2-name{animation:anFade .5s 1.75s both}
+.h2-meta{font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
+.fire .h2-meta{color:#d8a58c} .fire .h2-meta .num{color:#ffb347;font-weight:900}
+.lights .h2-meta{color:#93a9c4} .lights .h2-meta .num{color:#cfe3fa;font-weight:900}
+.paper .h2-meta{color:#5b6b80} .paper .h2-meta .num{color:#b8860b;font-weight:900}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-meta{animation:anFade .5s 1.15s both}
+#hr2Overlay.lights.show .h2-meta{animation:anFade .5s 1.85s both}
+/* hero stat: distance counter */
+.h2-dist{display:flex;align-items:baseline;gap:10px;border-radius:16px;padding:10px 30px;
+  margin-top:min(1vh,10px);opacity:0}
+.fire .h2-dist{background:linear-gradient(180deg,#2a0a05,#160404);border:1px solid rgba(255,106,31,.5);
+  box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 26px rgba(232,50,12,.3)}
+.lights .h2-dist{background:linear-gradient(180deg,#101826,#0a0f18);border:1px solid rgba(160,200,255,.42);
+  box-shadow:0 12px 30px rgba(0,0,0,.65),0 0 26px rgba(140,180,230,.22)}
+.paper .h2-dist{background:#0c2340;box-shadow:0 12px 30px rgba(12,35,64,.28)}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-dist{animation:anFade .5s 1.35s both}
+#hr2Overlay.lights.show .h2-dist{animation:anFade .5s 2s both}
+.h2-dist .v{font-weight:900;line-height:1;font-size:clamp(50px,7.5vw,104px)}
+.fire .h2-dist .v{background:linear-gradient(180deg,#fff7e6,#ffb347 55%,#ff6a1f);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.h2-dist .u{font-weight:900;color:#ffd28a;font-size:clamp(16px,2.2vw,28px);letter-spacing:2px}
+.lights .h2-dist .v{background:linear-gradient(180deg,#ffffff,#cfe3fa 55%,#9fc0e0);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.paper .h2-dist .v{color:#ffcb2e}
+.h2-dist .u{font-weight:900;font-size:clamp(16px,2.2vw,28px);letter-spacing:2px}
+.fire .h2-dist .u{color:#ffd28a} .lights .h2-dist .u{color:#aecbe8} .paper .h2-dist .u{color:#fff}
 .h2-stats{display:flex;gap:16px;margin-top:min(1vh,8px)}
-.h2-stat{background:#190606;border:1px solid rgba(255,106,31,.28);border-left:6px solid #ff6a1f;border-radius:12px;
-  padding:10px 20px;box-shadow:0 8px 22px rgba(0,0,0,.5);
-  opacity:0;transform:translateY(14px);transition:.4s}
+.h2-stat{border-radius:12px;padding:10px 20px;opacity:0;transform:translateY(14px);transition:.4s}
+.fire .h2-stat{background:#190606;border:1px solid rgba(255,106,31,.28);border-left:6px solid #ff6a1f;
+  box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.lights .h2-stat{background:#0d1420;border:1px solid rgba(160,200,255,.25);border-left:6px solid #7fa8d0;
+  box-shadow:0 8px 22px rgba(0,0,0,.55)}
+.paper .h2-stat{background:#fff;border:1px solid rgba(12,35,64,.15);border-left:6px solid #ffcb2e;
+  box-shadow:0 8px 22px rgba(12,35,64,.12)}
 #hr2Overlay.show .h2-stat{opacity:1;transform:none}
-#hr2Overlay.show .h2-stat:nth-child(1){transition-delay:1.5s}
-#hr2Overlay.show .h2-stat:nth-child(2){transition-delay:1.65s}
-#hr2Overlay.show .h2-stat:nth-child(3){transition-delay:1.8s}
-.h2-stat .v{font-weight:900;color:#fff2e2;font-size:clamp(22px,3vw,36px);line-height:1}
-.h2-stat .k{color:#ff9d5c;font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:4px}
-/* ember ticker */
-.h2-ticker{position:absolute;left:0;right:0;bottom:0;height:52px;background:#120404;z-index:5;
-  display:flex;align-items:center;overflow:hidden;border-top:3px solid #ff6a1f}
-.h2-ticker span{white-space:nowrap;font-weight:800;letter-spacing:2px;color:#ffb347;
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-stat:nth-child(1){transition-delay:1.5s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-stat:nth-child(2){transition-delay:1.65s}
+:is(#hr2Overlay.fire,#hr2Overlay.paper).show .h2-stat:nth-child(3){transition-delay:1.8s}
+#hr2Overlay.lights.show .h2-stat:nth-child(1){transition-delay:2.1s}
+#hr2Overlay.lights.show .h2-stat:nth-child(2){transition-delay:2.25s}
+#hr2Overlay.lights.show .h2-stat:nth-child(3){transition-delay:2.4s}
+.h2-stat .v{font-weight:900;font-size:clamp(22px,3vw,36px);line-height:1}
+.fire .h2-stat .v{color:#fff2e2} .lights .h2-stat .v{color:#eaf2fc} .paper .h2-stat .v{color:#0c2340}
+.h2-stat .k{font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:4px}
+.fire .h2-stat .k{color:#ff9d5c} .lights .h2-stat .k{color:#8fb0d4} .paper .h2-stat .k{color:#9a7d1d}
+/* news ticker */
+.h2-ticker{position:absolute;left:0;right:0;bottom:0;height:52px;z-index:5;
+  display:flex;align-items:center;overflow:hidden}
+.fire .h2-ticker{background:#120404;border-top:3px solid #ff6a1f}
+.lights .h2-ticker{background:#0a0f18;border-top:3px solid #7fa8d0}
+.paper .h2-ticker{background:#0c2340;border-top:3px solid #ffcb2e}
+.h2-ticker span{white-space:nowrap;font-weight:800;letter-spacing:2px;
   font-size:clamp(14px,1.6vw,19px);animation:h2tick 20s linear infinite}
+.fire .h2-ticker span{color:#ffb347} .lights .h2-ticker span{color:#aecbe8} .paper .h2-ticker span{color:#ffcb2e}
 @keyframes h2tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @media (max-width:760px){ .h2-hero,.h2-field{display:none} .h2-inner{padding-left:16px;padding-right:16px} }
 
@@ -878,9 +991,13 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- ============ HOME RUN V2 — FIREBALL RED ============ -->
+<!-- ============ HOME RUN V2 — DISTANCE-TIERED (fire 440+ / lights 380–439 / paper <380) ============ -->
 <div id="hr2Overlay">
   <div class="h2-topbar"></div>
+  <div class="h2-ambient"></div>
+  <div class="h2-bank b1"><div class="lamps"></div><div class="cone"></div></div>
+  <div class="h2-bank b2"><div class="lamps"></div><div class="cone"></div></div>
+  <div class="h2-bank b3"><div class="lamps"></div><div class="cone"></div></div>
   <svg class="h2-sky" viewBox="0 0 1600 900" preserveAspectRatio="none">
     <defs>
       <linearGradient id="h2fire" x1="0" y1="1" x2="1" y2="0">
@@ -919,7 +1036,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     </svg>
   </div>
   <div class="h2-inner">
-    <div class="h2-kick"><img id="h2Logo" alt=""><span>TORCHED!</span></div>
+    <div class="h2-kick"><img id="h2Logo" alt=""><span id="h2KickTxt">GONE!</span></div>
     <div class="h2-title">HOME RUN</div>
     <div class="h2-name" id="h2Name">—</div>
     <div class="h2-meta"><span class="num" id="h2Num"></span><span id="h2Team"></span></div>
@@ -1676,9 +1793,15 @@ function triggerHR2(info){
   $("#h2Num").textContent=info.number?("#"+info.number):"";
   $("#h2Team").textContent=team.name||"";
   const s=info.stats||{};
+  // pick the style by how far it went: 440+ scorcher / 380–439 night lights / <380 broadcast
+  const themeKey=(s.distance==null)?"lights":(s.distance>=440?"fire":(s.distance>=380?"lights":"paper"));
+  const T={fire:  {kick:"TORCHED!",   ball:800,  dist:1500, tiles:1550},
+           lights:{kick:"GOODNIGHT!", ball:1500, dist:2000, tiles:2100},
+           paper: {kick:"GONE!",      ball:800,  dist:1500, tiles:1550}}[themeKey];
+  $("#h2KickTxt").textContent=T.kick;
   const distWrap=document.querySelector(".h2-dist");
   if(s.distance){ distWrap.style.display=""; $("#h2Dist").textContent="0";
-    setTimeout(()=>countUp($("#h2Dist"),String(s.distance)),1500);
+    setTimeout(()=>countUp($("#h2Dist"),String(s.distance)),T.dist);
   }else distWrap.style.display="none";
   const box=$("#h2Stats"); box.innerHTML="";
   const tiles=[];
@@ -1687,7 +1810,7 @@ function triggerHR2(info){
   if(s.rbi)       tiles.push(["RBI",String(s.rbi)]);
   tiles.forEach(([k,v],i)=>{const d=document.createElement("div");d.className="h2-stat";
     d.innerHTML=`<div class="v"></div><div class="k">${k}</div>`;box.appendChild(d);
-    setTimeout(()=>countUp(d.querySelector(".v"),v),1550+i*160);
+    setTimeout(()=>countUp(d.querySelector(".v"),v),T.tiles+i*160);
   });
   // scrolling news ticker along the bottom
   const tick=`⚾ HOME RUN — ${info.name||"—"}${team.name?` (${team.name})`:""}`
@@ -1695,11 +1818,11 @@ function triggerHR2(info){
     +`${s.seasonHR?` • NO. ${s.seasonHR} THIS SEASON`:""}  •  `;
   $("#h2Ticker").textContent=tick.repeat(8);
   h2AimDiagram(s);   // aim the arc + pin at the real landing spot
-  hr2Ov.classList.remove("show"); void hr2Ov.offsetWidth;
-  hr2Ov.classList.add("show");
-  // launch the comet across the sky, then the ball along the field-card arc
-  setTimeout(()=>{try{document.getElementById("h2cometMotion").beginElement();}catch(e){}},150);
-  setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},800);
+  hr2Ov.classList.remove("show","fire","lights","paper"); void hr2Ov.offsetWidth;
+  hr2Ov.classList.add(themeKey,"show");
+  // fire: launch the comet across the sky; all: ball rides the field-card arc
+  if(themeKey==="fire")setTimeout(()=>{try{document.getElementById("h2cometMotion").beginElement();}catch(e){}},150);
+  setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},T.ball);
   clearTimeout(triggerHR2._t);
   triggerHR2._t=setTimeout(endHR2, info.dur||8500);
 }
@@ -1853,7 +1976,7 @@ $("#demoBtn").onclick=startDemo;
 $("#backBtn").onclick=showSetup;
 function demoStats(){
   const onBase=G.bases.filter(Boolean).length;
-  return {distance:380+Math.floor(Math.random()*90),          // 380–469 ft
+  return {distance:335+Math.floor(Math.random()*135),         // 335–469 ft (spans all 3 HR styles)
           exitVelo:Math.round((100+Math.random()*15)*10)/10,   // 100.0–115.0 mph
           seasonHR:8+Math.floor(Math.random()*40),             // 8–47
           rbi:onBase+1,                                         // solo..grand slam
