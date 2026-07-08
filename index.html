@@ -428,141 +428,234 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .k-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
 @media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
 
-/* =================== HOME RUN V2 — FULLY ANIMATED TAKEOVER (video alternative) =================== */
+/* =================== HOME RUN V2 — TICKER-TAPE BROADCAST ===================
+   bright network-stat-graphic look: cream paper + blueprint grid, navy + gold,
+   overhead ballpark diagram card with the ball arc drawn + landing pin,
+   stat chips, scrolling news ticker along the bottom                       */
 #hr2Overlay{position:fixed;inset:0;z-index:49;display:none;opacity:0;transition:opacity .35s;
-  overflow:hidden;background:#02081a}
+  overflow:hidden;background:linear-gradient(180deg,#fdfcf7 0%,#f2eddd 100%)}
 #hr2Overlay.show{display:block;opacity:1}
-.h2-wipe{position:absolute;inset:0;
+/* faint blueprint grid */
+#hr2Overlay::before{content:"";position:absolute;inset:0;opacity:.55;pointer-events:none;
   background:
-    linear-gradient(120deg, rgba(2,8,26,.25), rgba(2,8,26,.82)),
-    linear-gradient(180deg, color-mix(in srgb,var(--h2c,#0a2a5c) 85%,#000), color-mix(in srgb,var(--h2c,#0a2a5c) 38%,#000));
-  clip-path:inset(0 100% 0 0)}
-#hr2Overlay.show .h2-wipe{animation:h2wipe .5s cubic-bezier(.3,.7,.2,1) both}
-@keyframes h2wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-.h2-wipe::before{content:"";position:absolute;inset:-25%;opacity:.09;pointer-events:none;
-  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
-  animation:anStripes 1.6s linear infinite}
-#hr2Overlay::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-30%;width:26%;pointer-events:none;z-index:4;
-  background:linear-gradient(105deg,transparent,rgba(255,255,255,.10) 45%,rgba(255,255,255,.24) 50%,rgba(255,255,255,.10) 55%,transparent);
-  transform:skewX(-14deg);opacity:0}
-#hr2Overlay.show::after{animation:kSweepBig .9s ease-out .95s both}
-/* the ball flight: SVG streak drawn across the sky, ball rides it */
-.h2-sky{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
-#h2trail{stroke-dasharray:100;stroke-dashoffset:100;opacity:.9}
-#hr2Overlay.show #h2trail{animation:h2draw 1.15s ease-out .15s both, h2fadeout 1s ease 1.6s both}
-@keyframes h2draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
-@keyframes h2fadeout{from{opacity:.9}to{opacity:0}}
-#h2ball{opacity:0;filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 24px rgba(255,203,46,.8))}
-#hr2Overlay.show #h2ball{animation:h2ballLife 1.6s .15s both}
-@keyframes h2ballLife{0%{opacity:0}6%{opacity:1}72%{opacity:1}100%{opacity:0}}
-/* batter cutout */
-.h2-hero{position:absolute;left:0;bottom:0;height:min(80vh,700px);width:min(34vw,430px);z-index:3;
-  display:flex;align-items:flex-end;opacity:0;transform:translateY(50px);
-  transition:.6s cubic-bezier(.2,.8,.2,1);transition-delay:1.15s}
+    linear-gradient(rgba(12,35,64,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(12,35,64,.07) 1px,transparent 1px);
+  background-size:44px 44px}
+.h2-topbar{position:absolute;top:0;left:0;right:0;height:10px;z-index:3;
+  background:linear-gradient(90deg,#ffcb2e,#e8a90c)}
+/* batter cutout on a soft paper shadow */
+.h2-hero{position:absolute;left:0;bottom:52px;height:min(74vh,640px);width:min(30vw,390px);z-index:3;
+  display:flex;align-items:flex-end;opacity:0;transform:translateY(40px);
+  transition:.6s cubic-bezier(.2,.8,.2,1);transition-delay:.9s}
 #hr2Overlay.show .h2-hero{opacity:1;transform:none}
-.h2-spot{position:absolute;bottom:0;left:45%;transform:translateX(-50%);width:115%;height:85%;border-radius:50%;
-  filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--h2c,#0a2a5c) 90%,#000),transparent 70%)}
+.h2-spot{position:absolute;bottom:0;left:45%;transform:translateX(-50%);width:110%;height:26%;border-radius:50%;
+  filter:blur(12px);background:rgba(12,35,64,.22)}
 .h2-hero img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom left;
-  filter:drop-shadow(0 14px 30px rgba(0,0,0,.65))}
-/* center content with a punch on the title slam */
-.h2-inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(1.5vh,13px);text-align:center;padding-left:min(28vw,380px)}
-#hr2Overlay.show .h2-inner{animation:h2punch .45s 1s both}
-@keyframes h2punch{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
-.h2-kick{display:flex;align-items:center;gap:12px;color:var(--gold);font-weight:900;letter-spacing:7px;
-  font-size:clamp(13px,1.8vw,22px);opacity:0}
-.h2-kick img{width:clamp(26px,2.6vw,38px);height:clamp(26px,2.6vw,38px);object-fit:contain}
-#hr2Overlay.show .h2-kick{animation:anFade .4s .75s both}
-.h2-title{position:relative;font-weight:900;line-height:.92;letter-spacing:1px;font-size:clamp(52px,10.5vw,150px);
-  background:
-    linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
-    linear-gradient(180deg,#fff,#bcd0ff);
-  background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 8px 28px rgba(0,0,0,.6));opacity:0}
-#hr2Overlay.show .h2-title{animation:h2slam .5s cubic-bezier(.2,1.1,.3,1) .9s both, anShine2 2.8s linear 1.9s infinite}
-@keyframes h2slam{0%{opacity:0;transform:scale(1.9)}60%{opacity:1;transform:scale(.97)}100%{opacity:1;transform:scale(1)}}
-.h2-title::after{content:"";position:absolute;left:50%;top:50%;width:min(34vh,340px);height:min(34vh,340px);
-  border:4px solid var(--gold);border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(.25);pointer-events:none}
-#hr2Overlay.show .h2-title::after{animation:kRing .7s ease-out 1s both}
-.h2-name{font-weight:900;font-size:clamp(24px,3.4vw,46px);opacity:0}
-#hr2Overlay.show .h2-name{animation:anFade .5s 1.25s both}
-.h2-meta{color:#cfe0ff;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
-.h2-meta .num{color:var(--gold);font-weight:900}
-#hr2Overlay.show .h2-meta{animation:anFade .5s 1.35s both}
-/* the hero stat: distance counts up HUGE */
-.h2-dist{display:flex;align-items:baseline;gap:10px;margin-top:min(1vh,8px);opacity:0}
-#hr2Overlay.show .h2-dist{animation:anFade .5s 1.45s both}
-.h2-dist .v{font-weight:900;line-height:1;font-size:clamp(58px,9vw,120px);color:var(--gold);
-  text-shadow:0 6px 24px rgba(0,0,0,.55)}
-.h2-dist .u{font-weight:900;color:#cfe0ff;font-size:clamp(18px,2.4vw,30px);letter-spacing:2px}
-.h2-stats{display:flex;gap:24px;margin-top:min(1vh,8px)}
-.h2-stat{opacity:0;transform:translateY(14px);transition:.4s}
+  filter:drop-shadow(0 14px 26px rgba(12,35,64,.35))}
+/* overhead ballpark diagram card */
+.h2-field{position:absolute;right:3vw;top:47%;transform:translateY(-50%);width:min(26vw,340px);z-index:3;
+  background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(12,35,64,.20);padding:16px;opacity:0}
+#hr2Overlay.show .h2-field{animation:h2cardIn .5s cubic-bezier(.2,.9,.3,1) .55s both}
+@keyframes h2cardIn{from{opacity:0;transform:translateY(-46%) scale(.9)}to{opacity:1;transform:translateY(-50%) scale(1)}}
+.h2-field svg{display:block;width:100%;height:auto}
+.h2f path{stroke-dasharray:100;stroke-dashoffset:100}
+#hr2Overlay.show .h2f path{animation:h2draw .7s ease-out both}
+#hr2Overlay.show .h2f path:nth-child(1){animation-delay:.65s}
+#hr2Overlay.show .h2f path:nth-child(2){animation-delay:.75s}
+#hr2Overlay.show .h2f path:nth-child(3){animation-delay:.85s}
+#hr2Overlay.show .h2f path:nth-child(4){animation-delay:.95s}
+@keyframes h2draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+#h2trail{stroke-dasharray:100;stroke-dashoffset:100}
+#hr2Overlay.show #h2trail{animation:h2draw 1.1s ease-out .8s both}
+#h2ball{opacity:0}
+#hr2Overlay.show #h2ball{animation:h2ballLife 1.5s .8s both}
+@keyframes h2ballLife{0%{opacity:0}8%{opacity:1}80%{opacity:1}100%{opacity:0}}
+#h2pin{opacity:0}
+#hr2Overlay.show #h2pin{animation:anFade2 .3s 1.9s both}
+#hr2Overlay.show .h2ring{animation:h2ringPulse 1.4s ease-out 1.95s infinite}
+@keyframes h2ringPulse{from{r:8;opacity:.9}to{r:34;opacity:0}}
+/* center content: navy on paper */
+.h2-inner{position:relative;z-index:4;height:calc(100% - 52px);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.5vh,13px);text-align:center;
+  padding-left:min(26vw,340px);padding-right:min(26vw,340px)}
+.h2-kick{display:inline-flex;align-items:center;gap:10px;background:#0c2340;color:#ffcb2e;font-weight:900;
+  letter-spacing:6px;font-size:clamp(12px,1.6vw,19px);padding:8px 20px;border-radius:999px;opacity:0}
+.h2-kick img{width:clamp(22px,2.2vw,32px);height:clamp(22px,2.2vw,32px);object-fit:contain}
+#hr2Overlay.show .h2-kick{animation:anFade .4s .3s both}
+.h2-title{position:relative;font-weight:900;line-height:.92;letter-spacing:0;color:#0c2340;
+  font-size:clamp(50px,9.5vw,140px);opacity:0}
+#hr2Overlay.show .h2-title{animation:h2in .5s cubic-bezier(.2,.8,.2,1) .4s both}
+@keyframes h2in{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
+.h2-title::after{content:"";position:absolute;left:0;right:100%;bottom:-12px;height:9px;border-radius:5px;
+  background:linear-gradient(90deg,#ffcb2e,#e8a90c)}
+#hr2Overlay.show .h2-title::after{animation:h2under .5s cubic-bezier(.2,.8,.2,1) .75s both}
+@keyframes h2under{from{right:100%}to{right:0}}
+.h2-name{font-weight:900;color:#0c2340;font-size:clamp(24px,3.2vw,44px);margin-top:10px;opacity:0}
+#hr2Overlay.show .h2-name{animation:anFade .5s 1.05s both}
+.h2-meta{color:#5b6b80;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
+.h2-meta .num{color:#b8860b;font-weight:900}
+#hr2Overlay.show .h2-meta{animation:anFade .5s 1.15s both}
+/* hero stat chip: distance counts up huge */
+.h2-dist{display:flex;align-items:baseline;gap:10px;background:#0c2340;border-radius:16px;
+  padding:10px 30px;margin-top:min(1vh,10px);box-shadow:0 12px 30px rgba(12,35,64,.28);opacity:0}
+#hr2Overlay.show .h2-dist{animation:anFade .5s 1.35s both}
+.h2-dist .v{font-weight:900;line-height:1;font-size:clamp(50px,7.5vw,104px);color:#ffcb2e}
+.h2-dist .u{font-weight:900;color:#fff;font-size:clamp(16px,2.2vw,28px);letter-spacing:2px}
+.h2-stats{display:flex;gap:16px;margin-top:min(1vh,8px)}
+.h2-stat{background:#fff;border:1px solid rgba(12,35,64,.15);border-left:6px solid #ffcb2e;border-radius:12px;
+  padding:10px 20px;box-shadow:0 8px 22px rgba(12,35,64,.12);
+  opacity:0;transform:translateY(14px);transition:.4s}
 #hr2Overlay.show .h2-stat{opacity:1;transform:none}
-#hr2Overlay.show .h2-stat:nth-child(1){transition-delay:1.6s}
-#hr2Overlay.show .h2-stat:nth-child(2){transition-delay:1.75s}
-#hr2Overlay.show .h2-stat:nth-child(3){transition-delay:1.9s}
-.h2-stat .v{font-weight:900;font-size:clamp(22px,3vw,36px);line-height:1}
-.h2-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
-@media (max-width:760px){ .h2-hero{display:none} .h2-inner{padding-left:0} }
+#hr2Overlay.show .h2-stat:nth-child(1){transition-delay:1.5s}
+#hr2Overlay.show .h2-stat:nth-child(2){transition-delay:1.65s}
+#hr2Overlay.show .h2-stat:nth-child(3){transition-delay:1.8s}
+.h2-stat .v{font-weight:900;color:#0c2340;font-size:clamp(22px,3vw,36px);line-height:1}
+.h2-stat .k{color:#9a7d1d;font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:4px}
+/* scrolling news ticker */
+.h2-ticker{position:absolute;left:0;right:0;bottom:0;height:52px;background:#0c2340;z-index:5;
+  display:flex;align-items:center;overflow:hidden;border-top:3px solid #ffcb2e}
+.h2-ticker span{white-space:nowrap;font-weight:800;letter-spacing:2px;color:#ffcb2e;
+  font-size:clamp(14px,1.6vw,19px);animation:h2tick 20s linear infinite}
+@keyframes h2tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (max-width:760px){ .h2-hero,.h2-field{display:none} .h2-inner{padding-left:16px;padding-right:16px} }
 
-/* =================== 7TH STRETCH / RALLY / FINAL — SHARED TAKEOVER SKELETON =================== */
-#stretchOverlay,#rallyOverlay,#finalOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;
-  transition:opacity .4s;overflow:hidden}
-#stretchOverlay.show,#rallyOverlay.show,#finalOverlay.show{display:block;opacity:1}
-#stretchOverlay{background:radial-gradient(1000px 640px at 50% -10%,#0d2f63,#02081a 72%)}
-#rallyOverlay{background:
-  linear-gradient(120deg, rgba(2,8,26,.30), rgba(2,8,26,.85)),
-  linear-gradient(180deg, color-mix(in srgb,var(--rc,#0a2a5c) 82%,#000), color-mix(in srgb,var(--rc,#0a2a5c) 36%,#000))}
-#finalOverlay{background:
-  linear-gradient(120deg, rgba(2,8,26,.25), rgba(2,8,26,.82)),
-  linear-gradient(180deg, color-mix(in srgb,var(--fc,#0a2a5c) 85%,#000), color-mix(in srgb,var(--fc,#0a2a5c) 38%,#000))}
-#stretchOverlay::before,#rallyOverlay::before,#finalOverlay::before{content:"";position:absolute;inset:-25%;
-  opacity:.09;pointer-events:none;background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
-  animation:anStripes 2.2s linear infinite}
-#stretchOverlay::after,#rallyOverlay::after,#finalOverlay::after{content:"";position:absolute;top:-10%;bottom:-10%;
-  left:-30%;width:26%;pointer-events:none;transform:skewX(-14deg);opacity:0;
-  background:linear-gradient(105deg,transparent,rgba(255,255,255,.10) 45%,rgba(255,255,255,.22) 50%,rgba(255,255,255,.10) 55%,transparent)}
-#stretchOverlay.show::after,#rallyOverlay.show::after,#finalOverlay.show::after{animation:kSweepBig .9s ease-out .5s both}
-.tk-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2vh,18px);text-align:center;padding:20px}
-.tk-kick{color:var(--gold);font-weight:900;letter-spacing:9px;font-size:clamp(13px,1.9vw,24px);
-  text-shadow:0 2px 12px rgba(0,0,0,.7);opacity:0}
-:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-kick{animation:anFade .5s .25s both}
-.tk-title{position:relative;font-weight:900;line-height:.92;letter-spacing:1px;font-size:clamp(46px,9.5vw,136px);
+/* =================== 7TH-INNING STRETCH — LAZY DAYTIME ===================
+   soft sky, drifting clouds, warm sun, pillowy taffy-stretch lettering    */
+#stretchOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .5s;overflow:hidden;
+  background:linear-gradient(180deg,#7fc4ee 0%,#b7e0f7 55%,#e8f7ff 100%)}
+#stretchOverlay.show{display:block;opacity:1}
+.st-sun{position:absolute;top:7vh;right:8vw;width:min(20vw,190px);height:min(20vw,190px);border-radius:50%;
+  background:radial-gradient(circle,#ffe9a8 0%,#ffd766 60%,rgba(255,215,102,0) 72%);
+  box-shadow:0 0 90px 40px rgba(255,215,102,.55);animation:stSun 5s ease-in-out infinite}
+@keyframes stSun{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.st-cloud{position:absolute;background:#fff;border-radius:60px;opacity:.95;
+  filter:drop-shadow(0 8px 18px rgba(30,80,120,.18))}
+.st-cloud::before,.st-cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.st-cloud::before{width:55%;height:160%;left:12%;top:-70%}
+.st-cloud::after{width:42%;height:120%;right:12%;top:-45%}
+.st-cloud.c1{width:220px;height:60px;top:16vh;animation:stDrift 36s linear infinite}
+.st-cloud.c2{width:150px;height:44px;top:36vh;animation:stDrift 27s linear -12s infinite}
+.st-cloud.c3{width:280px;height:74px;top:62vh;animation:stDrift 46s linear -26s infinite}
+@keyframes stDrift{from{left:-24%}to{left:108%}}
+.st-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2.4vh,20px);text-align:center;padding:20px}
+.st-kick{color:#17406b;font-weight:900;letter-spacing:8px;font-size:clamp(14px,2vw,24px);opacity:0}
+#stretchOverlay.show .st-kick{animation:anFade .6s .3s both}
+.st-title{font-weight:900;line-height:.95;letter-spacing:2px;font-size:clamp(56px,12vw,160px);color:#fff;
+  -webkit-text-stroke:3px #17406b;
+  text-shadow:0 6px 0 rgba(23,64,107,.22),0 16px 34px rgba(23,64,107,.35);
+  opacity:0;transform-origin:50% 100%}
+#stretchOverlay.show .st-title{animation:stPop .6s cubic-bezier(.2,1.3,.4,1) .5s both,
+  stTaffy 3.4s ease-in-out 1.4s infinite}
+@keyframes stPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes stTaffy{0%,100%{transform:scale(1,1)}30%{transform:scale(.97,1.10)}
+  55%{transform:scale(1.05,.93)}78%{transform:scale(.99,1.03)}}
+.st-sub{color:#17406b;font-weight:800;font-size:clamp(15px,2.1vw,25px);opacity:0}
+#stretchOverlay.show .st-sub{animation:anFade .6s 1.25s both}
+
+/* =================== LATE-GAME RALLY — RALLY CAP FLIP ===================
+   comic halftone in the batting team's color; the cap flips upside down   */
+#rallyOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .4s;overflow:hidden;
+  background-image:
+    radial-gradient(rgba(255,255,255,.16) 2.2px, transparent 2.9px),
+    linear-gradient(135deg, color-mix(in srgb,var(--rc,#bf0d3e) 92%,#000), color-mix(in srgb,var(--rc,#bf0d3e) 52%,#000));
+  background-size:26px 26px,100% 100%}
+#rallyOverlay.show{display:block;opacity:1;animation:rcDots 16s linear infinite}
+@keyframes rcDots{from{background-position:0 0,0 0}to{background-position:260px 260px,0 0}}
+.rc-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.8vh,16px);text-align:center;padding:20px}
+.rc-kick{color:#fff;font-weight:900;letter-spacing:8px;font-size:clamp(13px,1.8vw,22px);
+  text-shadow:0 2px 10px rgba(0,0,0,.5);opacity:0}
+#rallyOverlay.show .rc-kick{animation:anFade .5s .25s both}
+.rc-capwrap{width:min(26vh,240px);opacity:0}
+#rallyOverlay.show .rc-capwrap{animation:rcDrop .55s cubic-bezier(.2,1.2,.4,1) .3s both}
+@keyframes rcDrop{from{opacity:0;transform:translateY(-80px)}to{opacity:1;transform:none}}
+.rc-cap{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 26px rgba(0,0,0,.45))}
+#rallyOverlay.show .rc-cap{animation:rcFlip 1s cubic-bezier(.3,1.3,.4,1) 1.05s both,
+  rcWobble 3s ease-in-out 2.3s infinite}
+@keyframes rcFlip{0%{transform:rotate(0)}55%{transform:rotate(198deg)}
+  72%{transform:rotate(171deg)}86%{transform:rotate(185deg)}100%{transform:rotate(180deg)}}
+@keyframes rcWobble{0%,100%{transform:rotate(180deg)}50%{transform:rotate(173deg)}}
+.rc-cap .brim{fill:color-mix(in srgb,var(--rc,#bf0d3e) 62%,#000)}
+.rc-title{font-weight:900;line-height:.95;font-size:clamp(42px,8.5vw,112px);color:#fff;
+  -webkit-text-stroke:2px rgba(0,0,0,.28);text-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0}
+#rallyOverlay.show .rc-title{animation:rcTitleIn .5s cubic-bezier(.2,1.2,.4,1) .55s both,
+  rcTilt 2.4s ease-in-out 1.3s infinite}
+@keyframes rcTitleIn{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
+@keyframes rcTilt{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+.r-diamond{position:relative;width:110px;height:110px;opacity:0}
+#rallyOverlay.show .r-diamond{animation:anFade .5s .95s both}
+.r-base{position:absolute;width:30px;height:30px;background:rgba(255,255,255,.2);
+  border:2px solid rgba(255,255,255,.65);transform:rotate(45deg)}
+.r-base.b2{top:6px;left:40px}.r-base.b3{top:40px;left:6px}.r-base.b1{top:40px;right:6px}
+.r-base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 20px var(--gold)}
+.rc-sub{background:rgba(0,0,0,.38);color:#fff;font-weight:800;letter-spacing:1px;
+  font-size:clamp(14px,1.9vw,22px);padding:10px 26px;border-radius:999px;opacity:0}
+#rallyOverlay.show .rc-sub{animation:anFade .5s 1.15s both}
+
+/* =================== FINAL / WALK-OFF — CHAMPAGNE GOLD ===================
+   black + metallic gold: engraved medallion, self-drawing laurels, plaque  */
+#finalOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .5s;overflow:hidden;
+  background:radial-gradient(900px 620px at 50% 30%, #241b0c 0%, #120d06 55%, #070502 100%)}
+#finalOverlay.show{display:block;opacity:1}
+#finalOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(560px 380px at 50% 40%, rgba(212,160,23,.16), transparent 70%)}
+.fg-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.8vh,16px);text-align:center;padding:20px}
+.fg-kick{color:#e9c968;font-weight:900;letter-spacing:12px;font-size:clamp(13px,1.9vw,24px);opacity:0}
+#finalOverlay.show .fg-kick{animation:anFade .6s .25s both}
+.fg-medalrow{display:flex;align-items:center;gap:min(2.6vw,28px)}
+.fg-medal{position:relative;width:min(32vh,280px);height:min(32vh,280px);border-radius:50%;
+  background:conic-gradient(from 210deg,#8a6a1f,#f5d67b 20%,#b8860b 45%,#f7e6a2 70%,#8a6a1f);
+  box-shadow:0 18px 60px rgba(0,0,0,.7),0 0 44px rgba(212,160,23,.35);opacity:0}
+#finalOverlay.show .fg-medal{animation:fgIn .8s cubic-bezier(.2,.9,.3,1) .4s both}
+@keyframes fgIn{from{opacity:0;transform:scale(.55) rotate(-10deg)}to{opacity:1;transform:none}}
+.fg-disc{position:absolute;inset:12px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%, #241b0c, #0d0905 72%);
+  border:2px solid rgba(245,214,123,.5)}
+.fg-disc img{width:62%;height:62%;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.85))}
+.fg-laurel{width:min(11vh,96px);height:auto;opacity:0}
+.fg-laurel.flip{transform:scaleX(-1)}
+#finalOverlay.show .fg-laurel{animation:anFade2 .4s .7s both}
+.fg-laurel .stem{stroke-dasharray:100;stroke-dashoffset:100}
+#finalOverlay.show .fg-laurel .stem{animation:h2draw 1s ease-out .8s both}
+.fg-laurel ellipse{opacity:0}
+#finalOverlay.show .fg-laurel ellipse{animation:anFade2 .35s both}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(1){animation-delay:1.0s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(2){animation-delay:1.08s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(3){animation-delay:1.16s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(4){animation-delay:1.24s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(5){animation-delay:1.32s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(6){animation-delay:1.40s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(7){animation-delay:1.48s}
+#finalOverlay.show .fg-laurel ellipse:nth-of-type(8){animation-delay:1.56s}
+.fg-title{font-weight:900;line-height:.95;letter-spacing:3px;font-size:clamp(40px,7.5vw,110px);
   background:
-    linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
-    linear-gradient(180deg,#fff,#bcd0ff);
+    linear-gradient(110deg, transparent 42%, rgba(255,244,200,.95) 50%, transparent 58%) no-repeat,
+    linear-gradient(180deg,#f7e6a2,#d4a017 55%,#8a6a1f);
   background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 8px 28px rgba(0,0,0,.6));clip-path:inset(0 100% 0 0)}
-:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-title{
-  animation:kReveal .6s cubic-bezier(.2,.8,.2,1) .5s both, anShine2 2.8s linear 1.8s infinite}
-.tk-sub{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.9vw,23px);opacity:0}
-:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-sub{animation:anFade .5s 1.15s both}
-/* stretch: swaying title + floating notes */
-#stretchOverlay.show .tk-title.sway{animation:kReveal .6s cubic-bezier(.2,.8,.2,1) .5s both,
-  anShine2 2.8s linear 1.8s infinite, stSway 3s ease-in-out 1.3s infinite}
-@keyframes stSway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
-.st-notes{display:flex;gap:min(6vw,70px);color:var(--gold);font-size:clamp(24px,3.4vw,44px);font-weight:900}
-.st-notes span{opacity:0;animation:stFloat 2.6s ease-in infinite}
-.st-notes span:nth-child(2){animation-delay:.9s}
-.st-notes span:nth-child(3){animation-delay:1.7s}
-@keyframes stFloat{0%{transform:translateY(26px);opacity:0}25%{opacity:.95}100%{transform:translateY(-46px);opacity:0}}
-/* rally: mini diamond with occupied bases lit */
-.r-diamond{position:relative;width:120px;height:120px;opacity:0}
-#rallyOverlay.show .r-diamond{animation:anFade .5s .9s both}
-.r-base{position:absolute;width:34px;height:34px;background:rgba(255,255,255,.14);
-  border:2px solid rgba(255,255,255,.4);transform:rotate(45deg)}
-.r-base.b2{top:6px;left:43px}.r-base.b3{top:43px;left:6px}.r-base.b1{top:43px;right:6px}
-.r-base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 20px var(--gold)}
-/* final: winner crest drops in + score line */
-.f-crest{width:min(26vw,240px);height:min(26vw,240px);object-fit:contain;
-  filter:drop-shadow(0 14px 40px rgba(0,0,0,.7));opacity:0}
-#finalOverlay.show .f-crest{animation:fDrop .6s cubic-bezier(.2,.9,.3,1) .25s both}
-@keyframes fDrop{from{opacity:0;transform:translateY(-40px) scale(.85)}to{opacity:1;transform:none}}
-.f-score{font-weight:900;font-size:clamp(34px,5.5vw,72px);opacity:0;text-shadow:0 6px 24px rgba(0,0,0,.55)}
-#finalOverlay.show .f-score{animation:anFade .5s 1.25s both}
+  filter:drop-shadow(0 8px 26px rgba(0,0,0,.7));opacity:0}
+#finalOverlay.show .fg-title{animation:fgTitleIn .6s cubic-bezier(.2,.8,.2,1) 1.1s both,
+  anShine2 3s linear 2s infinite}
+@keyframes fgTitleIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.fg-plaque{background:linear-gradient(180deg,#171006,#0c0803);border:2px solid #b8860b;border-radius:10px;
+  padding:12px 36px;color:#f3e8c8;font-family:Georgia,'Times New Roman',serif;font-weight:700;
+  letter-spacing:3px;font-size:clamp(24px,4.2vw,52px);
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.9),0 10px 30px rgba(0,0,0,.6);opacity:0}
+#finalOverlay.show .fg-plaque{animation:anFade .6s 1.5s both}
+.fg-sub{color:#cbb87a;font-family:Georgia,'Times New Roman',serif;font-style:italic;
+  font-size:clamp(15px,2vw,24px);opacity:0}
+#finalOverlay.show .fg-sub{animation:anFade .6s 1.75s both}
+/* walk-off ribbon across the medallion */
+.fg-ribbon{position:absolute;left:50%;bottom:7%;transform:translateX(-50%) rotate(-4deg);z-index:3;
+  background:linear-gradient(180deg,#e01843,#a80f30);color:#fff;font-weight:900;letter-spacing:4px;
+  padding:8px 26px;font-size:clamp(13px,1.8vw,22px);border-radius:4px;
+  box-shadow:0 8px 22px rgba(0,0,0,.6);display:none;opacity:0}
+#finalOverlay.walkoff .fg-ribbon{display:block}
+#finalOverlay.walkoff.show .fg-ribbon{animation:fgRibbon .5s cubic-bezier(.2,1.2,.4,1) 1.35s both}
+@keyframes fgRibbon{from{opacity:0;transform:translateX(-50%) rotate(-4deg) scale(1.7)}
+  to{opacity:1;transform:translateX(-50%) rotate(-4deg) scale(1)}}
 
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
@@ -737,25 +830,30 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- ============ HOME RUN V2 — FULLY ANIMATED TAKEOVER ============ -->
+<!-- ============ HOME RUN V2 — TICKER-TAPE BROADCAST ============ -->
 <div id="hr2Overlay">
-  <div class="h2-wipe"></div>
-  <svg class="h2-sky" viewBox="0 0 1600 900" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id="h2grad" x1="0" y1="1" x2="1" y2="0">
-        <stop offset="0" stop-color="rgba(255,255,255,0)"/>
-        <stop offset=".7" stop-color="rgba(255,255,255,.85)"/>
-        <stop offset="1" stop-color="#ffcb2e"/>
-      </linearGradient>
-    </defs>
-    <path id="h2trail" pathLength="100" d="M -60 820 Q 780 80 1660 260" fill="none"
-      stroke="url(#h2grad)" stroke-width="6" stroke-linecap="round"/>
-    <circle id="h2ball" r="11" fill="#fff">
-      <animateMotion id="h2motion" dur="1.15s" begin="indefinite" fill="freeze" path="M -60 820 Q 780 80 1660 260"/>
-    </circle>
-  </svg>
+  <div class="h2-topbar"></div>
   <button class="skip" id="hr2Skip">Skip ⏭</button>
   <div class="h2-hero"><div class="h2-spot"></div><img id="h2Shot" alt=""></div>
+  <div class="h2-field">
+    <svg viewBox="0 0 400 380">
+      <g class="h2f" stroke="#0c2340" fill="none" stroke-width="3" opacity=".85" stroke-linecap="round">
+        <path pathLength="100" d="M200 350 L70 220"/>
+        <path pathLength="100" d="M200 350 L330 220"/>
+        <path pathLength="100" d="M70 220 Q200 70 330 220"/>
+        <path pathLength="100" d="M200 350 L155 305 L200 260 L245 305 Z"/>
+      </g>
+      <path id="h2trail" pathLength="100" d="M200 345 Q150 200 128 132" fill="none"
+        stroke="#e8a90c" stroke-width="5" stroke-linecap="round"/>
+      <circle id="h2ball" r="7" fill="#fff" stroke="#0c2340" stroke-width="3">
+        <animateMotion id="h2motion" dur="1.1s" begin="indefinite" fill="freeze" path="M200 345 Q150 200 128 132"/>
+      </circle>
+      <g id="h2pin">
+        <circle class="h2ring" cx="128" cy="132" r="8" fill="none" stroke="#e8a90c" stroke-width="3"/>
+        <circle cx="128" cy="132" r="8" fill="#e8a90c" stroke="#fff" stroke-width="3"/>
+      </g>
+    </svg>
+  </div>
   <div class="h2-inner">
     <div class="h2-kick"><img id="h2Logo" alt=""><span>GONE!</span></div>
     <div class="h2-title">HOME RUN</div>
@@ -764,36 +862,81 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="h2-dist"><span class="v" id="h2Dist">0</span><span class="u">FT</span></div>
     <div class="h2-stats" id="h2Stats"></div>
   </div>
+  <div class="h2-ticker"><span id="h2Ticker"></span></div>
 </div>
 
-<!-- ============ 7TH-INNING STRETCH ============ -->
+<!-- ============ 7TH-INNING STRETCH — LAZY DAYTIME ============ -->
 <div id="stretchOverlay">
-  <div class="tk-inner">
-    <div class="tk-kick">⚾ MIDDLE OF THE 7TH</div>
-    <div class="tk-title sway">STRETCH&nbsp;TIME</div>
-    <div class="st-notes"><span>♪</span><span>♫</span><span>♪</span></div>
-    <div class="tk-sub">Stand up, stretch it out, sing along!</div>
+  <div class="st-sun"></div>
+  <div class="st-cloud c1"></div>
+  <div class="st-cloud c2"></div>
+  <div class="st-cloud c3"></div>
+  <div class="st-inner">
+    <div class="st-kick">⚾ SEVENTH INNING</div>
+    <div class="st-title">STRETCH</div>
+    <div class="st-sub">stand up · stretch it out · sing along ♪</div>
   </div>
 </div>
 
-<!-- ============ LATE-GAME RALLY ============ -->
+<!-- ============ LATE-GAME RALLY — RALLY CAP FLIP ============ -->
 <div id="rallyOverlay">
-  <div class="tk-inner">
-    <div class="tk-kick" id="rKick">LATE INNINGS</div>
-    <div class="tk-title">RALLY&nbsp;TIME</div>
+  <div class="rc-inner">
+    <div class="rc-kick" id="rKick">LATE INNINGS</div>
+    <div class="rc-capwrap">
+      <svg class="rc-cap" viewBox="0 0 220 150">
+        <path d="M30 92 Q30 22 110 22 Q190 22 190 92 Z" fill="var(--rc,#bf0d3e)" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M110 22 L110 92" stroke="#fff" stroke-width="4" opacity=".55" fill="none"/>
+        <path d="M64 30 Q60 60 58 92" stroke="#fff" stroke-width="4" opacity=".55" fill="none"/>
+        <path d="M156 30 Q160 60 162 92" stroke="#fff" stroke-width="4" opacity=".55" fill="none"/>
+        <circle cx="110" cy="20" r="7" fill="#fff"/>
+        <path class="brim" d="M30 92 Q110 122 190 92 L196 104 Q110 140 24 104 Z" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="rc-title">RALLY&nbsp;CAP&nbsp;TIME</div>
     <div class="r-diamond"><div class="r-base b2" id="rB2"></div><div class="r-base b3" id="rB3"></div><div class="r-base b1" id="rB1"></div></div>
-    <div class="tk-sub" id="rSub"></div>
+    <div class="rc-sub" id="rSub"></div>
   </div>
 </div>
 
-<!-- ============ FINAL / WALK-OFF ============ -->
+<!-- ============ FINAL / WALK-OFF — CHAMPAGNE GOLD ============ -->
 <div id="finalOverlay">
-  <div class="tk-inner">
-    <div class="tk-kick" id="fKick">FINAL</div>
-    <img class="f-crest" id="fCrest" alt="">
-    <div class="tk-title" id="fTitle">FINAL</div>
-    <div class="f-score" id="fScore"></div>
-    <div class="tk-sub" id="fSub"></div>
+  <div class="fg-inner">
+    <div class="fg-kick" id="fKick">FINAL</div>
+    <div class="fg-medalrow">
+      <svg class="fg-laurel" viewBox="0 0 100 240">
+        <path class="stem" pathLength="100" d="M85 235 Q20 160 45 10" stroke="#d4a017" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#e9c968">
+          <ellipse rx="13" ry="5" transform="translate(72 200) rotate(-42)"/>
+          <ellipse rx="13" ry="5" transform="translate(52 170) rotate(-26)"/>
+          <ellipse rx="13" ry="5" transform="translate(42 140) rotate(-14)"/>
+          <ellipse rx="13" ry="5" transform="translate(38 110) rotate(-4)"/>
+          <ellipse rx="13" ry="5" transform="translate(38 82) rotate(6)"/>
+          <ellipse rx="13" ry="5" transform="translate(42 56) rotate(16)"/>
+          <ellipse rx="13" ry="5" transform="translate(48 32) rotate(26)"/>
+          <ellipse rx="13" ry="5" transform="translate(44 12) rotate(38)"/>
+        </g>
+      </svg>
+      <div class="fg-medal">
+        <div class="fg-disc"><img id="fCrest" alt=""></div>
+        <div class="fg-ribbon">WALK-OFF</div>
+      </div>
+      <svg class="fg-laurel flip" viewBox="0 0 100 240">
+        <path class="stem" pathLength="100" d="M85 235 Q20 160 45 10" stroke="#d4a017" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#e9c968">
+          <ellipse rx="13" ry="5" transform="translate(72 200) rotate(-42)"/>
+          <ellipse rx="13" ry="5" transform="translate(52 170) rotate(-26)"/>
+          <ellipse rx="13" ry="5" transform="translate(42 140) rotate(-14)"/>
+          <ellipse rx="13" ry="5" transform="translate(38 110) rotate(-4)"/>
+          <ellipse rx="13" ry="5" transform="translate(38 82) rotate(6)"/>
+          <ellipse rx="13" ry="5" transform="translate(42 56) rotate(16)"/>
+          <ellipse rx="13" ry="5" transform="translate(48 32) rotate(26)"/>
+          <ellipse rx="13" ry="5" transform="translate(44 12) rotate(38)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="fg-title" id="fTitle">FINAL</div>
+    <div class="fg-plaque" id="fScore"></div>
+    <div class="fg-sub" id="fSub"></div>
   </div>
 </div>
 
@@ -1421,7 +1564,6 @@ function triggerHR2(info){
     renderBoard();
   }
   const team=info.team||{};
-  document.documentElement.style.setProperty('--h2c',teamColor(team.id||0));
   const shot=$("#h2Shot"), hero=shot.parentElement;
   if(info.id){
     hero.style.display="";
@@ -1445,12 +1587,17 @@ function triggerHR2(info){
   if(s.rbi)       tiles.push(["RBI",String(s.rbi)]);
   tiles.forEach(([k,v],i)=>{const d=document.createElement("div");d.className="h2-stat";
     d.innerHTML=`<div class="v"></div><div class="k">${k}</div>`;box.appendChild(d);
-    setTimeout(()=>countUp(d.querySelector(".v"),v),1650+i*160);
+    setTimeout(()=>countUp(d.querySelector(".v"),v),1550+i*160);
   });
+  // scrolling news ticker along the bottom
+  const tick=`⚾ HOME RUN — ${info.name||"—"}${team.name?` (${team.name})`:""}`
+    +`${s.distance?` • ${s.distance} FT`:""}${s.exitVelo?` • ${s.exitVelo} MPH`:""}`
+    +`${s.seasonHR?` • NO. ${s.seasonHR} THIS SEASON`:""}  •  `;
+  $("#h2Ticker").textContent=tick.repeat(8);
   hr2Ov.classList.remove("show"); void hr2Ov.offsetWidth;
   hr2Ov.classList.add("show");
-  // launch the ball along its arc, synced with the trail draw
-  setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},150);
+  // launch the ball along its arc, synced with the trail draw on the field card
+  setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},800);
   clearTimeout(triggerHR2._t);
   triggerHR2._t=setTimeout(endHR2, info.dur||8500);
 }
@@ -1566,9 +1713,9 @@ function triggerFinal(info){
   const tie=aw.score===hm.score;
   const winner=info.winner||(hm.score>aw.score?hm:aw);
   const loser=(winner===hm)?aw:hm;
-  document.documentElement.style.setProperty('--fc',teamColor(winner.id||0));
   $("#fCrest").src=winner.id?logoURL(winner.id):transparentPx();
-  $("#fKick").textContent=(info.walkoff&&!tie)?"WALK-OFF WIN!":"FINAL";
+  $("#fKick").textContent="FINAL";
+  fOv.classList.toggle("walkoff",!!(info.walkoff&&!tie));   // red ribbon on the medallion
   $("#fTitle").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
   $("#fScore").textContent=`${aw.abbr} ${aw.score} — ${hm.score} ${hm.abbr}`;
   $("#fSub").textContent=tie?"":(info.walkoff
