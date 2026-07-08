@@ -206,6 +206,70 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
 
+/* =================== ANTHEM / FIRST PITCH TAKEOVER =================== */
+#anthemOverlay{position:fixed;inset:0;z-index:48;display:none;align-items:center;justify-content:center;
+  background:radial-gradient(1200px 800px at 50% -10%,#0d3a78 0%,#071a38 55%,#02081a 100%);
+  opacity:0;transition:opacity .5s}
+#anthemOverlay.show{display:flex;opacity:1}
+.anthem-glow{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 85% at 0% 100%, color-mix(in srgb,var(--anAwayc,#0a2a5c) 55%,transparent),transparent 70%),
+    radial-gradient(60% 85% at 100% 100%, color-mix(in srgb,var(--anHomec,#bf0d3e) 55%,transparent),transparent 70%)}
+/* stars & stripes shimmer bar */
+.anthem-flag{position:absolute;top:0;left:0;right:0;height:8px;z-index:1;
+  background:repeating-linear-gradient(90deg,var(--red2) 0 56px,#fff 56px 112px,var(--navy2) 112px 168px,#fff 168px 224px);
+  opacity:.8;background-size:224px 100%;animation:flagslide 7s linear infinite}
+.anthem-flag.bot{top:auto;bottom:0;animation-direction:reverse}
+@keyframes flagslide{to{background-position:224px 0}}
+.anthem-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+  gap:min(3vh,24px);text-align:center;padding:24px}
+.anthem-kick{color:var(--gold);font-weight:900;letter-spacing:10px;font-size:clamp(14px,2.2vw,26px);
+  opacity:0;transform:translateY(-16px);transition:.6s;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+#anthemOverlay.show .anthem-kick{opacity:1;transform:none;transition-delay:.2s}
+.anthem-crests{display:flex;align-items:center;gap:min(5vw,56px)}
+.anthem-crest{width:min(18vw,180px);height:min(18vw,180px);object-fit:contain;
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.7));opacity:0;transition:.8s cubic-bezier(.2,.7,.2,1)}
+.anthem-crest.a{transform:translateX(-90px) scale(.8)}
+.anthem-crest.h{transform:translateX(90px) scale(.8)}
+#anthemOverlay.show .anthem-crest{opacity:1;transform:none;transition-delay:.35s}
+.anthem-at{font-weight:900;font-size:clamp(28px,5vw,58px);color:#fff;opacity:.55}
+.anthem-ball{font-weight:900;letter-spacing:2px;line-height:.9;font-size:clamp(52px,12vw,150px);
+  background:linear-gradient(180deg,#fff,#bcd0ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 8px 40px rgba(0,0,0,.5);opacity:0;transform:scale(.7);transition:.7s cubic-bezier(.2,.9,.2,1)}
+#anthemOverlay.show .anthem-ball{opacity:1;transform:none;transition-delay:.9s}
+.anthem-sub{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.8vw,22px);opacity:0;transition:.6s}
+#anthemOverlay.show .anthem-sub{opacity:1;transition-delay:1.3s}
+
+/* =================== WALK-UP (NEW BATTER) LOWER THIRD =================== */
+#walkupCard{position:fixed;left:0;bottom:min(9vh,88px);z-index:46;display:flex;align-items:flex-end;
+  pointer-events:none;transform:translateX(-118%);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+#walkupCard.show{transform:translateX(0)}
+.wu-shot{position:relative;width:min(19vw,176px);height:min(24vw,216px);align-self:flex-end;
+  margin-right:-16px;z-index:2;display:flex;align-items:flex-end;justify-content:center}
+.wu-shot .spot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;height:78%;border-radius:50%;
+  filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--wuc,#0a2a5c) 90%,#000),transparent 70%)}
+.wu-shot img{position:relative;height:100%;width:auto;object-fit:contain;object-position:bottom center;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.6))}
+.wu-panel{background:linear-gradient(90deg,rgba(4,14,34,.96),rgba(9,26,58,.9));
+  border-top:4px solid var(--wuc,#bf0d3e);border-right:1px solid var(--line);
+  border-radius:0 16px 16px 0;padding:16px 32px 18px 26px;min-width:min(44vw,500px);
+  box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.wu-kick{display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:900;
+  letter-spacing:5px;font-size:clamp(11px,1.4vw,16px)}
+.wu-kick img{width:26px;height:26px;object-fit:contain}
+.wu-name{font-weight:900;font-size:clamp(26px,4vw,52px);line-height:1;margin:6px 0 4px;letter-spacing:-.5px}
+.wu-meta{color:#cfe0ff;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.wu-meta .num{color:var(--gold);font-weight:900}
+.wu-meta .dot{opacity:.4}
+.wu-stats{display:flex;gap:26px;margin-top:12px}
+.wu-stat .v{font-weight:900;font-size:clamp(20px,2.6vw,32px);line-height:1}
+.wu-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
+@media (max-width:760px){
+  .wu-shot{display:none}
+  .wu-panel{min-width:0;width:94vw;border-radius:0 14px 14px 0}
+  .wu-stats{gap:18px}
+}
+
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
@@ -295,6 +359,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="linescore" id="lineTxt"></div>
     <div class="controls">
       <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
+      <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
+      <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
       <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
     </div>
     <div class="hint" id="boardHint"></div>
@@ -319,6 +385,35 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       </div>
       <div class="hrfx-stats" id="hrStats"></div>
     </div>
+  </div>
+</div>
+
+<!-- ============ ANTHEM / FIRST PITCH TAKEOVER ============ -->
+<div id="anthemOverlay">
+  <div class="anthem-flag"></div>
+  <div class="anthem-flag bot"></div>
+  <div class="anthem-glow"></div>
+  <button class="skip" id="anthemSkip">Skip ⏭</button>
+  <div class="anthem-inner">
+    <div class="anthem-kick" id="anthemKick">FIRST PITCH</div>
+    <div class="anthem-crests">
+      <img class="anthem-crest a" id="anAwayCrest" alt="">
+      <div class="anthem-at">@</div>
+      <img class="anthem-crest h" id="anHomeCrest" alt="">
+    </div>
+    <div class="anthem-ball" id="anthemBall">PLAY BALL</div>
+    <div class="anthem-sub" id="anthemSub"></div>
+  </div>
+</div>
+
+<!-- ============ WALK-UP (NEW BATTER) LOWER THIRD ============ -->
+<div id="walkupCard">
+  <div class="wu-shot"><div class="spot"></div><img id="wuShot" alt=""></div>
+  <div class="wu-panel">
+    <div class="wu-kick"><img id="wuLogo" alt=""><span id="wuKick">NOW BATTING</span></div>
+    <div class="wu-name" id="wuName">—</div>
+    <div class="wu-meta" id="wuMeta"></div>
+    <div class="wu-stats" id="wuStats"></div>
   </div>
 </div>
 
@@ -426,6 +521,8 @@ let G={ away:{id:0,abbr:"AWY",name:"Away",score:0},
         inning:1, half:"Top", balls:0, strikes:0, outs:0,
         bases:[false,false,false], battingHome:false };
 let lastHRIndex=-1;    // highest atBatIndex of a home run we've already shown
+let lastBatterId=null; // current batter id we've already introduced with a walk-up
+let anthemDone=false;  // fire the first-pitch takeover only once, on the Preview→Live flip
 
 function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
 function showSetup(){
@@ -433,7 +530,9 @@ function showSetup(){
   $("#board").style.display="none"; $("#setup").classList.remove("hidden");
   loadSchedule();
 }
-function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;} }
+function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
+  if(typeof endAnthem==="function")endAnthem();
+  if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
 
 function renderBoard(){
   $("#awayCrest").src=G.away.id?logoURL(G.away.id):transparentPx();
@@ -467,7 +566,7 @@ function startLiveGame(g){
   G.away={id:a.id,abbr:a.abbreviation||abbr3(a.teamName||a.name),name:a.teamName||a.name,score:g.teams.away.score||0};
   G.home={id:h.id,abbr:h.abbreviation||abbr3(h.teamName||h.name),name:h.teamName||h.name,score:g.teams.home.score||0};
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
-  lastHRIndex=-1;
+  lastHRIndex=-1; lastBatterId=null; anthemDone=false;
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 TEST HOME RUN";
   $("#statusTxt").textContent="CONNECTING…";
@@ -507,6 +606,28 @@ async function tickLive(first){
     else {$("#statusTxt").textContent=(gd.status.detailedState||"PRE-GAME").toUpperCase();dot.style.display="none";}
     $("#lineTxt").textContent=`${G.away.name} ${G.away.score} — ${G.home.score} ${G.home.name}`;
     renderBoard();
+    // ---- anthem / first-pitch detection (status flips Preview -> Live) ----
+    if(first){ anthemDone=(st!=="Preview"); }        // tuned in mid-game -> don't replay the intro
+    else if(!anthemDone && st==="Live"){
+      anthemDone=true;
+      triggerAnthem({sub:`${G.away.name} at ${G.home.name}`});
+    }
+    // ---- walk-up detection (current batter changes) ----
+    const cp=(ld.plays&&ld.plays.currentPlay)||{};
+    const curBatter=(cp.matchup&&cp.matchup.batter)||null;
+    if(curBatter&&curBatter.id){
+      if(first){ lastBatterId=curBatter.id; }         // first tick: seed, no card
+      else if(curBatter.id!==lastBatterId){
+        lastBatterId=curBatter.id;
+        const teamObj=(G.battingHome?G.home:G.away);   // batting team = who's up
+        const bid=curBatter.id, bname=curBatter.fullName||"";
+        fetchBatter(bid).then(d=>{
+          if(lastBatterId!==bid)return;                // batter changed again while fetching
+          triggerWalkup({id:bid,name:d.name||bname,number:d.number,pos:d.pos,bats:d.bats,
+            avg:d.avg,hr:d.hr,rbi:d.rbi,team:teamObj});
+        });
+      }
+    }
     // ---- home run detection ----
     const plays=(ld.plays&&ld.plays.allPlays)||[];
     let newest=null, maxIdx=lastHRIndex;
@@ -549,29 +670,44 @@ function startDemo(){
   $("#hrBtn").textContent="💥 HIT A HOME RUN";
   $("#statusTxt").textContent="DEMO";
   $("#liveDot").style.display="none";
-  $("#boardHint").textContent="This is a simulated game. Tap “HIT A HOME RUN” to fire the cinematic — it returns to the game when it's done.";
+  $("#boardHint").textContent="This is a simulated game. The first-pitch takeover plays on kickoff and a walk-up card intros each new batter — or tap the buttons to fire any cinematic.";
+  G.demoBatter=null;
   showBoard(); renderBoard();
   demoTimer=setInterval(demoTick,3200);
+  setTimeout(()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`}),500);
+  setTimeout(newDemoBatter,6200);   // first walk-up after the anthem clears
 }
+/* pick the next demo batter from the batting team + fire their walk-up */
+function newDemoBatter(){
+  const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
+  let p=roster[Math.floor(Math.random()*roster.length)];
+  if(G.demoBatter&&roster.length>1){ while(p.id===G.demoBatter.id)p=roster[Math.floor(Math.random()*roster.length)]; }
+  G.demoBatter=p;
+  triggerWalkup({id:p.id,name:p.name,number:p.number,pos:p.pos,bats:p.bats,team:battingTeam(),
+    avg:demoAvg(),hr:8+Math.floor(Math.random()*38),rbi:14+Math.floor(Math.random()*70)});
+}
+function demoAvg(){return "."+(210+Math.floor(Math.random()*120));} // .210–.329
 // Real players on the demo teams so the headshot + number match the logo shown.
 const DEMO_ROSTER={
   away:[ // Yankees (147)
-    {id:592450,name:"Aaron Judge",number:"99"},
-    {id:519317,name:"Giancarlo Stanton",number:"27"},
-    {id:683011,name:"Anthony Volpe",number:"11"},
-    {id:665862,name:"Jazz Chisholm Jr.",number:"13"}
+    {id:592450,name:"Aaron Judge",number:"99",pos:"RF",bats:"R"},
+    {id:519317,name:"Giancarlo Stanton",number:"27",pos:"DH",bats:"R"},
+    {id:683011,name:"Anthony Volpe",number:"11",pos:"SS",bats:"R"},
+    {id:665862,name:"Jazz Chisholm Jr.",number:"13",pos:"2B",bats:"L"}
   ],
   home:[ // Dodgers (119)
-    {id:660271,name:"Shohei Ohtani",number:"17"},
-    {id:605141,name:"Mookie Betts",number:"50"},
-    {id:518692,name:"Freddie Freeman",number:"5"},
-    {id:669257,name:"Will Smith",number:"16"},
-    {id:606192,name:"Teoscar Hernández",number:"37"}
+    {id:660271,name:"Shohei Ohtani",number:"17",pos:"DH",bats:"L"},
+    {id:605141,name:"Mookie Betts",number:"50",pos:"SS",bats:"R"},
+    {id:518692,name:"Freddie Freeman",number:"5",pos:"1B",bats:"L"},
+    {id:669257,name:"Will Smith",number:"16",pos:"C",bats:"R"},
+    {id:606192,name:"Teoscar Hernández",number:"37",pos:"RF",bats:"R"}
   ]
 };
 function battingTeam(){return G.battingHome?G.home:G.away;}
+let demoAbEnded=false;   // set by a terminal at-bat event this tick
 function demoTick(){
   // simple weighted at-bat sim to keep the board alive
+  demoAbEnded=false;
   const roll=Math.random();
   if(roll<0.34){ // strike/foul or strikeout
     G.strikes++; if(G.strikes>=3){outEvent();}
@@ -585,11 +721,12 @@ function demoTick(){
     hit(2);
   }
   renderBoard();
+  if(demoAbEnded)newDemoBatter();   // a new hitter steps in -> walk-up
 }
 function resetCount(){G.balls=0;G.strikes=0;}
-function outEvent(){G.outs++;resetCount(); if(G.outs>=3)nextHalf();}
-function walk(){resetCount();advance(1,0);} // walk forces runners minimally
-function hit(bases){resetCount();advance(bases,bases);}
+function outEvent(){G.outs++;resetCount();demoAbEnded=true; if(G.outs>=3)nextHalf();}
+function walk(){resetCount();advance(1,0);demoAbEnded=true;} // walk forces runners minimally
+function hit(bases){resetCount();advance(bases,bases);demoAbEnded=true;}
 function advance(runnerBases,batterTo){
   // move runners; count runs that cross the plate
   let runs=0;
@@ -685,6 +822,86 @@ vid.addEventListener("ended",endHomeRun);
 $("#skipBtn").onclick=endHomeRun;
 
 /* ============================================================
+   ANTHEM / FIRST PITCH TAKEOVER
+   ============================================================ */
+const anthemOv=$("#anthemOverlay");
+let anthemPlaying=false;
+function triggerAnthem(opts){
+  opts=opts||{};
+  if(hrPlaying||anthemPlaying)return;
+  anthemPlaying=true;
+  document.documentElement.style.setProperty('--anAwayc',teamColor(G.away.id));
+  document.documentElement.style.setProperty('--anHomec',teamColor(G.home.id));
+  $("#anAwayCrest").src=G.away.id?logoURL(G.away.id):transparentPx();
+  $("#anHomeCrest").src=G.home.id?logoURL(G.home.id):transparentPx();
+  $("#anthemKick").textContent=opts.kick||"NATIONAL ANTHEM • FIRST PITCH";
+  $("#anthemBall").textContent=opts.title||"PLAY BALL";
+  $("#anthemSub").textContent=opts.sub||`${G.away.name} at ${G.home.name}`;
+  anthemOv.classList.remove("show"); void anthemOv.offsetWidth;  // restart the entrance
+  anthemOv.classList.add("show");
+  clearTimeout(triggerAnthem._t);
+  triggerAnthem._t=setTimeout(endAnthem, opts.dur||5400);
+}
+function endAnthem(){ clearTimeout(triggerAnthem._t); anthemOv.classList.remove("show"); anthemPlaying=false; }
+$("#anthemSkip").onclick=endAnthem;
+
+/* ============================================================
+   WALK-UP (NEW BATTER) LOWER THIRD
+   info = {id,name,number,pos,bats,avg,hr,rbi,team:{id,name}} — any field optional
+   ============================================================ */
+const wuCard=$("#walkupCard");
+let wuHideT=null;
+function triggerWalkup(info){
+  info=info||{};
+  if(hrPlaying||anthemPlaying)return;   // never stack over a takeover
+  document.documentElement.style.setProperty('--wuc',teamColor((info.team&&info.team.id)||0));
+  const shot=$("#wuShot"), shotWrap=shot.parentElement;
+  if(info.id){
+    shotWrap.style.display="";
+    shot.onerror=()=>{ if(shot.src.indexOf('midfield')<0) shot.src=shotURL(info.id); else shotWrap.style.display="none"; };
+    shot.src=siloURL(info.id);
+  }else{ shotWrap.style.display="none"; shot.removeAttribute("src"); }
+  const team=info.team||{};
+  const logo=$("#wuLogo");
+  if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
+  $("#wuKick").textContent=info.kick||"NOW BATTING";
+  $("#wuName").textContent=info.name||"—";
+  const meta=[];
+  if(info.number)meta.push(`<span class="num">#${info.number}</span>`);
+  if(info.pos)meta.push(info.pos);
+  if(info.bats)meta.push(`Bats ${info.bats}`);
+  if(team.name)meta.push(team.name);
+  $("#wuMeta").innerHTML=meta.join('<span class="dot">•</span>');
+  const st=$("#wuStats"); st.innerHTML="";
+  const tiles=[];
+  if(info.avg!=null&&info.avg!=="")tiles.push(["AVG",fmtAvg(info.avg)]);
+  if(info.hr!=null&&info.hr!=="")tiles.push(["HR",String(info.hr)]);
+  if(info.rbi!=null&&info.rbi!=="")tiles.push(["RBI",String(info.rbi)]);
+  tiles.forEach(([k,v])=>{const d=document.createElement("div");d.className="wu-stat";
+    d.innerHTML=`<div class="v">${v}</div><div class="k">${k}</div>`;st.appendChild(d);});
+  wuCard.classList.remove("show"); void wuCard.offsetWidth;
+  wuCard.classList.add("show");
+  clearTimeout(wuHideT);
+  wuHideT=setTimeout(()=>wuCard.classList.remove("show"), info.dur||6000);
+}
+function fmtAvg(a){a=String(a); return a.charAt(0)==="0"?a.slice(1):a;}  // .287 not 0.287
+/* season hitting line for the walk-up card */
+async function fetchBatter(id){
+  try{
+    const r=await fetch(`${API}/v1/people/${id}?hydrate=stats(group=[hitting],type=[season])`);
+    const j=await r.json();
+    const p=(j.people&&j.people[0])||{};
+    let avg="",hr="",rbi="";
+    const grp=(p.stats||[]).find(s=>s.group&&s.group.displayName==="hitting")||(p.stats&&p.stats[0]);
+    const sp=grp&&grp.splits&&grp.splits[0];
+    if(sp&&sp.stat){avg=sp.stat.avg||"";hr=sp.stat.homeRuns;rbi=sp.stat.rbi;}
+    return {name:p.fullName||"",number:p.primaryNumber||"",
+            pos:(p.primaryPosition&&p.primaryPosition.abbreviation)||"",
+            bats:(p.batSide&&p.batSide.code)||"", avg,hr,rbi};
+  }catch(e){return {};}
+}
+
+/* ============================================================
    WIRE-UP
    ============================================================ */
 $("#demoBtn").onclick=startDemo;
@@ -696,6 +913,15 @@ function demoStats(){
           seasonHR:8+Math.floor(Math.random()*40),             // 8–47
           rbi:onBase+1};                                        // solo..grand slam
 }
+$("#anthemBtn").onclick=()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`});
+$("#walkupBtn").onclick=()=>{
+  if(MODE==="demo"){ newDemoBatter(); }
+  else{
+    const t=(G.battingHome?G.home:G.away);
+    triggerWalkup({id:592450,name:"Aaron Judge",number:"99",pos:"RF",bats:"R",
+      avg:".310",hr:37,rbi:98,team:t,kick:"NOW BATTING • PREVIEW"});
+  }
+};
 $("#hrBtn").onclick=()=>{
   if(MODE==="demo"){
     const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
