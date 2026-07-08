@@ -206,58 +206,83 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
   border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
 
-/* =================== ANTHEM / FIRST PITCH TAKEOVER =================== */
-#anthemOverlay{position:fixed;inset:0;z-index:48;display:none;align-items:center;justify-content:center;
-  background:radial-gradient(1200px 800px at 50% -10%,#0d3a78 0%,#071a38 55%,#02081a 100%);
-  opacity:0;transition:opacity .5s}
-#anthemOverlay.show{display:flex;opacity:1}
-.anthem-glow{position:absolute;inset:0;pointer-events:none;
+/* =================== ANTHEM / FIRST PITCH — 3-SCENE GAME OPEN ===================
+   p1: away team panel wipes across   p2: home team panel wipes across
+   p3: crests collide -> flash + shake -> PLAY BALL stamps in + fireworks     */
+#anthemOverlay{position:fixed;inset:0;z-index:48;display:none;background:#02081a;
+  opacity:0;transition:opacity .45s;overflow:hidden}
+#anthemOverlay.show{display:block;opacity:1}
+#anthemFx{position:absolute;inset:0;width:100%;height:100%;z-index:6;pointer-events:none}
+#anthemOverlay .skip{z-index:8}
+
+/* ---- scenes 1 & 2: full-screen team intro panels ---- */
+.an-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  gap:min(6vw,70px);visibility:hidden;padding:4vw}
+.an-panel.away{background:
+  linear-gradient(120deg, rgba(2,8,26,.20), rgba(2,8,26,.80)),
+  linear-gradient(180deg, color-mix(in srgb,var(--anAwayc,#0a2a5c) 88%,#000), color-mix(in srgb,var(--anAwayc,#0a2a5c) 42%,#000));
+  clip-path:inset(0 100% 0 0)}
+.an-panel.home{background:
+  linear-gradient(-120deg, rgba(2,8,26,.20), rgba(2,8,26,.80)),
+  linear-gradient(180deg, color-mix(in srgb,var(--anHomec,#bf0d3e) 88%,#000), color-mix(in srgb,var(--anHomec,#bf0d3e) 42%,#000));
+  clip-path:inset(0 0 0 100%)}
+/* moving diagonal pinstripes for texture */
+.an-panel::before{content:"";position:absolute;inset:-25%;opacity:.09;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
+  animation:anStripes 2.6s linear infinite}
+@keyframes anStripes{to{transform:translateX(199px)}}
+#anthemOverlay.p1 .an-panel.away{visibility:visible;animation:anWipeL 2.9s cubic-bezier(.3,.7,.2,1) both}
+#anthemOverlay.p2 .an-panel.home{visibility:visible;animation:anWipeR 2.9s cubic-bezier(.3,.7,.2,1) both}
+@keyframes anWipeL{0%{clip-path:inset(0 100% 0 0)}13%,86%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+@keyframes anWipeR{0%{clip-path:inset(0 0 0 100%)}13%,86%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 100% 0 0)}}
+.an-panel .crest{width:min(32vw,320px);height:min(32vw,320px);object-fit:contain;
+  filter:drop-shadow(0 16px 44px rgba(0,0,0,.65))}
+.an-panel .tx{max-width:46vw}
+.an-panel .tx.right{text-align:right}
+.an-panel .lbl{color:rgba(255,255,255,.65);font-weight:900;letter-spacing:9px;font-size:clamp(13px,1.7vw,22px)}
+.an-panel .nm{font-weight:900;font-size:clamp(44px,8.5vw,120px);line-height:.95;letter-spacing:-1px;color:#fff;
+  text-shadow:0 6px 30px rgba(0,0,0,.6)}
+/* panel content drifts through the shot (in from one side, out the other) */
+#anthemOverlay.p1 .an-panel.away .crest{animation:anDriftL 2.9s ease both}
+#anthemOverlay.p1 .an-panel.away .tx{animation:anDriftL 2.9s .08s ease both}
+#anthemOverlay.p2 .an-panel.home .crest{animation:anDriftR 2.9s ease both}
+#anthemOverlay.p2 .an-panel.home .tx{animation:anDriftR 2.9s .08s ease both}
+@keyframes anDriftL{0%{opacity:0;transform:translateX(-70px)}14%,84%{opacity:1;transform:none}100%{opacity:0;transform:translateX(55px)}}
+@keyframes anDriftR{0%{opacity:0;transform:translateX(70px)}14%,84%{opacity:1;transform:none}100%{opacity:0;transform:translateX(-55px)}}
+
+/* ---- scene 3: the clash + PLAY BALL stamp ---- */
+.an-finale{position:absolute;inset:0;visibility:hidden;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:min(2.6vh,22px);text-align:center;
   background:
-    radial-gradient(60% 85% at 0% 100%, color-mix(in srgb,var(--anAwayc,#0a2a5c) 55%,transparent),transparent 70%),
-    radial-gradient(60% 85% at 100% 100%, color-mix(in srgb,var(--anHomec,#bf0d3e) 55%,transparent),transparent 70%)}
-/* fireworks canvas + sweeping stadium searchlights */
-#anthemFx{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
-.anthem-beam{position:absolute;bottom:-14vh;left:50%;width:15vw;height:135vh;z-index:1;pointer-events:none;
-  transform-origin:50% 100%;mix-blend-mode:screen;opacity:.45;filter:blur(7px);
-  background:linear-gradient(to top, rgba(255,255,255,.30), rgba(170,200,255,.06) 60%, transparent);
-  clip-path:polygon(43% 100%,57% 100%,100% 0,0 0)}
-.anthem-beam.b1{margin-left:-32vw;animation:beamSweep 5.4s ease-in-out infinite}
-.anthem-beam.b2{margin-left:16vw;animation:beamSweep 6.3s ease-in-out infinite reverse}
-@keyframes beamSweep{0%,100%{transform:rotate(-17deg)}50%{transform:rotate(15deg)}}
-/* stars & stripes shimmer bar */
-.anthem-flag{position:absolute;top:0;left:0;right:0;height:8px;z-index:1;
-  background:repeating-linear-gradient(90deg,var(--red2) 0 56px,#fff 56px 112px,var(--navy2) 112px 168px,#fff 168px 224px);
-  opacity:.8;background-size:224px 100%;animation:flagslide 7s linear infinite}
-.anthem-flag.bot{top:auto;bottom:0;animation-direction:reverse}
-@keyframes flagslide{to{background-position:224px 0}}
-.anthem-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
-  gap:min(3vh,24px);text-align:center;padding:24px}
-/* slow "camera push" for a filmed feel */
-#anthemOverlay.show .anthem-inner{animation:anthemZoom 7s cubic-bezier(.3,.5,.6,1) forwards}
-@keyframes anthemZoom{from{transform:scale(1)}to{transform:scale(1.08)}}
-.anthem-kick{color:var(--gold);font-weight:900;letter-spacing:10px;font-size:clamp(14px,2.2vw,26px);
-  opacity:0;transform:translateY(-16px);transition:.6s;text-shadow:0 2px 12px rgba(0,0,0,.7)}
-#anthemOverlay.show .anthem-kick{opacity:1;transform:none;transition-delay:.2s}
-.anthem-crests{display:flex;align-items:center;gap:min(5vw,56px)}
-.anthem-crest{width:min(18vw,180px);height:min(18vw,180px);object-fit:contain;
-  filter:drop-shadow(0 10px 30px rgba(0,0,0,.7));opacity:0;transition:.8s cubic-bezier(.2,.7,.2,1)}
-.anthem-crest.a{transform:translateX(-90px) scale(.8)}
-.anthem-crest.h{transform:translateX(90px) scale(.8)}
-#anthemOverlay.show .anthem-crest{opacity:1;transform:none;transition-delay:.35s;
-  animation:crestFloat 3.6s ease-in-out 1.6s infinite}
-#anthemOverlay.show .anthem-crest.h{animation-delay:2.5s}
-@keyframes crestFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
-.anthem-at{font-weight:900;font-size:clamp(28px,5vw,58px);color:#fff;opacity:.55}
-.anthem-ball{font-weight:900;letter-spacing:2px;line-height:.9;font-size:clamp(52px,12vw,150px);
-  background:linear-gradient(110deg,#fff 25%,#93b4ef 40%,#fff 50%,#93b4ef 60%,#fff 75%);
-  background-size:250% 100%;background-position:0% 0;
+    radial-gradient(70% 95% at 10% 100%, color-mix(in srgb,var(--anAwayc,#0a2a5c) 42%,transparent), transparent 70%),
+    radial-gradient(70% 95% at 90% 100%, color-mix(in srgb,var(--anHomec,#bf0d3e) 42%,transparent), transparent 70%),
+    radial-gradient(1000px 640px at 50% -10%, #0d2f63, #02081a 72%)}
+#anthemOverlay.p3 .an-finale{visibility:visible;animation:anShake .55s .5s linear}
+@keyframes anShake{0%,100%{transform:none}20%{transform:translate(-14px,9px)}40%{transform:translate(11px,-7px)}
+  60%{transform:translate(-7px,5px)}80%{transform:translate(4px,-3px)}}
+.an-flash{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 44%,#fff,rgba(255,255,255,.35) 30%,transparent 62%)}
+#anthemOverlay.p3 .an-flash{animation:anFlash .9s .5s both}
+@keyframes anFlash{0%{opacity:0}12%{opacity:.95}100%{opacity:0}}
+.an-kick2{color:var(--gold);font-weight:900;letter-spacing:10px;font-size:clamp(13px,1.9vw,24px);
+  text-shadow:0 2px 12px rgba(0,0,0,.7);opacity:0}
+#anthemOverlay.p3 .an-kick2{animation:anFade .5s .85s both}
+.an-clash{display:flex;align-items:center;gap:min(3vw,34px)}
+.an-clash .cr{width:min(19vw,190px);height:min(19vw,190px);object-fit:contain;
+  filter:drop-shadow(0 12px 34px rgba(0,0,0,.7))}
+#anthemOverlay.p3 .cr.a{animation:anFlyA .55s cubic-bezier(.2,.9,.3,1) both}
+#anthemOverlay.p3 .cr.h{animation:anFlyH .55s cubic-bezier(.2,.9,.3,1) both}
+@keyframes anFlyA{from{transform:translateX(-58vw) rotate(-16deg)}to{transform:none}}
+@keyframes anFlyH{from{transform:translateX(58vw) rotate(16deg)}to{transform:none}}
+.an-stamp{font-weight:900;line-height:.9;letter-spacing:1px;font-size:clamp(56px,13vw,168px);
+  background:linear-gradient(180deg,#fff 30%,var(--gold));
   -webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:0 8px 40px rgba(0,0,0,.5);opacity:0;transform:scale(.7);transition:.7s cubic-bezier(.2,.9,.2,1)}
-#anthemOverlay.show .anthem-ball{opacity:1;transform:none;transition-delay:.9s;
-  animation:ballShine 2.3s linear 1.7s infinite}
-@keyframes ballShine{from{background-position:0% 0}to{background-position:250% 0}}
-.anthem-sub{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.8vw,22px);opacity:0;transition:.6s}
-#anthemOverlay.show .anthem-sub{opacity:1;transition-delay:1.3s}
+  filter:drop-shadow(0 10px 34px rgba(0,0,0,.65));opacity:0}
+#anthemOverlay.p3 .an-stamp{animation:anStamp .5s cubic-bezier(.15,1.25,.3,1) .58s both}
+@keyframes anStamp{from{opacity:0;transform:scale(2.6)}to{opacity:1;transform:scale(1)}}
+.an-sub2{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.8vw,22px);opacity:0}
+#anthemOverlay.p3 .an-sub2{animation:anFade .6s 1.15s both}
+@keyframes anFade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* =================== WALK-UP (NEW BATTER) LOWER THIRD =================== */
 #walkupCard{position:fixed;left:0;bottom:min(9vh,88px);z-index:46;display:flex;align-items:flex-end;
@@ -267,9 +292,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   margin-right:-16px;z-index:2;display:flex;align-items:flex-end;justify-content:center;
   opacity:0;transform:translateY(30px);transition:.5s cubic-bezier(.2,.8,.2,1);transition-delay:.2s}
 #walkupCard.show .wu-shot{opacity:1;transform:none}
-/* subtle "camera breathing" on the player so he's never frozen */
-#walkupCard.show .wu-shot img{animation:wuBreathe 4.5s ease-in-out .8s infinite alternate;transform-origin:bottom center}
-@keyframes wuBreathe{from{transform:scale(1)}to{transform:scale(1.05)}}
 .wu-shot .spot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;height:78%;border-radius:50%;
   filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--wuc,#0a2a5c) 90%,#000),transparent 70%)}
 .wu-shot img{position:relative;height:100%;width:auto;object-fit:contain;object-position:bottom center;
@@ -283,10 +305,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   background:linear-gradient(105deg,transparent,rgba(255,255,255,.13) 45%,rgba(255,255,255,.32) 50%,rgba(255,255,255,.13) 55%,transparent);
   transform:skewX(-18deg);animation:wuSweep 2.8s ease-in-out .9s infinite}
 @keyframes wuSweep{0%{left:-45%}55%,100%{left:130%}}
-/* team-color glow pulse so the card feels lit, not printed */
-#walkupCard.show .wu-panel{animation:wuGlow 2.4s ease-in-out infinite}
-@keyframes wuGlow{0%,100%{box-shadow:0 18px 50px rgba(0,0,0,.6)}
-  50%{box-shadow:0 18px 50px rgba(0,0,0,.6),0 0 36px color-mix(in srgb,var(--wuc,#bf0d3e) 50%,transparent)}}
 .wu-kick{display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:900;
   letter-spacing:5px;font-size:clamp(11px,1.4vw,16px)}
 .wu-kick img{width:26px;height:26px;object-fit:contain}
@@ -428,24 +446,27 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
-<!-- ============ ANTHEM / FIRST PITCH TAKEOVER ============ -->
+<!-- ============ ANTHEM / FIRST PITCH — 3-SCENE GAME OPEN ============ -->
 <div id="anthemOverlay">
-  <div class="anthem-flag"></div>
-  <div class="anthem-flag bot"></div>
-  <div class="anthem-glow"></div>
-  <div class="anthem-beam b1"></div>
-  <div class="anthem-beam b2"></div>
   <canvas id="anthemFx"></canvas>
   <button class="skip" id="anthemSkip">Skip ⏭</button>
-  <div class="anthem-inner">
-    <div class="anthem-kick" id="anthemKick">FIRST PITCH</div>
-    <div class="anthem-crests">
-      <img class="anthem-crest a" id="anAwayCrest" alt="">
-      <div class="anthem-at">@</div>
-      <img class="anthem-crest h" id="anHomeCrest" alt="">
+  <div class="an-panel away">
+    <img class="crest" id="anP1Crest" alt="">
+    <div class="tx"><div class="lbl">AWAY</div><div class="nm" id="anP1Name">Away</div></div>
+  </div>
+  <div class="an-panel home">
+    <div class="tx right"><div class="lbl">HOME</div><div class="nm" id="anP2Name">Home</div></div>
+    <img class="crest" id="anP2Crest" alt="">
+  </div>
+  <div class="an-finale">
+    <div class="an-flash"></div>
+    <div class="an-kick2">FIRST PITCH</div>
+    <div class="an-clash">
+      <img class="cr a" id="anFinA" alt="">
+      <img class="cr h" id="anFinH" alt="">
     </div>
-    <div class="anthem-ball" id="anthemBall">PLAY BALL</div>
-    <div class="anthem-sub" id="anthemSub"></div>
+    <div class="an-stamp">PLAY BALL</div>
+    <div class="an-sub2" id="anSub2"></div>
   </div>
 </div>
 
@@ -718,7 +739,7 @@ function startDemo(){
   showBoard(); renderBoard();
   demoTimer=setInterval(demoTick,3200);
   setTimeout(()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`}),500);
-  setTimeout(newDemoBatter,6200);   // first walk-up after the anthem clears
+  setTimeout(newDemoBatter,11500);   // first walk-up after the 10.5s game open clears
 }
 /* pick the next demo batter from the batting team + fire their walk-up */
 function newDemoBatter(){
@@ -868,26 +889,42 @@ $("#skipBtn").onclick=endHomeRun;
    ANTHEM / FIRST PITCH TAKEOVER
    ============================================================ */
 const anthemOv=$("#anthemOverlay");
-let anthemPlaying=false;
+let anthemPlaying=false, anTimers=[];
+/* 3-scene timeline: p1 away panel (0–2.9s) -> p2 home panel (2.9–5.8s)
+   -> p3 clash + PLAY BALL stamp + fireworks (5.8s–end)                */
 function triggerAnthem(opts){
   opts=opts||{};
   if(hrPlaying||anthemPlaying)return;
   anthemPlaying=true;
   document.documentElement.style.setProperty('--anAwayc',teamColor(G.away.id));
   document.documentElement.style.setProperty('--anHomec',teamColor(G.home.id));
-  $("#anAwayCrest").src=G.away.id?logoURL(G.away.id):transparentPx();
-  $("#anHomeCrest").src=G.home.id?logoURL(G.home.id):transparentPx();
-  $("#anthemKick").textContent=opts.kick||"NATIONAL ANTHEM • FIRST PITCH";
-  $("#anthemBall").textContent=opts.title||"PLAY BALL";
-  $("#anthemSub").textContent=opts.sub||`${G.away.name} at ${G.home.name}`;
-  anthemOv.classList.remove("show"); void anthemOv.offsetWidth;  // restart the entrance
-  anthemOv.classList.add("show");
+  const aLogo=G.away.id?logoURL(G.away.id):transparentPx();
+  const hLogo=G.home.id?logoURL(G.home.id):transparentPx();
+  $("#anP1Crest").src=aLogo; $("#anFinA").src=aLogo;
+  $("#anP2Crest").src=hLogo; $("#anFinH").src=hLogo;
+  $("#anP1Name").textContent=G.away.name;
+  $("#anP2Name").textContent=G.home.name;
+  $("#anSub2").textContent=opts.sub||`${G.away.name} at ${G.home.name}`;
   anColors=[teamColor(G.away.id),teamColor(G.home.id),"#ffcb2e","#ffffff"];
-  anthemFxStart();
-  clearTimeout(triggerAnthem._t);
-  triggerAnthem._t=setTimeout(endAnthem, opts.dur||6800);
+  anthemOv.classList.remove("show","p1","p2","p3"); void anthemOv.offsetWidth; // restart
+  anthemOv.classList.add("show","p1");
+  anTimers.forEach(clearTimeout);
+  anTimers=[
+    setTimeout(()=>{anthemOv.classList.remove("p1");anthemOv.classList.add("p2");},2900),
+    setTimeout(()=>{anthemOv.classList.remove("p2");anthemOv.classList.add("p3");anthemFxStart();},5800),
+    setTimeout(()=>{ // burst right at the crest collision
+      const w=anFx.clientWidth,h=anFx.clientHeight;
+      anBoom(w*0.30,h*0.30,anColors[0]); anBoom(w*0.70,h*0.30,anColors[1]); anBoom(w*0.50,h*0.20,"#ffcb2e");
+    },6450),
+    setTimeout(endAnthem, opts.dur||10500)
+  ];
 }
-function endAnthem(){ clearTimeout(triggerAnthem._t); anthemFxStop(); anthemOv.classList.remove("show"); anthemPlaying=false; }
+function endAnthem(){
+  anTimers.forEach(clearTimeout); anTimers=[];
+  anthemFxStop();
+  anthemOv.classList.remove("show","p1","p2","p3");
+  anthemPlaying=false;
+}
 $("#anthemSkip").onclick=endAnthem;
 
 /* ---- fireworks engine (canvas, runs only while the anthem is up) ---- */
@@ -977,7 +1014,7 @@ function triggerWalkup(info){
   wuCard.classList.remove("show"); void wuCard.offsetWidth;
   wuCard.classList.add("show");
   clearTimeout(wuHideT);
-  wuHideT=setTimeout(()=>wuCard.classList.remove("show"), info.dur||6000);
+  wuHideT=setTimeout(()=>wuCard.classList.remove("show"), info.dur||12000);
 }
 function fmtAvg(a){a=String(a); return a.charAt(0)==="0"?a.slice(1):a;}  // .287 not 0.287
 /* animate a stat value 0 -> final (handles ".297", "38", etc.) */
