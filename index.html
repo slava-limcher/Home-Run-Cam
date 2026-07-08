@@ -812,6 +812,8 @@ let lastHRIndex=-1;    // highest atBatIndex of a home run we've already shown
 let lastBatterId=null; // current batter id we've already introduced with a walk-up
 let anthemDone=false;  // fire the first-pitch takeover only once, on the Preview→Live flip
 let lastKIndex=-1;     // highest atBatIndex of an inning-ending strikeout we've already shown
+/* latest REAL moments from the live feed — the preview buttons replay these */
+let LIVE={batter:null, lastHR:null, lastK:null};
 
 function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
 function showSetup(){
@@ -858,10 +860,12 @@ function startLiveGame(g){
   G.home={id:h.id,abbr:h.abbreviation||abbr3(h.teamName||h.name),name:h.teamName||h.name,score:g.teams.home.score||0};
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
   lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
+  LIVE={batter:null, lastHR:null, lastK:null};
   $("#hrBtn").classList.remove("hidden");
-  $("#hrBtn").textContent="💥 TEST HOME RUN";
+  $("#hrBtn").textContent="💥 REPLAY LAST HR";
+  $("#hr2Btn").textContent="💥 LAST HR (V2)";
   $("#statusTxt").textContent="CONNECTING…";
-  $("#boardHint").textContent="Following the live feed. Home runs trigger the cinematic automatically. (The test button previews it any time.)";
+  $("#boardHint").textContent="Following the live feed — everything triggers automatically. The buttons replay the latest REAL moment: the last home run, the batter at the plate, the last inning-ending K.";
   showBoard(); renderBoard();
   livePk=g.gamePk;
   tickLive(true);
@@ -907,41 +911,34 @@ async function tickLive(first){
     const cp=(ld.plays&&ld.plays.currentPlay)||{};
     const curBatter=(cp.matchup&&cp.matchup.batter)||null;
     if(curBatter&&curBatter.id){
+      // the play's OWN half-inning decides the team (board state can lag between innings)
+      LIVE.batter={id:curBatter.id,name:curBatter.fullName||"",
+        half:(cp.about&&cp.about.halfInning)||(G.half==="Bottom"?"bottom":"top")};
       if(first){ lastBatterId=curBatter.id; }         // first tick: seed, no card
       else if(curBatter.id!==lastBatterId){
         lastBatterId=curBatter.id;
-        const teamObj=(G.battingHome?G.home:G.away);   // batting team = who's up
-        const bid=curBatter.id, bname=curBatter.fullName||"";
-        fetchBatter(bid).then(d=>{
-          if(lastBatterId!==bid)return;                // batter changed again while fetching
-          triggerWalkup({id:bid,name:d.name||bname,number:d.number,pos:d.pos,bats:d.bats,
-            avg:d.avg,hr:d.hr,rbi:d.rbi,team:teamObj});
-        });
+        fireLiveWalkup(LIVE.batter,true);
       }
     }
     // ---- home run detection ----
     const plays=(ld.plays&&ld.plays.allPlays)||[];
-    let newest=null, maxIdx=lastHRIndex;
+    let newestHR=null, maxHR=-1;
     for(const p of plays){
       if(p.result&&p.result.eventType==="home_run"&&p.about&&p.about.isComplete){
         const idx=p.about.atBatIndex;
-        if(idx>maxIdx){maxIdx=idx; newest=p;}
+        if(idx>maxHR){maxHR=idx; newestHR=p;}
       }
     }
-    if(first){ lastHRIndex=maxIdx; }          // don't replay HRs that happened before we tuned in
-    else if(newest && maxIdx>lastHRIndex){
-      lastHRIndex=maxIdx;
-      const b=(newest.matchup&&newest.matchup.batter)||{};
-      const half=(newest.about&&newest.about.halfInning)||"";
-      const team=(half==="bottom")?G.home:G.away;   // top=away bats, bottom=home bats
-      const hd=hitDataOf(newest);
-      const stats={distance:hd.distance,exitVelo:hd.exitVelo,
-                   seasonHR:seasonHRof(newest.result.description),rbi:newest.result.rbi||0};
-      triggerHR({id:b.id,name:b.fullName||"",number:"",team:team,stats:stats,desc:newest.result.description||""});
+    if(newestHR)LIVE.lastHR=newestHR;         // remembered for the replay buttons
+    if(first){ lastHRIndex=maxHR; }           // don't auto-replay HRs from before we tuned in
+    else if(newestHR && maxHR>lastHRIndex){
+      lastHRIndex=maxHR;
+      triggerHR(hrInfoFromPlay(newestHR));
+      const b=(newestHR.matchup&&newestHR.matchup.batter)||{};
       if(b.id)fetchNumber(b.id).then(n=>{if(n)$("#hrNum").textContent="#"+n;});
     }
     // ---- strikeout-ends-the-inning detection (K play whose end count = 3 outs) ----
-    let newestK=null, maxK=lastKIndex;
+    let newestK=null, maxK=-1;
     for(const p of plays){
       if(p.result&&/^strikeout/.test(p.result.eventType||"")&&p.about&&p.about.isComplete
          &&((p.count&&p.count.outs)||0)>=3){
@@ -949,21 +946,11 @@ async function tickLive(first){
         if(idx>maxK){maxK=idx; newestK=p;}
       }
     }
+    if(newestK)LIVE.lastK=newestK;              // remembered for the replay button
     if(first){ lastKIndex=maxK; }
     else if(newestK && maxK>lastKIndex){
       lastKIndex=maxK;
-      const pit=(newestK.matchup&&newestK.matchup.pitcher)||{};
-      const kHalf=(newestK.about&&newestK.about.halfInning)||"";
-      const kTeam=(kHalf==="top")?G.home:G.away;    // top: away bats, so HOME pitches
-      const inn=newestK.about.inning||G.inning;
-      triggerK({id:pit.id,name:pit.fullName||"",team:kTeam,
-                inningTxt:(kHalf==="top"?"MIDDLE ":"END ")+inn});
-      if(pit.id)fetchPitcher(pit.id).then(d=>{
-        if(!kPlaying)return;                        // overlay already gone
-        if(d.number)$("#kNum").textContent="#"+d.number;
-        if(d.so!==""&&d.so!=null)countUp($("#kSO"),String(d.so));
-        if(d.era)countUp($("#kERA"),String(d.era));
-      });
+      fireLiveK(newestK);
     }
   }catch(e){
     $("#statusTxt").textContent="RECONNECTING…";
@@ -984,6 +971,7 @@ function startDemo(){
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 HIT A HOME RUN";
+  $("#hr2Btn").textContent="💥 HOME RUN V2";
   $("#statusTxt").textContent="DEMO";
   $("#liveDot").style.display="none";
   $("#boardHint").textContent="This is a simulated game. The first-pitch takeover plays on kickoff and a walk-up card intros each new batter — or tap the buttons to fire any cinematic.";
@@ -1349,6 +1337,53 @@ async function fetchPitcher(id){
   }catch(e){return {};}
 }
 
+/* ============================================================
+   LIVE helpers — build cinematic info straight from a real play,
+   so player/team/stats always match what actually happened
+   ============================================================ */
+function hrInfoFromPlay(p){
+  const b=(p.matchup&&p.matchup.batter)||{};
+  const half=(p.about&&p.about.halfInning)||"";
+  const team=(half==="bottom")?G.home:G.away;      // top=away bats, bottom=home bats
+  const hd=hitDataOf(p);
+  return {id:b.id,name:b.fullName||"",number:"",team,
+    stats:{distance:hd.distance,exitVelo:hd.exitVelo,
+           seasonHR:seasonHRof(p.result.description),rbi:p.result.rbi||0},
+    desc:p.result.description||""};
+}
+function kInfoFromPlay(p){
+  const pit=(p.matchup&&p.matchup.pitcher)||{};
+  const half=(p.about&&p.about.halfInning)||"";
+  const team=(half==="top")?G.home:G.away;         // top: away bats, so HOME pitches
+  const inn=(p.about&&p.about.inning)||G.inning;
+  return {id:pit.id,name:pit.fullName||"",team,
+    inningTxt:(half==="top"?"MIDDLE ":"END ")+inn};
+}
+function fireLiveK(play){
+  const info=kInfoFromPlay(play);
+  triggerK(info);
+  if(info.id)fetchPitcher(info.id).then(d=>{
+    if(!kPlaying)return;                           // overlay already gone
+    if(d.number)$("#kNum").textContent="#"+d.number;
+    if(d.so!==""&&d.so!=null)countUp($("#kSO"),String(d.so));
+    if(d.era)countUp($("#kERA"),String(d.era));
+  });
+}
+function fireLiveWalkup(b,guard){
+  const teamObj=(b.half==="bottom")?G.home:G.away;
+  fetchBatter(b.id).then(d=>{
+    if(guard&&lastBatterId!==b.id)return;          // batter changed again while fetching
+    triggerWalkup({id:b.id,name:d.name||b.name,number:d.number,pos:d.pos,bats:d.bats,
+      avg:d.avg,hr:d.hr,rbi:d.rbi,team:teamObj});
+  });
+}
+async function replayLastHR(fn){
+  if(!LIVE.lastHR){ toast("No home run in this game yet"); return; }
+  const info=hrInfoFromPlay(LIVE.lastHR);
+  if(info.id){ const n=await fetchNumber(info.id); if(n)info.number=n; }
+  fn(info);
+}
+
 /* season hitting line for the walk-up card */
 async function fetchBatter(id){
   try{
@@ -1378,32 +1413,30 @@ function demoStats(){
           rbi:onBase+1};                                        // solo..grand slam
 }
 $("#anthemBtn").onclick=()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`});
+/* in LIVE mode every button replays the latest REAL moment from the feed */
 $("#walkupBtn").onclick=()=>{
   if(MODE==="demo"){ newDemoBatter(); }
-  else{
-    const t=(G.battingHome?G.home:G.away);
-    triggerWalkup({id:592450,name:"Aaron Judge",number:"99",pos:"RF",bats:"R",
-      avg:".310",hr:37,rbi:98,team:t,kick:"NOW BATTING • PREVIEW"});
-  }
+  else if(LIVE.batter){ fireLiveWalkup(LIVE.batter,false); }   // the man at the plate right now
+  else toast("No batter yet — the game hasn't started");
 };
 $("#kBtn").onclick=()=>{
-  const pitchSide=G.battingHome?"away":"home";
-  const p=DEMO_PITCHERS[pitchSide];
-  triggerK({id:p.id,name:p.name,number:p.number,
-    team:(pitchSide==="away"?G.away:G.home), ...demoKStats(),
-    inningTxt:(G.half==="Top"?"MIDDLE ":"END ")+G.inning});
-};
-function hrPreviewInfo(){  // shared by both HR buttons
   if(MODE==="demo"){
-    const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
-    const p=roster[Math.floor(Math.random()*roster.length)];
-    return {id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()};
+    const pitchSide=G.battingHome?"away":"home";
+    const p=DEMO_PITCHERS[pitchSide];
+    triggerK({id:p.id,name:p.name,number:p.number,
+      team:(pitchSide==="away"?G.away:G.home), ...demoKStats(),
+      inningTxt:(G.half==="Top"?"MIDDLE ":"END ")+G.inning});
   }
-  return {id:592450,name:"Aaron Judge",number:"99",team:(G.battingHome?G.home:G.away),
-          stats:{distance:441,exitVelo:112.3,seasonHR:37,rbi:2},desc:"Preview — home run cinematic"};
+  else if(LIVE.lastK){ fireLiveK(LIVE.lastK); }                // last punch-out that ended an inning
+  else toast("No inning-ending strikeout in this game yet");
+};
+function hrPreviewInfo(){  // demo data for both HR buttons
+  const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
+  const p=roster[Math.floor(Math.random()*roster.length)];
+  return {id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()};
 }
-$("#hrBtn").onclick=()=>triggerHR(hrPreviewInfo());
-$("#hr2Btn").onclick=()=>triggerHR2(hrPreviewInfo());
+$("#hrBtn").onclick=()=>{ if(MODE==="demo")triggerHR(hrPreviewInfo()); else replayLastHR(triggerHR); };
+$("#hr2Btn").onclick=()=>{ if(MODE==="demo")triggerHR2(hrPreviewInfo()); else replayLastHR(triggerHR2); };
 
 // preload the video quietly
 window.addEventListener("load",()=>{ try{vid.load();}catch(e){} });
