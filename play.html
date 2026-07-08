@@ -355,6 +355,59 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   .wu-stats{gap:18px}
 }
 
+/* =================== STRIKEOUT ENDS THE INNING — "K" TAKEOVER =================== */
+#kOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .4s;overflow:hidden;
+  background:
+    linear-gradient(120deg, rgba(2,8,26,.30), rgba(2,8,26,.85)),
+    linear-gradient(180deg, color-mix(in srgb,var(--kc,#0a2a5c) 80%,#000), color-mix(in srgb,var(--kc,#0a2a5c) 36%,#000))}
+#kOverlay.show{display:block;opacity:1}
+#kOverlay::before{content:"";position:absolute;inset:-25%;opacity:.08;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
+  animation:anStripes 2.6s linear infinite}
+/* pitcher cutout, bottom-left like the walk-up */
+.k-hero{position:absolute;left:0;bottom:0;height:min(74vh,640px);width:min(30vw,380px);
+  display:flex;align-items:flex-end;opacity:0;transform:translateY(40px);
+  transition:.55s cubic-bezier(.2,.8,.2,1);transition-delay:.35s}
+#kOverlay.show .k-hero{opacity:1;transform:none}
+.k-spot{position:absolute;bottom:0;left:45%;transform:translateX(-50%);width:115%;height:85%;border-radius:50%;
+  filter:blur(10px);opacity:.9;background:radial-gradient(closest-side,color-mix(in srgb,var(--kc,#0a2a5c) 90%,#000),transparent 70%)}
+.k-hero img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom left;
+  filter:drop-shadow(0 14px 30px rgba(0,0,0,.65))}
+.k-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.6vh,14px);text-align:center;padding-left:min(26vw,340px)}
+/* the three K's: two ghosts, the third reveals in gold with a shine */
+.k-row{display:flex;gap:min(2.4vw,26px);line-height:.9}
+.kk{font-weight:900;font-size:clamp(64px,15vh,150px);color:#fff;opacity:0}
+#kOverlay.show .kk:nth-child(1){animation:kGhost .3s .15s both}
+#kOverlay.show .kk:nth-child(2){animation:kGhost .3s .32s both}
+.kk.k3{background:
+    linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
+    linear-gradient(180deg,#fff,var(--gold));
+  background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,.55))}
+#kOverlay.show .kk.k3{animation:kReveal .4s cubic-bezier(.2,.8,.2,1) .55s both, kShine 2.6s linear 1.7s infinite}
+@keyframes kGhost{from{opacity:0;transform:translateY(16px)}to{opacity:.3;transform:none}}
+@keyframes kReveal{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 -6% 0 0)}}
+@keyframes kShine{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
+.k-title{font-weight:900;letter-spacing:6px;font-size:clamp(22px,3.4vw,44px);clip-path:inset(0 100% 0 0)}
+#kOverlay.show .k-title{animation:kReveal .5s cubic-bezier(.2,.8,.2,1) .85s both}
+.k-sub{color:var(--gold);font-weight:900;letter-spacing:4px;font-size:clamp(12px,1.6vw,19px);opacity:0}
+#kOverlay.show .k-sub{animation:anFade .5s 1.1s both}
+.k-name{font-weight:900;font-size:clamp(24px,3.4vw,46px);opacity:0;margin-top:min(1.6vh,14px)}
+#kOverlay.show .k-name{animation:anFade .5s 1.2s both}
+.k-meta{color:#cfe0ff;font-weight:700;font-size:clamp(13px,1.5vw,18px);display:flex;gap:10px;opacity:0}
+.k-meta .num{color:var(--gold);font-weight:900}
+#kOverlay.show .k-meta{animation:anFade .5s 1.3s both}
+.k-stats{display:flex;gap:26px;margin-top:min(1.4vh,12px)}
+.k-stat{opacity:0;transform:translateY(14px);transition:.4s}
+#kOverlay.show .k-stat{opacity:1;transform:none}
+#kOverlay.show .k-stat:nth-child(1){transition-delay:1.35s}
+#kOverlay.show .k-stat:nth-child(2){transition-delay:1.5s}
+.k-stat .v{font-weight:900;font-size:clamp(22px,3vw,36px);line-height:1}
+.k-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
+@media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
+
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
@@ -446,6 +499,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
       <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
       <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
+      <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
       <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
     </div>
     <div class="hint" id="boardHint"></div>
@@ -504,6 +558,22 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="wu-name" id="wuName">—</div>
     <div class="wu-meta" id="wuMeta"></div>
     <div class="wu-stats" id="wuStats"></div>
+  </div>
+</div>
+
+<!-- ============ STRIKEOUT ENDS THE INNING — "K" TAKEOVER ============ -->
+<div id="kOverlay">
+  <div class="k-hero"><div class="k-spot"></div><img id="kShot" alt=""></div>
+  <div class="k-inner">
+    <div class="k-row"><span class="kk">K</span><span class="kk">K</span><span class="kk k3">K</span></div>
+    <div class="k-title">STRIKEOUT</div>
+    <div class="k-sub" id="kSub">SIDE RETIRED</div>
+    <div class="k-name" id="kName">—</div>
+    <div class="k-meta"><span class="num" id="kNum"></span><span id="kTeam"></span></div>
+    <div class="k-stats">
+      <div class="k-stat"><div class="v" id="kSO">—</div><div class="k">SEASON K</div></div>
+      <div class="k-stat"><div class="v" id="kERA">—</div><div class="k">ERA</div></div>
+    </div>
   </div>
 </div>
 
@@ -613,6 +683,7 @@ let G={ away:{id:0,abbr:"AWY",name:"Away",score:0},
 let lastHRIndex=-1;    // highest atBatIndex of a home run we've already shown
 let lastBatterId=null; // current batter id we've already introduced with a walk-up
 let anthemDone=false;  // fire the first-pitch takeover only once, on the Preview→Live flip
+let lastKIndex=-1;     // highest atBatIndex of an inning-ending strikeout we've already shown
 
 function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
 function showSetup(){
@@ -622,6 +693,7 @@ function showSetup(){
 }
 function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
   if(typeof endAnthem==="function")endAnthem();
+  if(typeof endK==="function")endK();
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
 
 function renderBoard(){
@@ -656,7 +728,7 @@ function startLiveGame(g){
   G.away={id:a.id,abbr:a.abbreviation||abbr3(a.teamName||a.name),name:a.teamName||a.name,score:g.teams.away.score||0};
   G.home={id:h.id,abbr:h.abbreviation||abbr3(h.teamName||h.name),name:h.teamName||h.name,score:g.teams.home.score||0};
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
-  lastHRIndex=-1; lastBatterId=null; anthemDone=false;
+  lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 TEST HOME RUN";
   $("#statusTxt").textContent="CONNECTING…";
@@ -739,6 +811,31 @@ async function tickLive(first){
       triggerHR({id:b.id,name:b.fullName||"",number:"",team:team,stats:stats,desc:newest.result.description||""});
       if(b.id)fetchNumber(b.id).then(n=>{if(n)$("#hrNum").textContent="#"+n;});
     }
+    // ---- strikeout-ends-the-inning detection (K play whose end count = 3 outs) ----
+    let newestK=null, maxK=lastKIndex;
+    for(const p of plays){
+      if(p.result&&/^strikeout/.test(p.result.eventType||"")&&p.about&&p.about.isComplete
+         &&((p.count&&p.count.outs)||0)>=3){
+        const idx=p.about.atBatIndex;
+        if(idx>maxK){maxK=idx; newestK=p;}
+      }
+    }
+    if(first){ lastKIndex=maxK; }
+    else if(newestK && maxK>lastKIndex){
+      lastKIndex=maxK;
+      const pit=(newestK.matchup&&newestK.matchup.pitcher)||{};
+      const kHalf=(newestK.about&&newestK.about.halfInning)||"";
+      const kTeam=(kHalf==="top")?G.home:G.away;    // top: away bats, so HOME pitches
+      const inn=newestK.about.inning||G.inning;
+      triggerK({id:pit.id,name:pit.fullName||"",team:kTeam,
+                inningTxt:(kHalf==="top"?"MIDDLE ":"END ")+inn});
+      if(pit.id)fetchPitcher(pit.id).then(d=>{
+        if(!kPlaying)return;                        // overlay already gone
+        if(d.number)$("#kNum").textContent="#"+d.number;
+        if(d.so!==""&&d.so!=null)countUp($("#kSO"),String(d.so));
+        if(d.era)countUp($("#kERA"),String(d.era));
+      });
+    }
   }catch(e){
     $("#statusTxt").textContent="RECONNECTING…";
   }
@@ -793,6 +890,11 @@ const DEMO_ROSTER={
     {id:606192,name:"Teoscar Hernández",number:"37",pos:"RF",bats:"R"}
   ]
 };
+const DEMO_PITCHERS={
+  away:{id:543037,name:"Gerrit Cole",number:"45"},      // Yankees
+  home:{id:477132,name:"Clayton Kershaw",number:"22"}   // Dodgers
+};
+function demoKStats(){return {so:90+Math.floor(Math.random()*130), era:(2+Math.random()*2.8).toFixed(2)};}
 function battingTeam(){return G.battingHome?G.home:G.away;}
 let demoAbEnded=false;   // set by a terminal at-bat event this tick
 function demoTick(){
@@ -800,7 +902,19 @@ function demoTick(){
   demoAbEnded=false;
   const roll=Math.random();
   if(roll<0.34){ // strike/foul or strikeout
-    G.strikes++; if(G.strikes>=3){outEvent();}
+    G.strikes++;
+    if(G.strikes>=3){
+      const endsInning=(G.outs===2);                 // this K is the 3rd out
+      const pitchSide=G.battingHome?"away":"home";   // the DEFENSE is pitching
+      const inn=G.inning, half=G.half;
+      outEvent();
+      if(endsInning){
+        const p=DEMO_PITCHERS[pitchSide];
+        triggerK({id:p.id,name:p.name,number:p.number,
+          team:(pitchSide==="away"?G.away:G.home), ...demoKStats(),
+          inningTxt:(half==="Top"?"MIDDLE ":"END ")+inn});
+      }
+    }
   }else if(roll<0.55){ // ball / walk
     G.balls++; if(G.balls>=4){walk();}
   }else if(roll<0.72){ // out in play
@@ -955,7 +1069,7 @@ const wuCard=$("#walkupCard");
 let wuHideT=null;
 function triggerWalkup(info){
   info=info||{};
-  if(hrPlaying||anthemPlaying)return;   // never stack over a takeover
+  if(hrPlaying||anthemPlaying||kPlaying)return;   // never stack over a takeover
   document.documentElement.style.setProperty('--wuc',teamColor((info.team&&info.team.id)||0));
   const shot=$("#wuShot"), shotWrap=shot.parentElement;
   if(info.id){
@@ -1003,6 +1117,52 @@ function countUp(el,txt){
     if(p<1)requestAnimationFrame(step);
   })(t0);
 }
+/* ============================================================
+   STRIKEOUT ENDS THE INNING — "K" TAKEOVER
+   info = {id,name,number,team:{id,name},so,era,inningTxt,dur} — any field optional
+   ============================================================ */
+const kOv=$("#kOverlay");
+let kPlaying=false;
+function triggerK(info){
+  info=info||{};
+  if(hrPlaying||anthemPlaying||kPlaying)return;
+  kPlaying=true;
+  wuCard.classList.remove("show"); clearTimeout(wuHideT);   // clear the walk-up if it's up
+  const team=info.team||{};
+  document.documentElement.style.setProperty('--kc',teamColor(team.id||0));
+  const shot=$("#kShot"), hero=shot.parentElement;
+  if(info.id){
+    hero.style.display="";
+    shot.onerror=()=>{ if(shot.src.indexOf('midfield')<0) shot.src=shotURL(info.id); else hero.style.display="none"; };
+    shot.src=siloURL(info.id);
+  }else{ hero.style.display="none"; shot.removeAttribute("src"); }
+  $("#kName").textContent=info.name||"—";
+  $("#kNum").textContent=info.number?("#"+info.number):"";
+  $("#kTeam").textContent=team.name||"";
+  $("#kSub").textContent=info.inningTxt?("SIDE RETIRED • "+info.inningTxt):"SIDE RETIRED";
+  $("#kSO").textContent="—"; $("#kERA").textContent="—";
+  if(info.so!=null&&info.so!=="")setTimeout(()=>countUp($("#kSO"),String(info.so)),1350);
+  if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),1500);
+  kOv.classList.remove("show"); void kOv.offsetWidth;
+  kOv.classList.add("show");
+  clearTimeout(triggerK._t);
+  triggerK._t=setTimeout(endK, info.dur||6500);
+}
+function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
+/* season pitching line for the K card */
+async function fetchPitcher(id){
+  try{
+    const r=await fetch(`${API}/v1/people/${id}?hydrate=stats(group=[pitching],type=[season])`);
+    const j=await r.json();
+    const p=(j.people&&j.people[0])||{};
+    let so="",era="";
+    const grp=(p.stats||[]).find(s=>s.group&&s.group.displayName==="pitching")||(p.stats&&p.stats[0]);
+    const sp=grp&&grp.splits&&grp.splits[0];
+    if(sp&&sp.stat){so=sp.stat.strikeOuts;era=sp.stat.era||"";}
+    return {name:p.fullName||"",number:p.primaryNumber||"",so,era};
+  }catch(e){return {};}
+}
+
 /* season hitting line for the walk-up card */
 async function fetchBatter(id){
   try{
@@ -1039,6 +1199,13 @@ $("#walkupBtn").onclick=()=>{
     triggerWalkup({id:592450,name:"Aaron Judge",number:"99",pos:"RF",bats:"R",
       avg:".310",hr:37,rbi:98,team:t,kick:"NOW BATTING • PREVIEW"});
   }
+};
+$("#kBtn").onclick=()=>{
+  const pitchSide=G.battingHome?"away":"home";
+  const p=DEMO_PITCHERS[pitchSide];
+  triggerK({id:p.id,name:p.name,number:p.number,
+    team:(pitchSide==="away"?G.away:G.home), ...demoKStats(),
+    inningTxt:(G.half==="Top"?"MIDDLE ":"END ")+G.inning});
 };
 $("#hrBtn").onclick=()=>{
   if(MODE==="demo"){
