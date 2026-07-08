@@ -862,6 +862,43 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 @keyframes fgRibbon{from{opacity:0;transform:translateX(-50%) rotate(-4deg) scale(1.7)}
   to{opacity:1;transform:translateX(-50%) rotate(-4deg) scale(1)}}
 
+/* =================== LINEUP REVEAL — CHALKBOARD LINEUP CARD ===================
+   pre-game: both starting nines cascade onto a dugout chalkboard            */
+#lineupOverlay{position:fixed;inset:0;z-index:43;display:none;opacity:0;transition:opacity .45s;overflow:hidden;
+  background:radial-gradient(1000px 640px at 50% -10%, #17402b 0%, #0c2418 55%, #06130c 100%)}
+#lineupOverlay.show{display:block;opacity:1}
+#lineupOverlay::before{content:"";position:absolute;inset:0;opacity:.05;pointer-events:none;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 46px)}
+.lu-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);padding:20px;text-align:center}
+.lu-kick{color:var(--gold);font-weight:900;letter-spacing:9px;font-size:clamp(12px,1.7vw,22px);opacity:0}
+#lineupOverlay.show .lu-kick{animation:anFade .5s .15s both}
+.lu-title{font-weight:900;line-height:.95;letter-spacing:2px;font-size:clamp(34px,5.5vw,72px);color:#f2efe4;
+  text-shadow:0 4px 18px rgba(0,0,0,.6);opacity:0}
+#lineupOverlay.show .lu-title{animation:anFade .5s .3s both}
+.lu-cols{display:flex;gap:min(4vw,44px);align-items:flex-start}
+.lu-col{width:min(40vw,540px);background:rgba(255,255,255,.05);border:2px dashed rgba(242,239,228,.35);
+  border-radius:14px;padding:14px 18px;opacity:0;transform:translateY(26px)}
+#lineupOverlay.show .lu-col.a{animation:luCol .5s cubic-bezier(.2,.8,.2,1) .35s both}
+#lineupOverlay.show .lu-col.h{animation:luCol .5s cubic-bezier(.2,.8,.2,1) .5s both}
+@keyframes luCol{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.lu-head{display:flex;align-items:center;gap:10px;padding-bottom:8px;margin-bottom:8px;
+  border-bottom:2px solid rgba(242,239,228,.4)}
+.lu-head img{width:clamp(26px,2.6vw,38px);height:clamp(26px,2.6vw,38px);object-fit:contain}
+.lu-head .t{color:#f2efe4;font-weight:900;letter-spacing:2px;font-size:clamp(15px,1.8vw,24px)}
+.lu-row{display:flex;align-items:center;gap:12px;padding:5px 8px;opacity:0;text-align:left}
+#lineupOverlay.show .lu-row{animation:luRow .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes luRow{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:none}}
+.lu-row .n{flex:0 0 auto;width:clamp(22px,2.2vw,30px);height:clamp(22px,2.2vw,30px);border:2px solid var(--gold);
+  border-radius:50%;color:var(--gold);font-weight:900;font-size:clamp(11px,1.2vw,15px);
+  display:grid;place-items:center}
+.lu-row .mug{flex:0 0 auto;width:clamp(24px,2.6vw,34px);height:clamp(24px,2.6vw,34px);border-radius:50%;
+  object-fit:cover;background:rgba(255,255,255,.12)}
+.lu-row .nm{flex:1;color:#f2efe4;font-weight:800;font-size:clamp(13px,1.5vw,20px);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.lu-row .pos{flex:0 0 auto;color:var(--gold);font-weight:900;letter-spacing:1px;font-size:clamp(11px,1.2vw,15px)}
+@media (max-width:760px){ .lu-cols{flex-direction:column;align-items:center} .lu-col{width:92vw} }
+
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
@@ -955,6 +992,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
       <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
       <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
+      <button class="ghostbtn" id="lineupBtn">📋 Lineups</button>
       <button class="ghostbtn" id="stretchBtn">🧘 7th Stretch</button>
       <button class="ghostbtn" id="rallyBtn">📣 Rally</button>
       <button class="ghostbtn" id="finalBtn">🏆 Final</button>
@@ -1129,6 +1167,24 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
+<!-- ============ LINEUP REVEAL — CHALKBOARD LINEUP CARD ============ -->
+<div id="lineupOverlay">
+  <div class="lu-inner">
+    <div class="lu-kick">OFFICIAL LINEUP CARD</div>
+    <div class="lu-title">STARTING LINEUPS</div>
+    <div class="lu-cols">
+      <div class="lu-col a">
+        <div class="lu-head"><img id="luACrest" alt=""><span class="t" id="luAName">AWAY</span></div>
+        <div id="luARows"></div>
+      </div>
+      <div class="lu-col h">
+        <div class="lu-head"><img id="luHCrest" alt=""><span class="t" id="luHName">HOME</span></div>
+        <div id="luHRows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ FINAL / WALK-OFF — CHAMPAGNE GOLD ============ -->
 <div id="finalOverlay">
   <div class="fg-inner">
@@ -1283,6 +1339,7 @@ let LIVE={batter:null, lastHR:null, lastK:null};
 let stretchDone=false; // fired the 7th-inning stretch once (per game)
 let rallyKey="";       // half-inning key the rally alert last fired for
 let finalDone=false;   // fired the final/walk-off card once (per game)
+let lineupDone=false;  // fired the pre-game lineup reveal once (per game)
 
 function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
 function showSetup(){
@@ -1297,6 +1354,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endStretch==="function")endStretch();
   if(typeof endRally==="function")endRally();
   if(typeof endFinal==="function")endFinal();
+  if(typeof endLineup==="function")endLineup();
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
 
 function renderBoard(){
@@ -1332,8 +1390,8 @@ function startLiveGame(g){
   G.home={id:h.id,abbr:h.abbreviation||abbr3(h.teamName||h.name),name:h.teamName||h.name,score:g.teams.home.score||0};
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
   lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
-  LIVE={batter:null, lastHR:null, lastK:null};
-  stretchDone=false; rallyKey=""; finalDone=false;
+  LIVE={batter:null, lastHR:null, lastK:null, box:null};
+  stretchDone=false; rallyKey=""; finalDone=false; lineupDone=false;
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 REPLAY LAST HR";
   $("#hr2Btn").textContent="💥 LAST HR (V2)";
@@ -1392,6 +1450,15 @@ async function tickLive(first){
         lastBatterId=curBatter.id;
         fireLiveWalkup(LIVE.batter,true);
       }
+    }
+    // ---- lineup reveal (pre-game, the moment both starting nines are posted) ----
+    const box=ld.boxscore;
+    if(box)LIVE.box=box;
+    if(!lineupDone && st==="Preview" && box
+       && ((box.teams.away.battingOrder||[]).length>=9)
+       && ((box.teams.home.battingOrder||[]).length>=9)){
+      lineupDone=true;
+      triggerLineup(box);
     }
     // ---- 7th-inning stretch / late-game rally / final & walk-off ----
     if(first){
@@ -1506,6 +1573,25 @@ const DEMO_PITCHERS={
   away:{id:543037,name:"Gerrit Cole",number:"45"},      // Yankees
   home:{id:477132,name:"Clayton Kershaw",number:"22"}   // Dodgers
 };
+/* fill the demo lineups out to nine (no ids -> no headshots, names only) */
+const DEMO_EXTRA={
+  away:[{name:"Austin Wells",pos:"C"},{name:"Ben Rice",pos:"1B"},{name:"Trent Grisham",pos:"CF"},
+        {name:"Ryan McMahon",pos:"3B"},{name:"Jasson Domínguez",pos:"LF"}],
+  home:[{name:"Max Muncy",pos:"3B"},{name:"Tommy Edman",pos:"CF"},{name:"Andy Pages",pos:"LF"},
+        {name:"Miguel Rojas",pos:"2B"}]
+};
+function demoLineup(){
+  const mk=(roster,extra)=>{
+    const players={}, order=[];
+    [...roster,...extra].slice(0,9).forEach((p,i)=>{
+      const pid=p.id||-(i+1);
+      order.push(pid);
+      players["ID"+pid]={person:{fullName:p.name},position:{abbreviation:p.pos||""}};
+    });
+    return {battingOrder:order,players};
+  };
+  return {teams:{away:mk(DEMO_ROSTER.away,DEMO_EXTRA.away),home:mk(DEMO_ROSTER.home,DEMO_EXTRA.home)}};
+}
 function demoKStats(){return {so:90+Math.floor(Math.random()*130), era:(2+Math.random()*2.8).toFixed(2)};}
 function battingTeam(){return G.battingHome?G.home:G.away;}
 let demoAbEnded=false;   // set by a terminal at-bat event this tick
@@ -1944,7 +2030,7 @@ async function replayLastHR(fn){
    7TH-INNING STRETCH / LATE-GAME RALLY / FINAL & WALK-OFF
    ============================================================ */
 /* one central guard: no takeover ever stacks on another */
-function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying;}
+function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -2003,6 +2089,42 @@ function triggerFinal(info){
 }
 function endFinal(){ clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false; }
 
+/* ============================================================
+   LINEUP REVEAL — pre-game starting nines on the chalkboard
+   box = a boxscore object: teams.away/home.{battingOrder,players}
+   ============================================================ */
+const luOv=$("#lineupOverlay");
+let lineupPlaying=false;
+function triggerLineup(box){
+  if(takeoverBusy()||!box)return;
+  lineupPlaying=true; hideWalkup();
+  $("#luACrest").src=G.away.id?logoURL(G.away.id):transparentPx();
+  $("#luHCrest").src=G.home.id?logoURL(G.home.id):transparentPx();
+  $("#luAName").textContent=(G.away.name||"AWAY").toUpperCase();
+  $("#luHName").textContent=(G.home.name||"HOME").toUpperCase();
+  const fill=(sel,tb,base)=>{
+    const el=$(sel); el.innerHTML="";
+    ((tb&&tb.battingOrder)||[]).slice(0,9).forEach((pid,i)=>{
+      const p=(tb.players&&tb.players["ID"+pid])||{};
+      const nm=(p.person&&p.person.fullName)||"—";
+      const pos=(p.position&&p.position.abbreviation)||"";
+      const row=document.createElement("div"); row.className="lu-row";
+      row.style.animationDelay=(base+i*0.12)+"s";
+      row.innerHTML=`<span class="n">${i+1}</span>`
+        +(pid>0?`<img class="mug" src="${shotURL(pid)}" onerror="this.style.display='none'" alt="">`
+               :`<span class="mug"></span>`)
+        +`<span class="nm">${nm}</span><span class="pos">${pos}</span>`;
+      el.appendChild(row);
+    });
+  };
+  fill("#luARows",box.teams&&box.teams.away,.55);
+  fill("#luHRows",box.teams&&box.teams.home,.7);
+  luOv.classList.remove("show"); void luOv.offsetWidth; luOv.classList.add("show");
+  clearTimeout(triggerLineup._t);
+  triggerLineup._t=setTimeout(endLineup, 13000);
+}
+function endLineup(){ clearTimeout(triggerLineup._t); luOv.classList.remove("show"); lineupPlaying=false; }
+
 /* season hitting line for the walk-up card */
 async function fetchBatter(id){
   try{
@@ -2057,6 +2179,13 @@ function hrPreviewInfo(){  // demo data for both HR buttons
 }
 $("#hrBtn").onclick=()=>{ if(MODE==="demo")triggerHR(hrPreviewInfo()); else replayLastHR(triggerHR); };
 $("#hr2Btn").onclick=()=>{ if(MODE==="demo")triggerHR2(hrPreviewInfo()); else replayLastHR(triggerHR2); };
+$("#lineupBtn").onclick=()=>{
+  if(MODE==="demo"){ triggerLineup(demoLineup()); }
+  else if(LIVE.box
+    && ((LIVE.box.teams.away.battingOrder||[]).length>=9)
+    && ((LIVE.box.teams.home.battingOrder||[]).length>=9)){ triggerLineup(LIVE.box); }
+  else toast("Lineups aren't posted yet");
+};
 $("#stretchBtn").onclick=()=>triggerStretch();
 $("#rallyBtn").onclick=()=>{
   if(MODE==="demo"){
