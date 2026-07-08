@@ -506,6 +506,64 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .h2-stat .k{color:var(--gold);font-weight:800;letter-spacing:2px;font-size:clamp(9px,1vw,12px);margin-top:3px}
 @media (max-width:760px){ .h2-hero{display:none} .h2-inner{padding-left:0} }
 
+/* =================== 7TH STRETCH / RALLY / FINAL — SHARED TAKEOVER SKELETON =================== */
+#stretchOverlay,#rallyOverlay,#finalOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;
+  transition:opacity .4s;overflow:hidden}
+#stretchOverlay.show,#rallyOverlay.show,#finalOverlay.show{display:block;opacity:1}
+#stretchOverlay{background:radial-gradient(1000px 640px at 50% -10%,#0d2f63,#02081a 72%)}
+#rallyOverlay{background:
+  linear-gradient(120deg, rgba(2,8,26,.30), rgba(2,8,26,.85)),
+  linear-gradient(180deg, color-mix(in srgb,var(--rc,#0a2a5c) 82%,#000), color-mix(in srgb,var(--rc,#0a2a5c) 36%,#000))}
+#finalOverlay{background:
+  linear-gradient(120deg, rgba(2,8,26,.25), rgba(2,8,26,.82)),
+  linear-gradient(180deg, color-mix(in srgb,var(--fc,#0a2a5c) 85%,#000), color-mix(in srgb,var(--fc,#0a2a5c) 38%,#000))}
+#stretchOverlay::before,#rallyOverlay::before,#finalOverlay::before{content:"";position:absolute;inset:-25%;
+  opacity:.09;pointer-events:none;background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 90px);
+  animation:anStripes 2.2s linear infinite}
+#stretchOverlay::after,#rallyOverlay::after,#finalOverlay::after{content:"";position:absolute;top:-10%;bottom:-10%;
+  left:-30%;width:26%;pointer-events:none;transform:skewX(-14deg);opacity:0;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.10) 45%,rgba(255,255,255,.22) 50%,rgba(255,255,255,.10) 55%,transparent)}
+#stretchOverlay.show::after,#rallyOverlay.show::after,#finalOverlay.show::after{animation:kSweepBig .9s ease-out .5s both}
+.tk-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);text-align:center;padding:20px}
+.tk-kick{color:var(--gold);font-weight:900;letter-spacing:9px;font-size:clamp(13px,1.9vw,24px);
+  text-shadow:0 2px 12px rgba(0,0,0,.7);opacity:0}
+:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-kick{animation:anFade .5s .25s both}
+.tk-title{position:relative;font-weight:900;line-height:.92;letter-spacing:1px;font-size:clamp(46px,9.5vw,136px);
+  background:
+    linear-gradient(110deg, transparent 42%, rgba(255,203,46,.9) 50%, transparent 58%) no-repeat,
+    linear-gradient(180deg,#fff,#bcd0ff);
+  background-size:250% 100%,100% 100%;background-position:-150% 0,0 0;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 28px rgba(0,0,0,.6));clip-path:inset(0 100% 0 0)}
+:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-title{
+  animation:kReveal .6s cubic-bezier(.2,.8,.2,1) .5s both, anShine2 2.8s linear 1.8s infinite}
+.tk-sub{color:#cfe0ff;font-weight:700;font-size:clamp(14px,1.9vw,23px);opacity:0}
+:is(#stretchOverlay,#rallyOverlay,#finalOverlay).show .tk-sub{animation:anFade .5s 1.15s both}
+/* stretch: swaying title + floating notes */
+#stretchOverlay.show .tk-title.sway{animation:kReveal .6s cubic-bezier(.2,.8,.2,1) .5s both,
+  anShine2 2.8s linear 1.8s infinite, stSway 3s ease-in-out 1.3s infinite}
+@keyframes stSway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+.st-notes{display:flex;gap:min(6vw,70px);color:var(--gold);font-size:clamp(24px,3.4vw,44px);font-weight:900}
+.st-notes span{opacity:0;animation:stFloat 2.6s ease-in infinite}
+.st-notes span:nth-child(2){animation-delay:.9s}
+.st-notes span:nth-child(3){animation-delay:1.7s}
+@keyframes stFloat{0%{transform:translateY(26px);opacity:0}25%{opacity:.95}100%{transform:translateY(-46px);opacity:0}}
+/* rally: mini diamond with occupied bases lit */
+.r-diamond{position:relative;width:120px;height:120px;opacity:0}
+#rallyOverlay.show .r-diamond{animation:anFade .5s .9s both}
+.r-base{position:absolute;width:34px;height:34px;background:rgba(255,255,255,.14);
+  border:2px solid rgba(255,255,255,.4);transform:rotate(45deg)}
+.r-base.b2{top:6px;left:43px}.r-base.b3{top:43px;left:6px}.r-base.b1{top:43px;right:6px}
+.r-base.on{background:var(--gold);border-color:#fff;box-shadow:0 0 20px var(--gold)}
+/* final: winner crest drops in + score line */
+.f-crest{width:min(26vw,240px);height:min(26vw,240px);object-fit:contain;
+  filter:drop-shadow(0 14px 40px rgba(0,0,0,.7));opacity:0}
+#finalOverlay.show .f-crest{animation:fDrop .6s cubic-bezier(.2,.9,.3,1) .25s both}
+@keyframes fDrop{from{opacity:0;transform:translateY(-40px) scale(.85)}to{opacity:1;transform:none}}
+.f-score{font-weight:900;font-size:clamp(34px,5.5vw,72px);opacity:0;text-shadow:0 6px 24px rgba(0,0,0,.55)}
+#finalOverlay.show .f-score{animation:anFade .5s 1.25s both}
+
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
@@ -599,6 +657,9 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
       <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
       <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
       <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
+      <button class="ghostbtn" id="stretchBtn">🧘 7th Stretch</button>
+      <button class="ghostbtn" id="rallyBtn">📣 Rally</button>
+      <button class="ghostbtn" id="finalBtn">🏆 Final</button>
       <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
     </div>
     <div class="hint" id="boardHint"></div>
@@ -702,6 +763,37 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="h2-meta"><span class="num" id="h2Num"></span><span id="h2Team"></span></div>
     <div class="h2-dist"><span class="v" id="h2Dist">0</span><span class="u">FT</span></div>
     <div class="h2-stats" id="h2Stats"></div>
+  </div>
+</div>
+
+<!-- ============ 7TH-INNING STRETCH ============ -->
+<div id="stretchOverlay">
+  <div class="tk-inner">
+    <div class="tk-kick">⚾ MIDDLE OF THE 7TH</div>
+    <div class="tk-title sway">STRETCH&nbsp;TIME</div>
+    <div class="st-notes"><span>♪</span><span>♫</span><span>♪</span></div>
+    <div class="tk-sub">Stand up, stretch it out, sing along!</div>
+  </div>
+</div>
+
+<!-- ============ LATE-GAME RALLY ============ -->
+<div id="rallyOverlay">
+  <div class="tk-inner">
+    <div class="tk-kick" id="rKick">LATE INNINGS</div>
+    <div class="tk-title">RALLY&nbsp;TIME</div>
+    <div class="r-diamond"><div class="r-base b2" id="rB2"></div><div class="r-base b3" id="rB3"></div><div class="r-base b1" id="rB1"></div></div>
+    <div class="tk-sub" id="rSub"></div>
+  </div>
+</div>
+
+<!-- ============ FINAL / WALK-OFF ============ -->
+<div id="finalOverlay">
+  <div class="tk-inner">
+    <div class="tk-kick" id="fKick">FINAL</div>
+    <img class="f-crest" id="fCrest" alt="">
+    <div class="tk-title" id="fTitle">FINAL</div>
+    <div class="f-score" id="fScore"></div>
+    <div class="tk-sub" id="fSub"></div>
   </div>
 </div>
 
@@ -814,6 +906,9 @@ let anthemDone=false;  // fire the first-pitch takeover only once, on the Previe
 let lastKIndex=-1;     // highest atBatIndex of an inning-ending strikeout we've already shown
 /* latest REAL moments from the live feed — the preview buttons replay these */
 let LIVE={batter:null, lastHR:null, lastK:null};
+let stretchDone=false; // fired the 7th-inning stretch once (per game)
+let rallyKey="";       // half-inning key the rally alert last fired for
+let finalDone=false;   // fired the final/walk-off card once (per game)
 
 function showBoard(){ $("#setup").classList.add("hidden"); $("#board").style.display="flex"; }
 function showSetup(){
@@ -825,6 +920,9 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endAnthem==="function")endAnthem();
   if(typeof endK==="function")endK();
   if(typeof endHR2==="function")endHR2();
+  if(typeof endStretch==="function")endStretch();
+  if(typeof endRally==="function")endRally();
+  if(typeof endFinal==="function")endFinal();
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
 
 function renderBoard(){
@@ -861,6 +959,7 @@ function startLiveGame(g){
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
   lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
   LIVE={batter:null, lastHR:null, lastK:null};
+  stretchDone=false; rallyKey=""; finalDone=false;
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 REPLAY LAST HR";
   $("#hr2Btn").textContent="💥 LAST HR (V2)";
@@ -920,6 +1019,28 @@ async function tickLive(first){
         fireLiveWalkup(LIVE.batter,true);
       }
     }
+    // ---- 7th-inning stretch / late-game rally / final & walk-off ----
+    if(first){
+      stretchDone=(G.inning>7)||(G.inning===7&&G.half==="Bottom")||st==="Final";
+      finalDone=(st==="Final");
+    }else{
+      if(!stretchDone && st==="Live" && G.inning===7 && G.half==="Bottom"){
+        stretchDone=true; triggerStretch();
+      }
+      const batS=G.battingHome?G.home.score:G.away.score,
+            fldS=G.battingHome?G.away.score:G.home.score,
+            rk=G.inning+"-"+G.half;
+      if(st==="Live" && G.inning>=8 && batS<fldS && G.bases.some(Boolean) && rallyKey!==rk){
+        rallyKey=rk;
+        triggerRally({team:battingTeam(),deficit:fldS-batS,bases:[...G.bases],inning:G.inning,half:G.half});
+      }
+      if(!finalDone && st==="Final"){
+        finalDone=true;
+        const homeWon=G.home.score>G.away.score;
+        triggerFinal({winner:homeWon?G.home:G.away,aw:G.away,hm:G.home,inning:G.inning,
+          walkoff:homeWon&&G.half==="Bottom"&&G.inning>=9});
+      }
+    }
     // ---- home run detection ----
     const plays=(ld.plays&&ld.plays.allPlays)||[];
     let newestHR=null, maxHR=-1;
@@ -975,7 +1096,7 @@ function startDemo(){
   $("#statusTxt").textContent="DEMO";
   $("#liveDot").style.display="none";
   $("#boardHint").textContent="This is a simulated game. The first-pitch takeover plays on kickoff and a walk-up card intros each new batter — or tap the buttons to fire any cinematic.";
-  G.demoBatter=null;
+  G.demoBatter=null; rallyKey="";
   showBoard(); renderBoard();
   demoTimer=setInterval(demoTick,3200);
   setTimeout(()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`}),500);
@@ -1042,6 +1163,16 @@ function demoTick(){
     hit(2);
   }
   renderBoard();
+  // late-game rally check (8th+, batting team trailing, runners on)
+  if(G.inning>=8){
+    const batS=G.battingHome?G.home.score:G.away.score,
+          fldS=G.battingHome?G.away.score:G.home.score,
+          rk=G.inning+"-"+G.half;
+    if(batS<fldS && G.bases.some(Boolean) && rallyKey!==rk){
+      rallyKey=rk;
+      triggerRally({team:battingTeam(),deficit:fldS-batS,bases:[...G.bases],inning:G.inning,half:G.half});
+    }
+  }
   if(demoAbEnded)newDemoBatter();   // a new hitter steps in -> walk-up
 }
 function resetCount(){G.balls=0;G.strikes=0;}
@@ -1063,7 +1194,9 @@ function advance(runnerBases,batterTo){
 }
 function nextHalf(){
   G.outs=0;resetCount();G.bases=[false,false,false];
-  if(G.half==="Top"){G.half="Bottom";G.battingHome=true;}
+  if(G.half==="Top"){G.half="Bottom";G.battingHome=true;
+    if(G.inning===7)triggerStretch();          // middle of the 7th
+  }
   else{G.half="Top";G.battingHome=false;G.inning++;if(G.inning>9)G.inning=1;}
 }
 
@@ -1074,7 +1207,7 @@ const ov=$("#hrOverlay"), vid=$("#hrVideo");
 let hrPlaying=false;
 /* info = {id, name, number, team:{id,name,abbr}, desc} — any field optional */
 function triggerHR(info){
-  if(hrPlaying||hr2Playing)return; hrPlaying=true;
+  if(takeoverBusy())return; hrPlaying=true;
   info=info||{};
   // in demo, actually score the HR on the board
   if(MODE==="demo"){
@@ -1151,7 +1284,7 @@ let anthemPlaying=false, anTimers=[];
    -> p3 clash + PLAY BALL stamp + fireworks (5.8s–end)                */
 function triggerAnthem(opts){
   opts=opts||{};
-  if(hrPlaying||hr2Playing||anthemPlaying)return;
+  if(takeoverBusy())return;
   anthemPlaying=true;
   document.documentElement.style.setProperty('--anAwayc',teamColor(G.away.id));
   document.documentElement.style.setProperty('--anHomec',teamColor(G.home.id));
@@ -1186,7 +1319,7 @@ const wuCard=$("#walkupCard");
 let wuHideT=null;
 function triggerWalkup(info){
   info=info||{};
-  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;   // never stack over a takeover
+  if(takeoverBusy())return;   // never stack over a takeover
   document.documentElement.style.setProperty('--wuc',teamColor((info.team&&info.team.id)||0));
   const shot=$("#wuShot"), shotWrap=shot.parentElement;
   if(info.id){
@@ -1242,7 +1375,7 @@ const kOv=$("#kOverlay");
 let kPlaying=false;
 function triggerK(info){
   info=info||{};
-  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;
+  if(takeoverBusy())return;
   kPlaying=true;
   wuCard.classList.remove("show"); clearTimeout(wuHideT);   // clear the walk-up if it's up
   const team=info.team||{};
@@ -1276,7 +1409,7 @@ const hr2Ov=$("#hr2Overlay");
 let hr2Playing=false;
 function triggerHR2(info){
   info=info||{};
-  if(hrPlaying||hr2Playing||anthemPlaying||kPlaying)return;
+  if(takeoverBusy())return;
   hr2Playing=true;
   wuCard.classList.remove("show"); clearTimeout(wuHideT);
   // in demo, score it on the board just like the video version does
@@ -1384,6 +1517,69 @@ async function replayLastHR(fn){
   fn(info);
 }
 
+/* ============================================================
+   7TH-INNING STRETCH / LATE-GAME RALLY / FINAL & WALK-OFF
+   ============================================================ */
+/* one central guard: no takeover ever stacks on another */
+function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying;}
+function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
+const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
+let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
+
+function triggerStretch(opts){
+  if(takeoverBusy())return;
+  stretchPlaying=true; hideWalkup();
+  stOv.classList.remove("show"); void stOv.offsetWidth; stOv.classList.add("show");
+  clearTimeout(triggerStretch._t);
+  triggerStretch._t=setTimeout(endStretch,(opts&&opts.dur)||7000);
+}
+function endStretch(){ clearTimeout(triggerStretch._t); stOv.classList.remove("show"); stretchPlaying=false; }
+
+/* info = {team:{id,name}, deficit, bases:[1st,2nd,3rd], inning, half} */
+function triggerRally(info){
+  info=info||{};
+  if(takeoverBusy())return;
+  rallyPlaying=true; hideWalkup();
+  const team=info.team||{};
+  document.documentElement.style.setProperty('--rc',teamColor(team.id||0));
+  const b=info.bases||[false,false,false];
+  $("#rB1").classList.toggle("on",!!b[0]);
+  $("#rB2").classList.toggle("on",!!b[1]);
+  $("#rB3").classList.toggle("on",!!b[2]);
+  const names=["1ST","2ND","3RD"].filter((_,i)=>b[i]);
+  const rtxt=b.every(Boolean)?"BASES LOADED":(names.length?"RUNNERS ON "+names.join(" & "):"");
+  $("#rKick").textContent=((team.name||"")+" • LATE INNINGS").toUpperCase();
+  $("#rSub").textContent=[`DOWN ${info.deficit||1}`,rtxt,`${info.half==="Top"?"TOP":"BOTTOM"} ${info.inning||8}`]
+    .filter(Boolean).join(" • ");
+  rOv.classList.remove("show"); void rOv.offsetWidth; rOv.classList.add("show");
+  clearTimeout(triggerRally._t);
+  triggerRally._t=setTimeout(endRally, info.dur||6000);
+}
+function endRally(){ clearTimeout(triggerRally._t); rOv.classList.remove("show"); rallyPlaying=false; }
+
+/* info = {winner, walkoff, aw, hm, inning} */
+function triggerFinal(info){
+  info=info||{};
+  if(takeoverBusy())return;
+  finalPlaying=true; hideWalkup();
+  const aw=info.aw||G.away, hm=info.hm||G.home;
+  const tie=aw.score===hm.score;
+  const winner=info.winner||(hm.score>aw.score?hm:aw);
+  const loser=(winner===hm)?aw:hm;
+  document.documentElement.style.setProperty('--fc',teamColor(winner.id||0));
+  $("#fCrest").src=winner.id?logoURL(winner.id):transparentPx();
+  $("#fKick").textContent=(info.walkoff&&!tie)?"WALK-OFF WIN!":"FINAL";
+  $("#fTitle").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
+  $("#fScore").textContent=`${aw.abbr} ${aw.score} — ${hm.score} ${hm.abbr}`;
+  $("#fSub").textContent=tie?"":(info.walkoff
+    ?`${winner.name} walk it off in the ${info.inning||G.inning}th!`
+    :`${winner.name} defeat the ${loser.name}`);
+  fOv.classList.remove("show"); void fOv.offsetWidth; fOv.classList.add("show");
+  clearTimeout(triggerFinal._t);
+  triggerFinal._t=setTimeout(endFinal, info.dur||9000);
+}
+function endFinal(){ clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false; }
+
 /* season hitting line for the walk-up card */
 async function fetchBatter(id){
   try{
@@ -1437,6 +1633,28 @@ function hrPreviewInfo(){  // demo data for both HR buttons
 }
 $("#hrBtn").onclick=()=>{ if(MODE==="demo")triggerHR(hrPreviewInfo()); else replayLastHR(triggerHR); };
 $("#hr2Btn").onclick=()=>{ if(MODE==="demo")triggerHR2(hrPreviewInfo()); else replayLastHR(triggerHR2); };
+$("#stretchBtn").onclick=()=>triggerStretch();
+$("#rallyBtn").onclick=()=>{
+  if(MODE==="demo"){
+    let b=[Math.random()<.7,Math.random()<.5,Math.random()<.35];
+    if(!b.some(Boolean))b=[true,false,false];
+    triggerRally({team:battingTeam(),deficit:1+Math.floor(Math.random()*3),bases:b,
+      inning:8+Math.floor(Math.random()*2),half:G.half});
+  }else{ // real game situation, right now
+    const batS=G.battingHome?G.home.score:G.away.score,
+          fldS=G.battingHome?G.away.score:G.home.score;
+    triggerRally({team:battingTeam(),deficit:Math.max(1,fldS-batS),
+      bases:G.bases.some(Boolean)?[...G.bases]:[true,false,false],
+      inning:G.inning,half:G.half});
+  }
+};
+$("#finalBtn").onclick=()=>{
+  const homeWon=G.home.score>=G.away.score;
+  const walkoff=(MODE==="live")
+    ? (G.home.score>G.away.score&&G.half==="Bottom"&&G.inning>=9)
+    : Math.random()<.5;
+  triggerFinal({winner:homeWon?G.home:G.away,walkoff,aw:G.away,hm:G.home,inning:G.inning});
+};
 
 // preload the video quietly
 window.addEventListener("load",()=>{ try{vid.load();}catch(e){} });
