@@ -972,106 +972,143 @@ body.nfl .nfl-dd{display:block}
 @keyframes nfpSlam{from{opacity:0;transform:scale(1.9)}to{opacity:1;transform:scale(1)}}
 @keyframes nfpShine{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
 
-/* ---- KICKOFF: team-color panels slam together ---- */
-.ko2-half{position:absolute;inset:0}
-.ko2-half.a{background:
-  linear-gradient(120deg,rgba(2,6,12,.25),rgba(2,6,12,.75)),
-  linear-gradient(180deg,color-mix(in srgb,var(--nflA,#e31837) 85%,#000),color-mix(in srgb,var(--nflA,#e31837) 40%,#000));
-  transform:translateX(-101%)}
-.ko2-half.h{background:
-  linear-gradient(-120deg,rgba(2,6,12,.25),rgba(2,6,12,.75)),
-  linear-gradient(180deg,color-mix(in srgb,var(--nflH,#00338d) 85%,#000),color-mix(in srgb,var(--nflH,#00338d) 40%,#000));
-  clip-path:polygon(56% 0,100% 0,100% 100%,44% 100%);transform:translateX(101%);
-  filter:drop-shadow(-4px 0 0 #dfe7ef) drop-shadow(-2px 0 9px rgba(190,210,235,.7))}
-#koOverlay.show .ko2-half.a{animation:ko2InA .55s cubic-bezier(.2,.85,.25,1) both}
-#koOverlay.show .ko2-half.h{animation:ko2InH .55s cubic-bezier(.2,.85,.25,1) .08s both}
-@keyframes ko2InA{from{transform:translateX(-101%)}to{transform:none}}
-@keyframes ko2InH{from{transform:translateX(101%)}to{transform:none}}
-.ko2-logo{position:absolute;top:50%;width:min(21vw,210px);height:min(21vw,210px);object-fit:contain;
-  opacity:0;transform:translateY(-46%);filter:drop-shadow(0 14px 36px rgba(0,0,0,.7))}
-.ko2-logo.a{left:7%}.ko2-logo.h{right:7%}
-#koOverlay.show .ko2-logo{animation:ko2Logo .5s ease .55s both}
-@keyframes ko2Logo{from{opacity:0;transform:translateY(-40%)}to{opacity:1;transform:translateY(-50%)}}
+/* ---- KICKOFF (A · Tunnel Run): charge out of a smoky tunnel ---- */
+#koOverlay{background:radial-gradient(closest-side at 50% 50%,
+  color-mix(in srgb,var(--nflH,#00338d) 55%,#000) 0%, #0a0e15 42%, #04060a 100%)}
+.ko-tunnel{position:absolute;inset:0;pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.55) 0 3%,transparent 3% 8%,rgba(0,0,0,.55) 8% 11%),
+    radial-gradient(closest-side at 50% 50%, transparent 26%, rgba(2,4,8,.86) 60%)}
+.ko-glow{position:absolute;left:50%;top:50%;width:38vmin;height:38vmin;transform:translate(-50%,-50%);
+  border-radius:50%;pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side, color-mix(in srgb,var(--nflH,#00338d) 80%,#fff) 0%,
+    color-mix(in srgb,var(--nflH,#00338d) 60%,transparent) 45%, transparent 72%)}
+#koOverlay.show .ko-glow{animation:koGlow 1.2s ease-out .1s both}
+@keyframes koGlow{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  60%{opacity:1}100%{opacity:.85;transform:translate(-50%,-50%) scale(1)}}
+/* drifting smoke haze */
+.ko-smoke{position:absolute;border-radius:50%;filter:blur(38px);pointer-events:none;opacity:0;
+  background:radial-gradient(closest-side,rgba(200,214,232,.5),transparent 70%)}
+.ko-smoke.s1{left:12%;bottom:6%;width:44vw;height:44vw}
+.ko-smoke.s2{right:8%;bottom:2%;width:38vw;height:38vw}
+#koOverlay.show .ko-smoke.s1{animation:koSmoke 4.5s ease-in-out .2s infinite}
+#koOverlay.show .ko-smoke.s2{animation:koSmoke 5.2s ease-in-out .6s infinite reverse}
+@keyframes koSmoke{0%{opacity:0;transform:translateY(30px) scale(.9)}
+  40%{opacity:.7}100%{opacity:0;transform:translateY(-40px) scale(1.25)}}
+.ko-logos{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:2;
+  display:flex;gap:min(3vw,34px);align-items:center;opacity:0}
+#koOverlay.show .ko-logos{animation:anFade .5s .45s both}
+.ko-logos img{width:min(11vw,110px);height:min(11vw,110px);object-fit:contain;
+  filter:drop-shadow(0 10px 26px rgba(0,0,0,.8))}
+.ko-logos .at{color:#c6d2e0;font-weight:900;font-style:italic;font-size:clamp(24px,3vw,44px)}
+/* the word charges out of the tunnel at the screen */
 .ko2-center{position:absolute;inset:0;z-index:3;pointer-events:none;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:min(2vh,16px);text-align:center}
-.ko2-center::before{content:"";position:absolute;width:min(74vw,940px);height:min(46vh,380px);border-radius:50%;
-  background:radial-gradient(closest-side,rgba(3,6,12,.72),transparent 75%);z-index:-1;opacity:0}
-#koOverlay.show .ko2-center::before{animation:anFade2 .5s .6s both}
-#koOverlay.show .ko2-center .nfp-kick{animation:anFade .4s .7s both}
-.ko2-title{font-size:clamp(56px,12vw,170px);line-height:.9;opacity:0}
-#koOverlay.show .ko2-title{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) .8s both,
+#koOverlay.show .ko2-center .nfp-kick{animation:anFade .4s .55s both}
+.ko2-title{font-size:clamp(56px,13vw,190px);line-height:.9;opacity:0;transform-origin:50% 50%}
+#koOverlay.show .ko2-title{animation:koCharge .85s cubic-bezier(.4,.0,.3,1) .7s both,
   nfpShine 2.8s linear 1.7s infinite}
+@keyframes koCharge{0%{opacity:0;transform:scale(.12);filter:blur(6px)}
+  55%{opacity:1;filter:blur(0)}80%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 .ko2-venue{color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
-#koOverlay.show .ko2-venue{animation:anFade .5s 1.25s both}
+#koOverlay.show .ko2-venue{animation:anFade .5s 1.5s both}
 
-/* ---- RED ZONE: horizontal field graphic, informational ---- */
+/* ---- RED ZONE (A · Camera Push): full field zooms down to the 20 ---- */
 .rz2-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(2vh,18px);text-align:center}
-#rzOverlay.show .nfp-kick{animation:anFade .4s .2s both}
 .rz2-title{font-weight:900;letter-spacing:2px;color:#fff;font-size:clamp(48px,9vw,120px);line-height:.95;
-  text-shadow:0 8px 26px rgba(0,0,0,.7);opacity:0}
-#rzOverlay.show .rz2-title{animation:anFade .45s .3s both}
+  text-shadow:0 8px 26px rgba(0,0,0,.7);opacity:0;z-index:3}
+#rzOverlay.show .rz2-title{animation:anFade .45s 1.5s both}   /* lands after the camera push */
 .rz2-card{width:min(82vw,1020px);background:#0d1118;border:1px solid rgba(255,255,255,.14);border-radius:16px;
-  box-shadow:0 18px 50px rgba(0,0,0,.6);padding:18px;opacity:0}
-#rzOverlay.show .rz2-card{animation:rz2In .45s cubic-bezier(.2,.9,.3,1) .5s both}
+  box-shadow:0 18px 50px rgba(0,0,0,.6);padding:18px;opacity:0;overflow:hidden}
+#rzOverlay.show .rz2-card{animation:rz2In .4s ease .15s both}
 @keyframes rz2In{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.rz2-card svg{display:block;width:100%;height:auto}
-.rz2-card .yl{stroke:rgba(255,255,255,.5);stroke-width:2}
+.rz2-vp{position:relative;width:100%;overflow:hidden}
+.rz2-vp svg{display:block;width:100%;height:auto;transform-origin:88% 50%}
+/* start zoomed OUT on the whole field, push in to the red-zone end */
+#rzOverlay.show .rz2-vp svg{animation:rz2Push 1.5s cubic-bezier(.5,0,.2,1) .35s both}
+@keyframes rz2Push{0%{transform:scale(1)}100%{transform:scale(2.5)}}
+.rz2-card .fieldbg{fill:#123f22}
+.rz2-card .yl{stroke:rgba(255,255,255,.45);stroke-width:2}
 .rz2-card .gl{stroke:#fff;stroke-width:4}
-.rz2-card .hash{stroke:rgba(255,255,255,.28);stroke-width:2;stroke-dasharray:2 18}
-.rz2-card .num{fill:rgba(255,255,255,.8);font-weight:900;font-style:italic;font-size:24px}
+.rz2-card .hash{stroke:rgba(255,255,255,.24);stroke-width:2;stroke-dasharray:2 16}
+.rz2-card .num{fill:rgba(255,255,255,.75);font-weight:900;font-style:italic;font-size:22px}
 .rz2-card .ez{fill:var(--nflOff,#e31837)}
-#rzOverlay.show .rz2-card .ez{animation:rz2Glow 1.6s ease-in-out .8s infinite}
-@keyframes rz2Glow{0%,100%{opacity:.55}50%{opacity:.95}}
-.rz2-card .eztxt{fill:rgba(255,255,255,.9);font-weight:900;font-size:20px;letter-spacing:5px}
+#rzOverlay.show .rz2-card .ez{animation:rz2Glow 1.5s ease-in-out 1.6s infinite}
+@keyframes rz2Glow{0%,100%{opacity:.5}50%{opacity:.95}}
+.rz2-card .eztxt{fill:rgba(255,255,255,.9);font-weight:900;font-size:16px;letter-spacing:4px}
 .rz2-card .ball{fill:#8a5a2b;stroke:#fff;stroke-width:2}
-#rzOverlay.show #rzBallG{animation:rz2Ball .5s cubic-bezier(.2,1.1,.3,1) .95s both}
+#rzBallG{opacity:0}
+#rzOverlay.show #rzBallG{animation:rz2Ball .4s cubic-bezier(.2,1.1,.3,1) 1.7s both}
 @keyframes rz2Ball{from{opacity:0}to{opacity:1}}
-.rz2-sub{color:#c6d2e0;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0}
-#rzOverlay.show .rz2-sub{animation:anFade .4s 1.15s both}
+/* radar ping where the ball lands */
+#rzPing{transform-box:fill-box;transform-origin:center;opacity:0}
+#rzOverlay.show #rzPing{animation:rz2Ping 1.3s ease-out 1.8s infinite}
+@keyframes rz2Ping{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
+.rz2-sub{color:#c6d2e0;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0;z-index:3}
+#rzOverlay.show .rz2-sub{animation:anFade .4s 1.9s both}
 
-/* ---- 3RD DOWN: chain-gang flip card in the defense's color ---- */
+/* ---- 3RD DOWN (A · Money Down): letterpress + crossing spotlights ---- */
 .dm-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2.2vh,20px);text-align:center}
+  justify-content:center;gap:min(2.2vh,20px);text-align:center;overflow:hidden}
 #nmOverlay.show .nfp-kick{animation:anFade .4s .15s both}
-.dm-card{background:linear-gradient(180deg,color-mix(in srgb,var(--nflDef,#00338d) 92%,#000),color-mix(in srgb,var(--nflDef,#00338d) 55%,#000));
-  border:4px solid rgba(255,255,255,.85);border-radius:22px;padding:min(5vh,44px) min(7vw,80px);
-  box-shadow:0 22px 60px rgba(0,0,0,.65);opacity:0;transform-origin:50% 100%}
-#nmOverlay.show .dm-card{animation:dmFlip .6s cubic-bezier(.2,1.05,.3,1) .35s both,
-  dmPulse 2.2s ease-in-out 1.2s infinite}
-@keyframes dmFlip{from{opacity:0;transform:perspective(900px) rotateX(88deg)}
-  to{opacity:1;transform:perspective(900px) rotateX(0)}}
-@keyframes dmPulse{0%,100%{box-shadow:0 22px 60px rgba(0,0,0,.65)}
-  50%{box-shadow:0 22px 60px rgba(0,0,0,.65),0 0 44px color-mix(in srgb,var(--nflDef,#00338d) 60%,transparent)}}
-.dm-card .t{font-weight:900;font-style:italic;color:#fff;font-size:clamp(54px,10vw,150px);line-height:.95;
-  text-shadow:0 6px 22px rgba(0,0,0,.6)}
-.dm-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,24px);opacity:0}
-#nmOverlay.show .dm-sub{animation:anFade .4s .95s both}
+/* two spotlight beams sweeping across, crossing over the text */
+.dm-beam{position:absolute;top:-30%;left:50%;width:16vw;height:150%;z-index:1;pointer-events:none;
+  transform-origin:50% 0;mix-blend-mode:screen;filter:blur(10px);opacity:.5;
+  background:linear-gradient(to bottom,rgba(220,232,248,.55),rgba(220,232,248,.05) 65%,transparent);
+  clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
+.dm-beam.l{margin-left:-26vw;animation:dmBeamL 4s ease-in-out infinite}
+.dm-beam.r{margin-left:10vw;animation:dmBeamR 4.6s ease-in-out infinite}
+@keyframes dmBeamL{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(14deg)}}
+@keyframes dmBeamR{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-14deg)}}
+.dm-ghost{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;
+  width:min(50vh,460px);height:min(50vh,460px);object-fit:contain;opacity:.1;pointer-events:none}
+.dm-money{position:relative;z-index:2;font-weight:900;font-style:italic;line-height:.95;
+  font-size:clamp(58px,11vw,168px);letter-spacing:-2px;
+  color:#e7edf5;text-shadow:0 2px 0 #aeb9c6,0 4px 0 #8b97a6,0 6px 0 #6b7684,0 16px 34px rgba(0,0,0,.75);opacity:0}
+#nmOverlay.show .dm-money{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) .35s both}
+.dm-kicker2{position:relative;z-index:2;color:var(--gold);font-weight:900;letter-spacing:8px;
+  font-size:clamp(18px,2.6vw,34px);opacity:0}
+#nmOverlay.show .dm-kicker2{animation:anFade .4s .7s both}
+.dm-sub{position:relative;z-index:2;color:#c6d2e0;font-weight:800;letter-spacing:2px;
+  font-size:clamp(16px,2vw,24px);opacity:0}
+#nmOverlay.show .dm-sub{animation:anFade .4s .9s both}
 
-/* ---- TOUCHDOWN: hard diagonal team-color wipe + score bug ---- */
-#tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .3s;overflow:hidden;background:#04060a}
+/* ---- TOUCHDOWN (A · Goal-Line Eruption): ball crosses, word erupts up ---- */
+#tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .3s;overflow:hidden;
+  background:radial-gradient(1100px 700px at 50% 120%,
+    color-mix(in srgb,var(--nflOff,#e31837) 60%,#000) 0%, #0a0e15 55%, #04060a 100%)}
 #tdOverlay.show{display:block;opacity:1}
-.td2-wipe{position:absolute;inset:0;
-  background:linear-gradient(160deg,color-mix(in srgb,var(--nflOff,#e31837) 90%,#000),color-mix(in srgb,var(--nflOff,#e31837) 45%,#000));
-  clip-path:polygon(0 0,0 0,-18% 100%,0 100%)}
-#tdOverlay.show .td2-wipe{animation:td2Wipe .5s cubic-bezier(.25,.8,.25,1) both}
-@keyframes td2Wipe{from{clip-path:polygon(0 0,0 0,-18% 100%,0 100%)}
-  to{clip-path:polygon(0 0,118% 0,100% 100%,0 100%)}}
-/* the goal-line flash riding the wipe edge */
-.td2-line{position:absolute;top:-10%;bottom:-10%;width:6px;left:-4%;opacity:0;transform:skewX(-8deg);
-  background:#fff;box-shadow:0 0 24px #fff,0 0 60px rgba(255,255,255,.7)}
-#tdOverlay.show .td2-line{animation:td2Line .55s cubic-bezier(.3,.6,.4,1) both}
-@keyframes td2Line{0%{left:-4%;opacity:1}100%{left:104%;opacity:0}}
-.td2-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+/* field strip along the bottom with the ball rocketing across the goal line */
+.td2-field{position:absolute;left:0;right:0;bottom:0;height:26vh;z-index:1;overflow:hidden;
+  background:linear-gradient(180deg,#0f3a20,#0a2817);border-top:3px solid rgba(255,255,255,.2)}
+.td2-field .ezone{position:absolute;top:0;bottom:0;right:0;width:22%;
+  background:color-mix(in srgb,var(--nflOff,#e31837) 78%,#000)}
+.td2-field .goal{position:absolute;top:0;bottom:0;right:22%;width:5px;background:#fff;
+  box-shadow:0 0 20px #fff}
+.td2-yl{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.35)}
+.td2-ball{position:absolute;top:52%;left:-6%;width:min(5vw,54px);height:min(3.2vw,34px);
+  background:radial-gradient(closest-side,#a9702f,#6e4413);border-radius:50%;transform:translateY(-50%);
+  box-shadow:0 0 16px rgba(255,230,180,.6);border:2px solid #fff}
+#tdOverlay.show .td2-ball{animation:td2Ball .8s cubic-bezier(.3,.5,.3,1) .1s both}
+@keyframes td2Ball{0%{left:-6%}100%{left:84%}}
+.td2-goalflash{position:absolute;top:-20%;bottom:-20%;right:22%;width:8px;background:#fff;opacity:0;
+  box-shadow:0 0 30px #fff,0 0 80px rgba(255,255,255,.8);z-index:2}
+#tdOverlay.show .td2-goalflash{animation:td2Flash .5s ease-out .7s both}
+@keyframes td2Flash{0%{opacity:0;transform:scaleY(.6)}25%{opacity:1;transform:scaleY(1)}100%{opacity:0}}
+.td2-inner{position:relative;z-index:3;height:74vh;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(2vh,18px);text-align:center}
 .td2-title{font-size:clamp(56px,12.5vw,180px);line-height:.9;opacity:0}
-#tdOverlay.show .td2-title{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) .55s both,
-  nfpShine 2.6s linear 1.5s infinite}
+/* erupts UP out of the end zone */
+#tdOverlay.show .td2-title{animation:td2Erupt .6s cubic-bezier(.2,1.05,.3,1) .8s both,
+  nfpShine 2.6s linear 1.9s infinite}
+@keyframes td2Erupt{0%{opacity:0;transform:translateY(60px) scale(.7)}
+  60%{opacity:1;transform:translateY(-8px) scale(1.04)}100%{opacity:1;transform:none}}
 .td2-sub{color:#fff;font-weight:900;letter-spacing:3px;font-size:clamp(17px,2.3vw,28px);opacity:0}
-#tdOverlay.show .td2-sub{animation:anFade .4s .95s both}
+#tdOverlay.show .td2-sub{animation:anFade .4s 1.25s both}
 .td2-bug{display:flex;align-items:center;background:#0d1118;border:1px solid rgba(255,255,255,.16);
   border-radius:12px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.6);opacity:0}
-#tdOverlay.show .td2-bug{animation:anFade .45s 1.15s both}
+#tdOverlay.show .td2-bug{animation:anFade .45s 1.45s both}
 .td2-bug .cell{display:flex;align-items:center;gap:10px;padding:10px 24px;font-weight:900;color:#fff;
   font-size:clamp(20px,2.6vw,34px)}
 .td2-bug .cell.a{border-right:1px solid rgba(255,255,255,.15)}
@@ -1079,50 +1116,60 @@ body.nfl .nfl-dd{display:block}
 .td2-plus{background:var(--gold);color:#08243f;font-weight:900;padding:10px 18px;
   font-size:clamp(18px,2.2vw,28px);align-self:stretch;display:flex;align-items:center}
 
-/* ---- TWO-MINUTE WARNING: TV-timeout slate ---- */
-.tm2-band{position:absolute;left:0;right:0;height:50%}
-.tm2-band.a{top:0;transform:translateY(-101%);
-  background:linear-gradient(180deg,color-mix(in srgb,var(--nflA,#e31837) 80%,#000),color-mix(in srgb,var(--nflA,#e31837) 35%,#000))}
-.tm2-band.h{bottom:0;transform:translateY(101%);
-  background:linear-gradient(0deg,color-mix(in srgb,var(--nflH,#00338d) 80%,#000),color-mix(in srgb,var(--nflH,#00338d) 35%,#000))}
-#tmOverlay.show .tm2-band.a{animation:tm2A .5s cubic-bezier(.2,.85,.25,1) both}
-#tmOverlay.show .tm2-band.h{animation:tm2H .5s cubic-bezier(.2,.85,.25,1) .06s both}
-@keyframes tm2A{from{transform:translateY(-101%)}to{transform:none}}
-@keyframes tm2H{from{transform:translateY(101%)}to{transform:none}}
-.tm2-slab{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;text-align:center;
+/* ---- TWO-MINUTE WARNING (A · Clock Wipe): radial sweep reveal ---- */
+.tm2-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:conic-gradient(from -90deg, #04060a 0turn, #04060a var(--sw,0turn), transparent var(--sw,0turn) 1turn)}
+#tmOverlay.show .tm2-sweep{animation:tm2Sweep 1s linear both}
+@keyframes tm2Sweep{from{--sw:1turn}to{--sw:0turn}}
+@property --sw{syntax:'<angle>';inherits:false;initial-value:0turn}
+.tm2-slab{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;text-align:center;
   background:linear-gradient(180deg,#161c26,#0b0f16);border:1px solid rgba(255,255,255,.16);border-radius:20px;
   padding:min(4vh,34px) min(6vw,70px);box-shadow:0 24px 70px rgba(0,0,0,.7);opacity:0}
-#tmOverlay.show .tm2-slab{animation:tm2Slab .45s cubic-bezier(.2,.9,.3,1) .45s both}
-@keyframes tm2Slab{from{opacity:0;transform:translate(-50%,-46%) scale(.94)}
-  to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+#tmOverlay.show .tm2-slab{animation:anFade .4s .8s both}
+.tm2-ring{position:absolute;left:50%;top:50%;width:min(60vh,520px);height:min(60vh,520px);z-index:0;
+  transform:translate(-50%,-50%);border:3px solid rgba(147,163,184,.35);border-radius:50%;opacity:0}
+#tmOverlay.show .tm2-ring{animation:anFade2 .5s .3s both}
+.tm2-hand{position:absolute;left:50%;top:50%;width:4px;height:min(30vh,260px);z-index:0;
+  background:linear-gradient(180deg,#ffb01f,transparent);transform-origin:50% 100%;
+  transform:translate(-50%,-100%) rotate(0deg);opacity:0}
+#tmOverlay.show .tm2-hand{animation:tm2Hand 1s linear both}
+@keyframes tm2Hand{0%{opacity:.9;transform:translate(-50%,-100%) rotate(0deg)}
+  100%{opacity:.9;transform:translate(-50%,-100%) rotate(-360deg)}}
 .tm2-clock{font-weight:900;font-style:italic;color:#fff;font-size:clamp(80px,15vw,200px);
   line-height:1;letter-spacing:-2px;text-shadow:0 10px 30px rgba(0,0,0,.6)}
 .tm2-title{color:#93a3b8;font-weight:900;letter-spacing:7px;font-size:clamp(16px,2.2vw,28px);margin-top:6px}
 .tm2-recap{color:#c6d2e0;font-weight:800;font-size:clamp(15px,1.9vw,23px);margin-top:10px}
 
-/* ---- TURNOVER: possession-arrow flip on a steel bar ---- */
+/* ---- TURNOVER (A · Ball Snatch): football yanked across the bar ---- */
 .po-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(2.2vh,20px);text-align:center}
 #toOverlay.show .nfp-kick{animation:anFade .4s .2s both}
-.po-bar{display:flex;align-items:center;gap:min(4vw,48px);
-  background:linear-gradient(180deg,#161c26,#0b0f16);border:1px solid rgba(255,255,255,.16);border-radius:18px;
+.po-bar{position:relative;display:flex;align-items:center;justify-content:space-between;
+  width:min(64vw,760px);background:linear-gradient(180deg,#161c26,#0b0f16);
+  border:1px solid rgba(255,255,255,.16);border-radius:18px;
   padding:16px 46px;box-shadow:0 18px 50px rgba(0,0,0,.6);opacity:0}
 #toOverlay.show .po-bar{animation:anFade .4s .35s both}
 .po-bar img{width:min(9vw,88px);height:min(9vw,88px);object-fit:contain}
-.po-arrow{font-weight:900;color:var(--gold);font-size:clamp(42px,6vw,82px);line-height:1;
-  transform:rotate(180deg)}   /* base = pointing LEFT (away ball) */
-#toOverlay.show .po-arrow{animation:poFlipA .7s cubic-bezier(.3,1.25,.4,1) .55s both}
-#toOverlay.show .po-arrow.right{animation:poFlipH .7s cubic-bezier(.3,1.25,.4,1) .55s both}
-@keyframes poFlipA{from{transform:rotate(0)}to{transform:rotate(180deg)}}
-@keyframes poFlipH{from{transform:rotate(180deg)}to{transform:rotate(360deg)}}
+/* the football gets yanked from the losing logo to the recovering one */
+.po-ball{position:absolute;top:50%;font-size:clamp(34px,4.6vw,60px);line-height:1;
+  transform:translateY(-50%);left:14%;opacity:0;z-index:3}
+#toOverlay.show .po-ball{animation:poSnatch .55s cubic-bezier(.6,-0.2,.3,1.5) .6s both}
+#toOverlay.show .po-ball.toHome{animation:poSnatchH .55s cubic-bezier(.6,-0.2,.3,1.5) .6s both}
+@keyframes poSnatch{0%{opacity:1;left:80%}18%{left:82%}100%{opacity:1;left:14%}}   /* to away (left) */
+@keyframes poSnatchH{0%{opacity:1;left:14%}18%{left:12%}100%{opacity:1;left:80%}} /* to home (right) */
+/* motion streak behind the ball */
+.po-streak{position:absolute;top:50%;height:4px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  transform:translateY(-50%);left:14%;right:14%;opacity:0;z-index:2}
+#toOverlay.show .po-streak{animation:poStreak .5s ease-out .65s both}
+@keyframes poStreak{0%{opacity:0}30%{opacity:.85}100%{opacity:0}}
 .po-title{font-weight:900;font-style:italic;line-height:.92;font-size:clamp(50px,10vw,140px);
   color:var(--nflDef,#fff);text-shadow:0 8px 26px rgba(0,0,0,.7);opacity:0}
-#toOverlay.show .po-title{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) .85s both}
+#toOverlay.show .po-title{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) 1.1s both}
 .po-plus{background:var(--gold);color:#08243f;font-weight:900;border-radius:10px;
   padding:6px 20px;font-size:clamp(22px,3vw,40px);opacity:0}
-#toOverlay.show .po-plus{animation:anFade .4s 1.25s both}
+#toOverlay.show .po-plus{animation:anFade .4s 1.45s both}
 .po-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,24px);opacity:0}
-#toOverlay.show .po-sub{animation:anFade .4s 1.3s both}
+#toOverlay.show .po-sub{animation:anFade .4s 1.5s both}
 
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
@@ -1478,8 +1525,11 @@ body.nfl .nfl-dd{display:block}
 
 <!-- ============ NFL BROADCAST PACKAGE OVERLAYS ============ -->
 <div id="koOverlay">
-  <div class="ko2-half a"><img class="ko2-logo a" id="koA" alt=""></div>
-  <div class="ko2-half h"><img class="ko2-logo h" id="koH" alt=""></div>
+  <div class="ko-tunnel"></div>
+  <div class="ko-glow"></div>
+  <div class="ko-smoke s1"></div>
+  <div class="ko-smoke s2"></div>
+  <div class="ko-logos"><img id="koA" alt=""><span class="at">@</span><img id="koH" alt=""></div>
   <div class="ko2-center">
     <div class="nfp-kick" id="koMatch"></div>
     <div class="ko2-title nfp-chrome">KICKOFF</div>
@@ -1487,39 +1537,49 @@ body.nfl .nfl-dd{display:block}
   </div>
 </div>
 <div id="rzOverlay"><div class="rz2-inner">
-  <div class="nfp-kick" id="rzKick">OFFENSE DRIVE</div>
   <div class="rz2-title">RED ZONE</div>
-  <div class="rz2-card">
+  <div class="rz2-card"><div class="rz2-vp">
     <svg viewBox="0 0 620 150">
-      <rect x="0" y="20" width="500" height="110" fill="#123f22"/>
+      <rect class="fieldbg" x="0" y="20" width="500" height="110"/>
       <rect class="ez" x="500" y="20" width="120" height="110"/>
       <line class="hash" x1="0" y1="52" x2="500" y2="52"/>
       <line class="hash" x1="0" y1="98" x2="500" y2="98"/>
-      <line class="yl" x1="100" y1="20" x2="100" y2="130"/>
-      <line class="yl" x1="200" y1="20" x2="200" y2="130"/>
-      <line class="yl" x1="300" y1="20" x2="300" y2="130"/>
-      <line class="yl" x1="400" y1="20" x2="400" y2="130"/>
+      <line class="yl" x1="50" y1="20" x2="50" y2="130"/>
+      <line class="yl" x1="150" y1="20" x2="150" y2="130"/>
+      <line class="yl" x1="250" y1="20" x2="250" y2="130"/>
+      <line class="yl" x1="350" y1="20" x2="350" y2="130"/>
+      <line class="yl" x1="420" y1="20" x2="420" y2="130"/>
+      <line class="yl" x1="460" y1="20" x2="460" y2="130"/>
       <line class="gl" x1="500" y1="20" x2="500" y2="130"/>
-      <text class="num" x="100" y="83" text-anchor="middle">20</text>
-      <text class="num" x="300" y="83" text-anchor="middle">10</text>
-      <text class="eztxt" x="560" y="82" text-anchor="middle" transform="rotate(-90 560 78)">END ZONE</text>
-      <g id="rzBallG" transform="translate(140 75)">
-        <ellipse class="ball" rx="16" ry="10"/>
-        <line x1="-6" y1="0" x2="6" y2="0" stroke="#fff" stroke-width="2"/>
-        <text id="rzBallYd" y="-20" text-anchor="middle" fill="#fff" font-weight="900" font-size="22"></text>
+      <text class="num" x="420" y="80" text-anchor="middle">20</text>
+      <text class="num" x="460" y="80" text-anchor="middle">10</text>
+      <text class="eztxt" x="560" y="80" text-anchor="middle" transform="rotate(-90 560 78)">END ZONE</text>
+      <g id="rzBallG" transform="translate(460 75)">
+        <circle id="rzPing" r="12" fill="none" stroke="#fff" stroke-width="2"/>
+        <ellipse class="ball" rx="11" ry="7"/>
+        <line x1="-4" y1="0" x2="4" y2="0" stroke="#fff" stroke-width="1.6"/>
+        <text id="rzBallYd" y="-16" text-anchor="middle" fill="#fff" font-weight="900" font-size="16"></text>
       </g>
     </svg>
-  </div>
+  </div></div>
   <div class="rz2-sub" id="rzSub"></div>
 </div></div>
 <div id="nmOverlay"><div class="dm-inner">
-  <div class="nfp-kick" id="dmKick">3RD DOWN</div>
-  <div class="dm-card"><div class="t" id="dmTxt">3RD &amp; 7</div></div>
+  <div class="dm-beam l"></div>
+  <div class="dm-beam r"></div>
+  <img class="dm-ghost" id="dmGhost" alt="">
+  <div class="dm-kicker2">MONEY DOWN</div>
+  <div class="dm-money" id="dmTxt">3RD &amp; 7</div>
   <div class="dm-sub" id="dmSub"></div>
 </div></div>
 <div id="tdOverlay">
-  <div class="td2-wipe"></div>
-  <div class="td2-line"></div>
+  <div class="td2-field">
+    <div class="td2-yl" style="left:20%"></div><div class="td2-yl" style="left:40%"></div>
+    <div class="td2-yl" style="left:60%"></div>
+    <div class="goal"></div><div class="ezone"></div>
+    <div class="td2-ball"></div>
+  </div>
+  <div class="td2-goalflash"></div>
   <div class="td2-inner">
     <div class="td2-title nfp-chrome">TOUCHDOWN</div>
     <div class="td2-sub" id="tdSub"></div>
@@ -1531,19 +1591,21 @@ body.nfl .nfl-dd{display:block}
   </div>
 </div>
 <div id="tmOverlay">
-  <div class="tm2-band a"></div>
-  <div class="tm2-band h"></div>
+  <div class="tm2-ring"></div>
+  <div class="tm2-hand"></div>
   <div class="tm2-slab">
     <div class="tm2-clock">2:00</div>
     <div class="tm2-title">TWO-MINUTE WARNING</div>
     <div class="tm2-recap" id="tmRecap"></div>
   </div>
+  <div class="tm2-sweep"></div>
 </div>
 <div id="toOverlay"><div class="po-inner">
   <div class="nfp-kick" id="poKick">TURNOVER</div>
   <div class="po-bar">
     <img id="poA" alt="">
-    <div class="po-arrow" id="poArrow">➤</div>
+    <div class="po-streak"></div>
+    <div class="po-ball" id="poBall">🏈</div>
     <img id="poH" alt="">
   </div>
   <div class="po-title" id="poTitle">TAKEAWAY</div>
@@ -2814,11 +2876,10 @@ function triggerRedZone(info){
   info=info||{};
   if(takeoverBusy())return; rzPlaying=true; hideWalkup();
   document.documentElement.style.setProperty('--nflOff',(info.team&&info.team.colorHex)||"#e31837");
-  $("#rzKick").textContent=(((info.team&&info.team.name)||"OFFENSE")+" DRIVE").toUpperCase();
-  const y=Math.max(1,Math.min(24,Math.round(info.yards||18)));
-  $("#rzBallG").setAttribute("transform",`translate(${500-y*20} 75)`);   // 20px per yard on the diagram
+  const y=Math.max(1,Math.min(20,Math.round(info.yards||18)));
+  $("#rzBallG").setAttribute("transform",`translate(${500-y*4} 75)`);   // last 20 yds = 420→500 (4px/yd)
   $("#rzBallYd").textContent=y;
-  $("#rzSub").textContent=`${y} YARD${y>1?"S":""} FROM THE GOAL LINE`;
+  $("#rzSub").textContent=(((info.team&&info.team.name)||"OFFENSE")+` DRIVE • ${y} YARD${y>1?"S":""} TO THE END ZONE`).toUpperCase();
   rzOv.classList.remove("show"); void rzOv.offsetWidth; rzOv.classList.add("show");
   clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,6000);
 }
@@ -2828,7 +2889,7 @@ function triggerNoise(info){   // 3rd-down chain-gang marker
   if(takeoverBusy())return; nmPlaying=true; hideWalkup();
   const def=info.defTeam||{};
   document.documentElement.style.setProperty('--nflDef',def.colorHex||"#00338d");
-  $("#dmKick").textContent="3RD DOWN";
+  $("#dmGhost").src=def.logo||"";
   $("#dmTxt").textContent=(info.dd||"3RD & LONG").toUpperCase();
   $("#dmSub").textContent=((def.name||"DEFENSE")+" DEFENSE ON THE FIELD").toUpperCase();
   nmOv.classList.remove("show"); void nmOv.offsetWidth; nmOv.classList.add("show");
@@ -2870,7 +2931,7 @@ function triggerTurnover(info){
   $("#poKick").textContent=(info.kind||"TURNOVER").replace(/!/g,"");
   $("#poTitle").textContent=info.pickSix?"PICK SIX":"TAKEAWAY";
   $("#poA").src=G.away.logo||""; $("#poH").src=G.home.logo||"";
-  $("#poArrow").classList.toggle("right",toHome);
+  $("#poBall").classList.toggle("toHome",toHome);   // ball snatched toward the recovering side
   $("#poPlus").style.display=info.pickSix?"":"none";
   $("#poSub").textContent=((rec.name||"")+" BALL").toUpperCase();
   toOv.classList.remove("show"); void toOv.offsetWidth; toOv.classList.add("show");
