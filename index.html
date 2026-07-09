@@ -944,6 +944,155 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .lu-row .pos{flex:0 0 auto;color:var(--gold);font-weight:900;letter-spacing:1px;font-size:clamp(13px,1.3vw,16px)}
 @media (max-width:760px){ .lu-cols{flex-direction:column;align-items:center} .lu-col{width:92vw} }
 
+/* =================== NFL MODE =================== */
+.lgtabs{display:flex;gap:10px;margin-bottom:14px}
+.lgtabs button{background:var(--navy2);border:1px solid var(--line);border-radius:12px;
+  padding:10px 28px;font-weight:900;font-size:16px;letter-spacing:1px;color:var(--dim)}
+.lgtabs button.on{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;border-color:transparent}
+body.nfl .diamond,body.nfl .count,body.nfl .outs{display:none}
+.nfl-dd{display:none;color:var(--gold);font-weight:800;letter-spacing:1px;
+  font-size:clamp(14px,1.6vw,20px);text-align:center}
+body.nfl .nfl-dd{display:block}
+#mlbBtns,#nflBtns{display:contents}
+
+/* ---- kickoff: chrome coin on the turf ---- */
+#koOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .4s;overflow:hidden;
+  background:linear-gradient(180deg,#0c4020 0%,#0a3319 60%,#052012 100%)}
+#koOverlay.show{display:block;opacity:1}
+#koOverlay::before{content:"";position:absolute;inset:0;opacity:.16;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent 0 90px,rgba(255,255,255,.5) 90px 94px)}
+.ko-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);text-align:center}
+.ko-kick{color:#d7e6dd;font-weight:900;letter-spacing:9px;font-size:clamp(14px,1.9vw,23px);opacity:0}
+#koOverlay.show .ko-kick{animation:anFade .5s .2s both}
+.ko-coin{width:min(22vh,190px);height:min(22vh,190px);border-radius:50%;position:relative;opacity:0;
+  background:conic-gradient(from 200deg,#8e9aa8,#e8eef4 25%,#9aa7b6 45%,#f4f8fc 70%,#8e9aa8);
+  box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 26px rgba(255,255,255,.5);
+  display:grid;place-items:center;font-size:clamp(40px,6vw,74px)}
+#koOverlay.show .ko-coin{animation:koDrop .5s cubic-bezier(.2,1.2,.4,1) .3s both,
+  koFlip 1.1s cubic-bezier(.3,1,.4,1) .9s both}
+@keyframes koDrop{from{opacity:0;transform:translateY(-90px)}to{opacity:1;transform:none}}
+@keyframes koFlip{0%{transform:rotateX(0)}70%{transform:rotateX(900deg)}85%{transform:rotateX(1050deg)}100%{transform:rotateX(1080deg)}}
+.ko-title{font-weight:900;line-height:.95;font-size:clamp(52px,10vw,140px);
+  background:linear-gradient(180deg,#fff,#c9d6e2 55%,#8e9aa8);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 8px 26px rgba(0,0,0,.7));opacity:0}
+#koOverlay.show .ko-title{animation:koSlam .45s cubic-bezier(.2,1.1,.3,1) 2.05s both}
+@keyframes koSlam{from{opacity:0;transform:scale(2)}to{opacity:1;transform:scale(1)}}
+.ko-sub{color:#d7e6dd;font-weight:800;font-size:clamp(16px,2vw,24px);opacity:0}
+#koOverlay.show .ko-sub{animation:anFade .5s 2.5s both}
+
+/* ---- red zone: full alert ---- */
+#rzOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:radial-gradient(1000px 640px at 50% 20%,#6b0f14 0%,#3d060a 55%,#160204 100%)}
+#rzOverlay.show{display:block;opacity:1;animation:rzPulse 1.1s ease-in-out infinite}
+@keyframes rzPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.22)}}
+#rzOverlay::before{content:"";position:absolute;inset:-25%;opacity:.13;pointer-events:none;
+  background:repeating-linear-gradient(135deg,#ff2733 0 26px,transparent 26px 78px);
+  animation:anStripes 1.4s linear infinite}
+.rz-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,16px);text-align:center}
+.rz-kick{color:#ffb3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#rzOverlay.show .rz-kick{animation:anFade .4s .15s both}
+.rz-title{font-weight:900;line-height:.92;font-size:clamp(56px,11.5vw,160px);color:#ff2733;
+  -webkit-text-stroke:3px #fff;text-shadow:0 0 34px rgba(255,39,51,.8),0 10px 30px rgba(0,0,0,.8);opacity:0}
+#rzOverlay.show .rz-title{animation:koSlam .4s cubic-bezier(.2,1.1,.3,1) .35s both,
+  rzBlink 1.1s steps(1) 1s infinite}
+@keyframes rzBlink{0%{opacity:1}55%{opacity:.55}100%{opacity:1}}
+.rz-sub{color:#fff;font-weight:900;letter-spacing:2px;font-size:clamp(17px,2.3vw,28px);opacity:0}
+#rzOverlay.show .rz-sub{animation:anFade .4s .8s both}
+
+/* ---- 3rd-down noise meter ---- */
+#nmOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .3s;overflow:hidden;background:#050505}
+#nmOverlay.show{display:block;opacity:1}
+.nm-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2.4vh,22px);text-align:center}
+.nm-kick{color:#9aa4b1;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#nmOverlay.show .nm-kick{animation:anFade .4s .15s both}
+.nm-title{font-weight:900;font-size:clamp(46px,9vw,120px);line-height:.95;color:#fff;opacity:0}
+#nmOverlay.show .nm-title{animation:koSlam .4s .3s both, nmShake .5s ease-in-out 2.2s infinite}
+@keyframes nmShake{0%,100%{transform:rotate(0)}25%{transform:rotate(-1.4deg)}75%{transform:rotate(1.4deg)}}
+.nm-meter{width:min(72vw,900px);height:min(9vh,72px);border:3px solid #39424e;border-radius:14px;
+  padding:6px;opacity:0;background:#0c0f13}
+#nmOverlay.show .nm-meter{animation:anFade .4s .5s both}
+.nm-fill{height:100%;width:0;border-radius:8px;
+  background:
+    repeating-linear-gradient(90deg,transparent 0 22px,rgba(0,0,0,.55) 22px 28px),
+    linear-gradient(90deg,#2ee56b 0%,#ffe03a 55%,#ff8a1f 75%,#ff2733 100%)}
+#nmOverlay.show .nm-fill{animation:nmFill 2.4s cubic-bezier(.3,.7,.4,1) .7s both,
+  nmJitter .35s linear 3.1s infinite}
+@keyframes nmFill{from{width:0}to{width:100%}}
+@keyframes nmJitter{0%,100%{width:100%}50%{width:96%}}
+.nm-db{display:flex;align-items:baseline;gap:8px;opacity:0}
+#nmOverlay.show .nm-db{animation:anFade .4s .8s both}
+.nm-db .v{font-weight:900;font-size:clamp(48px,7vw,96px);color:#ffe03a;line-height:1}
+.nm-db .u{font-weight:900;color:#9aa4b1;font-size:clamp(18px,2.2vw,28px)}
+.nm-sub{color:#fff;font-weight:900;letter-spacing:3px;font-size:clamp(18px,2.3vw,28px);opacity:0}
+#nmOverlay.show .nm-sub{animation:anFade .4s 1s both, rzBlink .9s steps(1) 2s infinite}
+
+/* ---- touchdown: six points, team-color light show ---- */
+#tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:linear-gradient(160deg, color-mix(in srgb,var(--tdc,#bf0d3e) 88%,#000), color-mix(in srgb,var(--tdc,#bf0d3e) 40%,#000))}
+#tdOverlay.show{display:block;opacity:1}
+#tdOverlay::before{content:"";position:absolute;left:50%;top:50%;width:200vmax;height:200vmax;
+  margin:-100vmax;pointer-events:none;animation:tdRays 16s linear infinite;
+  background:conic-gradient(rgba(255,255,255,.13) 0 14deg,transparent 14deg 46deg,
+    rgba(255,255,255,.13) 46deg 60deg,transparent 60deg 104deg,
+    rgba(255,255,255,.13) 104deg 118deg,transparent 118deg 166deg,
+    rgba(255,255,255,.13) 166deg 180deg,transparent 180deg 224deg,
+    rgba(255,255,255,.13) 224deg 238deg,transparent 238deg 284deg,
+    rgba(255,255,255,.13) 284deg 298deg,transparent 298deg 360deg)}
+@keyframes tdRays{to{transform:rotate(360deg)}}
+.td-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(1.8vh,16px);text-align:center}
+.td-posts{width:min(15vw,130px);opacity:0}
+#tdOverlay.show .td-posts{animation:anFade .4s .2s both}
+.td-posts path{stroke:#fff;stroke-width:6;fill:none;stroke-linecap:round}
+.td-title{font-weight:900;line-height:.9;font-size:clamp(54px,11.5vw,164px);color:#fff;
+  text-shadow:0 0 30px rgba(255,255,255,.4),0 12px 34px rgba(0,0,0,.7);opacity:0}
+#tdOverlay.show .td-title{animation:tdSlam .5s cubic-bezier(.2,1.15,.3,1) .35s both}
+@keyframes tdSlam{0%{opacity:0;transform:scale(2.4)}60%{opacity:1;transform:scale(.96)}100%{opacity:1;transform:scale(1)}}
+.td-six{font-weight:900;color:var(--gold);font-size:clamp(34px,5vw,66px);opacity:0;
+  text-shadow:0 4px 18px rgba(0,0,0,.6)}
+#tdOverlay.show .td-six{animation:anFade .4s 1s both}
+.td-sub{color:#fff;font-weight:800;font-size:clamp(17px,2.2vw,27px);opacity:0}
+#tdOverlay.show .td-sub{animation:anFade .4s 1.25s both}
+
+/* ---- two-minute warning: the clock ---- */
+#tmOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:radial-gradient(900px 600px at 50% 30%,#1a1206 0%,#0a0703 60%,#030201 100%)}
+#tmOverlay.show{display:block;opacity:1}
+.tm-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2.2vh,20px);text-align:center}
+.tm-clock{font-family:Consolas,'Courier New',monospace;font-weight:700;line-height:1;
+  font-size:clamp(90px,18vw,240px);color:#ffb01f;opacity:0;
+  text-shadow:0 0 26px rgba(255,176,31,.75),0 0 70px rgba(255,176,31,.35)}
+#tmOverlay.show .tm-clock{animation:anFade .4s .25s both, tmBlink 1s steps(1) 1s infinite}
+@keyframes tmBlink{0%{opacity:1}50%{opacity:.72}100%{opacity:1}}
+.tm-title{font-weight:900;letter-spacing:8px;color:#fff;font-size:clamp(22px,3.4vw,44px);opacity:0}
+#tmOverlay.show .tm-title{animation:anFade .5s .7s both}
+.tm-sub{color:#c8b98f;font-weight:800;font-size:clamp(16px,2vw,23px);opacity:0}
+#tmOverlay.show .tm-sub{animation:anFade .5s 1s both}
+
+/* ---- turnover: broadcast glitch ---- */
+#toOverlay{position:fixed;inset:0;z-index:46;display:none;opacity:0;transition:opacity .3s;overflow:hidden;background:#04060a}
+#toOverlay.show{display:block;opacity:1}
+#toOverlay::before{content:"";position:absolute;inset:0;opacity:.09;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(0,255,240,.5) 5px 6px)}
+.to-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);text-align:center}
+.to-arrows{font-weight:900;font-size:clamp(50px,8vw,110px);color:#22e6c8;opacity:0;line-height:1}
+#toOverlay.show .to-arrows{animation:anFade .3s .15s both, toSpin 1.1s cubic-bezier(.3,1.2,.4,1) .3s both}
+@keyframes toSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.to-title{font-weight:900;line-height:.92;font-size:clamp(52px,10.5vw,150px);color:#fff;opacity:0}
+#toOverlay.show .to-title{animation:koSlam .35s .45s both, toGlitch .9s steps(2) 1s infinite}
+@keyframes toGlitch{0%,100%{text-shadow:4px 0 #22e6c8,-4px 0 #ff3df0}
+  25%{text-shadow:-5px 2px #22e6c8,5px -2px #ff3df0}
+  50%{text-shadow:3px -2px #22e6c8,-3px 2px #ff3df0}
+  75%{text-shadow:-2px 0 #22e6c8,2px 0 #ff3df0}}
+.to-sub{color:#22e6c8;font-weight:900;letter-spacing:3px;font-size:clamp(17px,2.2vw,27px);opacity:0}
+#toOverlay.show .to-sub{animation:anFade .4s 1s both}
+
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
@@ -966,6 +1115,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     </div>
   </div>
   <p class="tag">Pick tonight's game. We'll follow the live scoreboard on your TV — and the instant someone goes deep, the Home Run cinematic takes over the screen. 💥</p>
+
+  <div class="lgtabs">
+    <button id="lgMLB" class="on">⚾ MLB</button>
+    <button id="lgNFL">🏈 NFL</button>
+  </div>
 
   <div class="datebar">
     <button id="prevDay">◀</button>
@@ -1023,6 +1177,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
           </div>
           <div class="count"><span>B <b id="balls">0</b></span><span>S <b id="strikes">0</b></span></div>
           <div class="outs" id="outs"></div>
+          <div class="nfl-dd" id="nflDD"></div>
         </div>
         <div class="team" id="teamHome">
           <img class="crest" id="homeCrest" alt="">
@@ -1035,16 +1190,27 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     <div class="linescore" id="lineTxt"></div>
     <div class="amb" id="ambient"><span class="amb-lb" id="ambLb"></span><span class="amb-vl" id="ambVl"></span></div>
     <div class="controls">
-      <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
-      <button class="hrbtn" id="hr2Btn">💥 HOME RUN V2</button>
-      <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
-      <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
-      <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
-      <button class="ghostbtn" id="lineupBtn">📋 Lineups</button>
-      <button class="ghostbtn" id="stretchBtn">🧘 7th Stretch</button>
-      <button class="ghostbtn" id="rallyBtn">📣 Rally</button>
-      <button class="ghostbtn" id="finalBtn">🏆 Final</button>
-      <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
+      <span id="mlbBtns">
+        <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
+        <button class="hrbtn" id="hr2Btn">💥 HOME RUN V2</button>
+        <button class="ghostbtn" id="anthemBtn">🎤 Anthem / First Pitch</button>
+        <button class="ghostbtn" id="walkupBtn">🎬 Walk-Up</button>
+        <button class="ghostbtn" id="kBtn">⚡ Strikeout</button>
+        <button class="ghostbtn" id="lineupBtn">📋 Lineups</button>
+        <button class="ghostbtn" id="stretchBtn">🧘 7th Stretch</button>
+        <button class="ghostbtn" id="rallyBtn">📣 Rally</button>
+        <button class="ghostbtn" id="finalBtn">🏆 Final</button>
+        <button class="ghostbtn hidden" id="testBtn">▶ Preview Animation</button>
+      </span>
+      <span id="nflBtns" class="hidden">
+        <button class="hrbtn" id="tdBtn">🏈 TOUCHDOWN</button>
+        <button class="ghostbtn" id="koBtn">🪙 Kickoff</button>
+        <button class="ghostbtn" id="rzBtn">🟥 Red Zone</button>
+        <button class="ghostbtn" id="nmBtn">📢 Noise Meter</button>
+        <button class="ghostbtn" id="tmBtn">⏱ 2-Minute</button>
+        <button class="ghostbtn" id="toBtn">🔄 Turnover</button>
+        <button class="ghostbtn" id="nfBtn">🏆 Final</button>
+      </span>
     </div>
     <div class="hint" id="boardHint"></div>
   </div>
@@ -1280,6 +1446,42 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   </div>
 </div>
 
+<!-- ============ NFL OVERLAYS ============ -->
+<div id="koOverlay"><div class="ko-inner">
+  <div class="ko-kick">GAME ON</div>
+  <div class="ko-coin">🏈</div>
+  <div class="ko-title">KICKOFF!</div>
+  <div class="ko-sub" id="koSub"></div>
+</div></div>
+<div id="rzOverlay"><div class="rz-inner">
+  <div class="rz-kick" id="rzKick">DRIVE ALERT</div>
+  <div class="rz-title">RED&nbsp;ZONE</div>
+  <div class="rz-sub" id="rzSub"></div>
+</div></div>
+<div id="nmOverlay"><div class="nm-inner">
+  <div class="nm-kick" id="nmKick">3RD DOWN</div>
+  <div class="nm-title">NOISE&nbsp;METER</div>
+  <div class="nm-meter"><div class="nm-fill"></div></div>
+  <div class="nm-db"><span class="v" id="nmDb">0</span><span class="u">dB</span></div>
+  <div class="nm-sub">GET&nbsp;LOUD!</div>
+</div></div>
+<div id="tdOverlay"><div class="td-inner">
+  <svg class="td-posts" viewBox="0 0 100 90"><path d="M50 88 L50 46 M20 6 L20 46 L80 46 L80 6"/></svg>
+  <div class="td-title">TOUCHDOWN</div>
+  <div class="td-six">+6</div>
+  <div class="td-sub" id="tdSub"></div>
+</div></div>
+<div id="tmOverlay"><div class="tm-inner">
+  <div class="tm-clock">2:00</div>
+  <div class="tm-title">TWO-MINUTE WARNING</div>
+  <div class="tm-sub" id="tmSub"></div>
+</div></div>
+<div id="toOverlay"><div class="to-inner">
+  <div class="to-arrows">⇄</div>
+  <div class="to-title" id="toTitle">TURNOVER!</div>
+  <div class="to-sub" id="toSub"></div>
+</div></div>
+
 <div id="toast"></div>
 
 <script>
@@ -1407,6 +1609,34 @@ function playKSequence(){
   if(!AC||!audioOn)return; audioResume();
   playPunch(.12); playPunch(.32); playPunch(.6); playZap(.62);
 }
+/* red-zone two-tone alarm */
+function playAlarm(){
+  if(!AC||!audioOn)return; audioResume();
+  const t=AC.currentTime;
+  for(let i=0;i<4;i++){
+    const o=AC.createOscillator(); o.type="square";
+    o.frequency.setValueAtTime(i%2?620:840,t+i*.28);
+    const g=AC.createGain();
+    g.gain.setValueAtTime(.13,t+i*.28); g.gain.exponentialRampToValueAtTime(.001,t+i*.28+.22);
+    o.connect(g); g.connect(masterGain); o.start(t+i*.28); o.stop(t+i*.28+.24);
+  }
+}
+/* two-minute-warning clock ticks */
+function playTicks(){
+  if(!AC||!audioOn)return; audioResume();
+  const t=AC.currentTime;
+  for(let i=0;i<4;i++){
+    const o=AC.createOscillator(); o.type="square"; o.frequency.value=1400;
+    const g=AC.createGain();
+    g.gain.setValueAtTime(.11,t+i*.5); g.gain.exponentialRampToValueAtTime(.001,t+i*.5+.07);
+    o.connect(g); g.connect(masterGain); o.start(t+i*.5); o.stop(t+i*.5+.08);
+  }
+}
+/* turnover chaos hit */
+function playTurnoverSfx(){
+  if(!AC||!audioOn)return; audioResume();
+  playZap(0); playPunch(.1); playZap(.4);
+}
 
 /* ---------- team brand colors (fallback = MLB navy) ---------- */
 const TEAM_COLOR={108:"#ba0021",109:"#a71930",110:"#df4601",111:"#bd3039",112:"#0e3386",
@@ -1432,6 +1662,7 @@ function dateLabel(d){
   return nice;
 }
 async function loadSchedule(){
+  if(LEAGUE==="nfl")return loadScheduleNFL();
   $("#dlabel").textContent=dateLabel(curDate);
   const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
   try{
@@ -1507,7 +1738,9 @@ function showSetup(){
   loadSchedule();
 }
 function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
+  if(nflPoll){clearInterval(nflPoll);nflPoll=null;} if(nflDemoTimer){clearInterval(nflDemoTimer);nflDemoTimer=null;}
   if(typeof stopAmbient==="function")stopAmbient();
+  ["endKickoff","endRedZone","endNoise","endTouchdown","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(typeof endAnthem==="function")endAnthem();
   if(typeof endK==="function")endK();
   if(typeof endHR2==="function")endHR2();
@@ -1589,6 +1822,8 @@ function startLiveGame(g){
   lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
   LIVE={batter:null, lastHR:null, lastK:null, box:null};
   stretchDone=false; rallyKey=""; finalDone=false; lineupDone=false;
+  $("#mlbBtns").classList.remove("hidden"); $("#nflBtns").classList.add("hidden");
+  document.querySelector("#board .inning .lbl").textContent="INNING";
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 REPLAY LAST HR";
   $("#hr2Btn").textContent="💥 LAST HR (V2)";
@@ -1738,6 +1973,8 @@ function startDemo(){
   G.away={...DEMO_TEAMS[0],score:0};
   G.home={...DEMO_TEAMS[1],score:0};
   G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
+  $("#mlbBtns").classList.remove("hidden"); $("#nflBtns").classList.add("hidden");
+  document.querySelector("#board .inning .lbl").textContent="INNING";
   $("#hrBtn").classList.remove("hidden");
   $("#hrBtn").textContent="💥 HIT A HOME RUN";
   $("#hr2Btn").textContent="💥 HOME RUN V2";
@@ -2305,7 +2542,8 @@ async function replayLastHR(fn){
    7TH-INNING STRETCH / LATE-GAME RALLY / FINAL & WALK-OFF
    ============================================================ */
 /* one central guard: no takeover ever stacks on another */
-function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying;}
+function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -2352,7 +2590,7 @@ function triggerFinal(info){
   const tie=aw.score===hm.score;
   const winner=info.winner||(hm.score>aw.score?hm:aw);
   const loser=(winner===hm)?aw:hm;
-  $("#fCrest").src=winner.id?logoURL(winner.id):transparentPx();
+  $("#fCrest").src=teamLogo(winner);
   $("#fKick").textContent="FINAL";
   fOv.classList.toggle("walkoff",!!(info.walkoff&&!tie));   // red ribbon on the medallion
   $("#fTitle").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
@@ -2404,6 +2642,287 @@ function triggerLineup(box){
 }
 function endLineup(){ clearTimeout(triggerLineup._t); luOv.classList.remove("show"); lineupPlaying=false; }
 
+/* ============================================================
+   NFL MODE — ESPN key-less feed + 7 jumbotron moments
+   (kickoff, red zone, 3rd-down noise meter, touchdown,
+    two-minute warning, turnover/pick-six, final)
+   ============================================================ */
+let LEAGUE="mlb";
+const ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl";
+let nflPoll=null, nflDemoTimer=null, nflPk=null;
+let NG={q:1,clock:"15:00",sec:900,down:1,dist:10,ytez:75,posHome:false,dd:""};
+let NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:false};
+function teamLogo(t){return (t&&t.logo)||((t&&t.id&&!t.colorHex)?logoURL(t.id):transparentPx());}
+function setLeague(l){
+  LEAGUE=l;
+  document.body.classList.toggle("nfl",l==="nfl");
+  $("#lgMLB").classList.toggle("on",l==="mlb");
+  $("#lgNFL").classList.toggle("on",l==="nfl");
+  loadSchedule();
+}
+async function loadScheduleNFL(){
+  $("#dlabel").textContent=dateLabel(curDate);
+  const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
+  try{
+    const ymdc=`${curDate.getFullYear()}${pad(curDate.getMonth()+1)}${pad(curDate.getDate())}`;
+    const r=await fetch(`${ESPN}/scoreboard?dates=${ymdc}`);
+    const j=await r.json();
+    const evs=j.events||[];
+    if(!evs.length){box.innerHTML='<div class="empty">No NFL games on this date (season runs Sep–Feb).<br>Try another day, or run the Demo Game above.</div>';return;}
+    box.innerHTML="";
+    evs.forEach(ev=>box.appendChild(nflGameCard(ev)));
+  }catch(e){box.innerHTML='<div class="empty">Couldn\'t reach the ESPN feed.<br>Check your connection, or run the Demo Game above.</div>';}
+}
+function nflTeamOf(c){
+  const t=(c&&c.team)||{};
+  return {id:t.id,abbr:t.abbreviation||"TM",name:t.shortDisplayName||t.displayName||"Team",
+    score:parseInt((c&&c.score)||"0",10)||0,
+    logo:t.logo||(t.logos&&t.logos[0]&&t.logos[0].href)||"",
+    colorHex:t.color?("#"+t.color):"#0a2a5c"};
+}
+function nflGameCard(ev){
+  const comp=(ev.competitions&&ev.competitions[0])||{};
+  const cs=comp.competitors||[];
+  const away=nflTeamOf(cs.find(c=>c.homeAway==="away")||cs[1]);
+  const home=nflTeamOf(cs.find(c=>c.homeAway==="home")||cs[0]);
+  const st=(ev.status&&ev.status.type)||{};
+  const el=document.createElement("button"); el.className="gcard";
+  let mid;
+  if(st.state==="in")mid=`<div class="gmid"><div class="st live">● LIVE</div><div class="sc">${away.score} - ${home.score}</div><div class="tm">${st.shortDetail||""}</div></div>`;
+  else if(st.state==="post")mid=`<div class="gmid"><div class="st final">FINAL</div><div class="sc">${away.score} - ${home.score}</div></div>`;
+  else{const t=new Date(ev.date).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+    mid=`<div class="gmid"><div class="vs">@</div><div class="tm">${t}</div></div>`;}
+  el.innerHTML=`<div class="gteam away"><img src="${away.logo}" alt=""><div><div class="nm">${away.name}</div><div class="rec"></div></div></div>${mid}
+    <div class="gteam home"><div><div class="nm">${home.name}</div><div class="rec"></div></div><img src="${home.logo}" alt=""></div>`;
+  el.onclick=()=>startLiveGameNFL(ev.id,away,home);
+  return el;
+}
+function renderBoardNFL(){
+  $("#awayCrest").src=G.away.logo||transparentPx();
+  $("#homeCrest").src=G.home.logo||transparentPx();
+  $("#awayAbbr").textContent=G.away.abbr; $("#homeAbbr").textContent=G.home.abbr;
+  $("#awayFull").textContent=G.away.name; $("#homeFull").textContent=G.home.name;
+  $("#awayScore").textContent=G.away.score; $("#homeScore").textContent=G.home.score;
+  $("#teamAway").classList.toggle("batting",!NG.posHome);   // possession glow
+  $("#teamHome").classList.toggle("batting",NG.posHome);
+  $("#inHalf").textContent=NG.clock||"";
+  $("#inNum").textContent=NG.q<=4?("Q"+NG.q):"OT";
+  document.querySelector("#board .inning .lbl").textContent="QUARTER";
+  $("#nflDD").textContent=NG.dd||"";
+}
+function fmtClock(s){return Math.floor(s/60)+":"+pad(s%60);}
+function clockSecs(c){const m=/^(\d+):(\d\d)/.exec(c||"");return m?(+m[1]*60+ +m[2]):null;}
+function startDemoNFL(){
+  MODE="demo"; stopAll();
+  G.away={abbr:"KC",name:"Chiefs",score:0,logo:"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",colorHex:"#e31837"};
+  G.home={abbr:"BUF",name:"Bills",score:0,logo:"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png",colorHex:"#00338d"};
+  NG={q:1,clock:"15:00",sec:900,down:1,dist:10,ytez:75,posHome:false,dd:"1ST & 10 • KC BALL"};
+  NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:true};
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.remove("hidden");
+  $("#statusTxt").textContent="DEMO"; $("#liveDot").style.display="none";
+  $("#boardHint").textContent="Simulated NFL game — every jumbotron moment fires on its own, or tap the buttons.";
+  showBoard(); renderBoardNFL();
+  audioInit(); audioResume(); startAmbient();
+  setTimeout(triggerKickoff,600);
+  nflDemoTimer=setInterval(nflDemoTick,3000);
+}
+function nflDemoTick(){
+  NG.sec-=30+Math.floor(Math.random()*25);
+  if(NG.sec<=0){NG.q=NG.q>=4?1:NG.q+1;NG.sec=900;NFLSEEN.rzDrive=null;}
+  NG.clock=fmtClock(Math.max(0,NG.sec));
+  if((NG.q===2||NG.q===4)&&NG.sec<=120&&!NFLSEEN.twoMin[NG.q]){
+    NFLSEEN.twoMin[NG.q]=true; triggerTwoMin({q:NG.q});
+  }
+  const off=NG.posHome?G.home:G.away;
+  const gain=-3+Math.floor(Math.random()*18);
+  NG.ytez-=gain; NG.dist-=gain;
+  if(Math.random()<.05){                                    // turnover
+    NG.posHome=!NG.posHome; NG.ytez=75; NG.down=1; NG.dist=10; NFLSEEN.rzDrive=null;
+    triggerTurnover({team:NG.posHome?G.home:G.away,kind:Math.random()<.5?"INTERCEPTED!":"FUMBLE!",pickSix:false});
+  }else if(NG.ytez<=0){                                     // touchdown
+    if(NG.posHome)G.home.score+=7; else G.away.score+=7;
+    triggerTouchdown({team:off});
+    NG.posHome=!NG.posHome; NG.ytez=75; NG.down=1; NG.dist=10; NFLSEEN.rzDrive=null;
+  }else{
+    if(NG.dist<=0){NG.down=1;NG.dist=10;}
+    else{NG.down++;
+      if(NG.down>4){NG.posHome=!NG.posHome;NG.ytez=100-NG.ytez;NG.down=1;NG.dist=10;NFLSEEN.rzDrive=null;}}
+    if(NG.down===3&&Math.random()<.5)triggerNoise({dd:`3RD & ${Math.max(1,NG.dist)}`});
+    if(NG.ytez<=20&&NFLSEEN.rzDrive!=="demo"){NFLSEEN.rzDrive="demo";triggerRedZone({team:off,yards:Math.max(1,NG.ytez)});}
+  }
+  const ord=["1ST","2ND","3RD","4TH"][Math.min(NG.down,4)-1];
+  NG.dd=`${ord} & ${Math.max(1,NG.dist)} • ${(NG.posHome?G.home:G.away).abbr} BALL`;
+  renderBoardNFL();
+}
+function startLiveGameNFL(id,away,home){
+  MODE="live"; stopAll();
+  livePk=null; nflPk=id;
+  G.away=away; G.home=home;
+  NG={q:1,clock:"",sec:0,down:1,dist:10,ytez:75,posHome:false,dd:""};
+  NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:false};
+  LIVE={batter:null,lastHR:null,lastK:null,box:null};
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.remove("hidden");
+  $("#statusTxt").textContent="CONNECTING…";
+  $("#boardHint").textContent="Following the live ESPN feed — kickoff, red zone, 3rd-down noise, touchdowns, the 2-minute warning, turnovers and the final all fire automatically.";
+  showBoard(); renderBoardNFL();
+  audioInit(); audioResume(); startAmbient();
+  tickNFL(true);
+  nflPoll=setInterval(()=>tickNFL(false),12000);
+}
+async function tickNFL(first){
+  if(MODE!=="live"||!nflPk)return;
+  try{
+    const r=await fetch(`${ESPN}/summary?event=${nflPk}`);
+    const j=await r.json();
+    const comp=(j.header&&j.header.competitions&&j.header.competitions[0])||{};
+    const cs=comp.competitors||[];
+    const ca=cs.find(c=>c.homeAway==="away"), ch=cs.find(c=>c.homeAway==="home");
+    if(ca)G.away.score=parseInt(ca.score||"0",10)||0;
+    if(ch)G.home.score=parseInt(ch.score||"0",10)||0;
+    const st=(comp.status&&comp.status.type)||{};
+    NG.q=(comp.status&&comp.status.period)||NG.q;
+    NG.clock=(comp.status&&comp.status.displayClock)||NG.clock;
+    if(st.state==="in"){$("#statusTxt").textContent="● LIVE";$("#liveDot").style.display="inline-block";}
+    else if(st.state==="post"){$("#statusTxt").textContent="FINAL";$("#liveDot").style.display="none";}
+    else{$("#statusTxt").textContent=(st.shortDetail||"PRE-GAME").toUpperCase();$("#liveDot").style.display="none";}
+    LIVE.venue=(j.gameInfo&&j.gameInfo.venue&&j.gameInfo.venue.fullName)||LIVE.venue;
+    // flatten every play across drives
+    const drives=j.drives||{};
+    const allDrives=[...(drives.previous||[]),...(drives.current?[drives.current]:[])];
+    const plays=[]; allDrives.forEach(d=>{(d.plays||[]).forEach(p=>plays.push({p,d}));});
+    const last=plays.length?plays[plays.length-1]:null;
+    if(last&&last.p.end){
+      const e=last.p.end;
+      const posAbbr=(drives.current&&drives.current.team&&drives.current.team.abbreviation)||"";
+      NG.posHome=posAbbr===G.home.abbr;
+      NG.dd=((e.downDistanceText||e.shortDownDistanceText||"").toUpperCase())+(posAbbr?` • ${posAbbr} BALL`:"");
+    }
+    renderBoardNFL();
+    if(first&&!NFLSEEN.seeded){   // tune-in: don't replay history
+      NFLSEEN.seeded=true;
+      NFLSEEN.kickoff=plays.some(x=>/kickoff/i.test((x.p.type&&x.p.type.text)||""));
+      plays.forEach(x=>{
+        if(x.p.scoringPlay)NFLSEEN.scores.add(x.p.id);
+        if(/intercept|fumble/i.test((x.p.type&&x.p.type.text)||""))NFLSEEN.tos.add(x.p.id);
+      });
+      if(drives.current)NFLSEEN.rzDrive=drives.current.id||null;
+      NFLSEEN.twoMin[2]=NG.q>2||(NG.q===2&&(clockSecs(NG.clock)||900)<=120);
+      NFLSEEN.twoMin[4]=NG.q>4||(NG.q===4&&(clockSecs(NG.clock)||900)<=120);
+      NFLSEEN.noisePlay=last?last.p.id:null;
+      NFLSEEN.final=st.state==="post";
+      return;
+    }
+    // kickoff (first one ever seen)
+    if(!NFLSEEN.kickoff){
+      const ko=plays.find(x=>/kickoff/i.test((x.p.type&&x.p.type.text)||""));
+      if(ko){NFLSEEN.kickoff=true;triggerKickoff();}
+    }
+    // touchdowns + pick-sixes + turnovers
+    for(const x of plays){
+      const p=x.p, tt=(p.type&&p.type.text)||"";
+      if(p.scoringPlay&&!NFLSEEN.scores.has(p.id)){
+        NFLSEEN.scores.add(p.id);
+        const txt=tt+" "+(p.text||"");
+        const isTD=/touchdown/i.test(txt);
+        if(isTD&&/intercept/i.test(txt)){NFLSEEN.tos.add(p.id);triggerTurnover({kind:"PICK SIX!",pickSix:true});}
+        else if(isTD){
+          const team=((x.d.team&&x.d.team.abbreviation)===G.home.abbr)?G.home:G.away;
+          triggerTouchdown({team});
+        }
+      }else if(/interception|fumble recovery \(opponent\)/i.test(tt)&&!p.scoringPlay&&!NFLSEEN.tos.has(p.id)){
+        NFLSEEN.tos.add(p.id);
+        triggerTurnover({kind:/intercept/i.test(tt)?"INTERCEPTED!":"FUMBLE!",pickSix:false});
+      }
+    }
+    // red zone entry (once per drive)
+    if(st.state==="in"&&drives.current&&last&&last.p.end){
+      const did=drives.current.id;
+      if((last.p.end.yardsToEndzone||100)<=20&&NFLSEEN.rzDrive!==did){
+        NFLSEEN.rzDrive=did;
+        triggerRedZone({team:NG.posHome?G.home:G.away,yards:last.p.end.yardsToEndzone});
+      }
+    }
+    // 3rd-down noise meter
+    if(st.state==="in"&&last&&last.p.end&&last.p.end.down===3&&NFLSEEN.noisePlay!==last.p.id){
+      NFLSEEN.noisePlay=last.p.id;
+      triggerNoise({dd:(last.p.end.shortDownDistanceText||"3RD DOWN").toUpperCase()});
+    }
+    // two-minute warning (clock-derived per spec fallback)
+    const secs=clockSecs(NG.clock);
+    if(st.state==="in"&&(NG.q===2||NG.q===4)&&secs!==null&&secs<=120&&!NFLSEEN.twoMin[NG.q]){
+      NFLSEEN.twoMin[NG.q]=true; triggerTwoMin({q:NG.q});
+    }
+    // final whistle
+    if(st.state==="post"&&!NFLSEEN.final){
+      NFLSEEN.final=true;
+      const homeWon=G.home.score>G.away.score;
+      triggerFinal({winner:homeWon?G.home:G.away,aw:G.away,hm:G.home,walkoff:false});
+    }
+  }catch(e){$("#statusTxt").textContent="RECONNECTING…";}
+}
+/* ---- the six NFL takeovers ---- */
+const koOv=$("#koOverlay"),rzOv=$("#rzOverlay"),nmOv=$("#nmOverlay"),
+      tdOv=$("#tdOverlay"),tmOv=$("#tmOverlay"),toOv=$("#toOverlay");
+let koPlaying=false,rzPlaying=false,nmPlaying=false,tdPlaying=false,tmPlaying=false,toPlaying=false;
+function triggerKickoff(){
+  if(takeoverBusy())return; koPlaying=true; hideWalkup();
+  $("#koSub").textContent=`${G.away.name} @ ${G.home.name}`.toUpperCase();
+  koOv.classList.remove("show"); void koOv.offsetWidth; koOv.classList.add("show");
+  playFanfare(); setTimeout(()=>playHorn(.9),2100);
+  clearTimeout(triggerKickoff._t); triggerKickoff._t=setTimeout(endKickoff,6500);
+}
+function endKickoff(){clearTimeout(triggerKickoff._t);koOv.classList.remove("show");koPlaying=false;}
+function triggerRedZone(info){
+  info=info||{};
+  if(takeoverBusy())return; rzPlaying=true; hideWalkup();
+  $("#rzKick").textContent=(((info.team&&info.team.name)||"OFFENSE")+" KNOCKING").toUpperCase();
+  $("#rzSub").textContent=info.yards?`${info.yards} YARDS FROM THE GOAL LINE`:"INSIDE THE 20";
+  rzOv.classList.remove("show"); void rzOv.offsetWidth; rzOv.classList.add("show");
+  playAlarm();
+  clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,5500);
+}
+function endRedZone(){clearTimeout(triggerRedZone._t);rzOv.classList.remove("show");rzPlaying=false;}
+function triggerNoise(info){
+  info=info||{};
+  if(takeoverBusy())return; nmPlaying=true; hideWalkup();
+  $("#nmKick").textContent=(info.dd||"3RD DOWN").toUpperCase();
+  $("#nmDb").textContent="0";
+  nmOv.classList.remove("show"); void nmOv.offsetWidth; nmOv.classList.add("show");
+  playCrowd(4.5,.6);
+  setTimeout(()=>countUp($("#nmDb"),"112"),700);
+  clearTimeout(triggerNoise._t); triggerNoise._t=setTimeout(endNoise,6000);
+}
+function endNoise(){clearTimeout(triggerNoise._t);nmOv.classList.remove("show");nmPlaying=false;}
+function triggerTouchdown(info){
+  info=info||{};
+  if(takeoverBusy())return; tdPlaying=true; hideWalkup();
+  document.documentElement.style.setProperty('--tdc',(info.team&&info.team.colorHex)||"#bf0d3e");
+  $("#tdSub").textContent=(((info.team&&info.team.name)||"")+" PUT SIX ON THE BOARD").toUpperCase();
+  tdOv.classList.remove("show"); void tdOv.offsetWidth; tdOv.classList.add("show");
+  playCrowd(6,.55); setTimeout(()=>playHorn(1.2),400);
+  clearTimeout(triggerTouchdown._t); triggerTouchdown._t=setTimeout(endTouchdown,7500);
+}
+function endTouchdown(){clearTimeout(triggerTouchdown._t);tdOv.classList.remove("show");tdPlaying=false;}
+function triggerTwoMin(info){
+  if(takeoverBusy())return; tmPlaying=true; hideWalkup();
+  $("#tmSub").textContent=(info&&info.q===4)?"FOURTH QUARTER — CRUNCH TIME":"END OF THE HALF APPROACHING";
+  tmOv.classList.remove("show"); void tmOv.offsetWidth; tmOv.classList.add("show");
+  playTicks();
+  clearTimeout(triggerTwoMin._t); triggerTwoMin._t=setTimeout(endTwoMin,6000);
+}
+function endTwoMin(){clearTimeout(triggerTwoMin._t);tmOv.classList.remove("show");tmPlaying=false;}
+function triggerTurnover(info){
+  info=info||{};
+  if(takeoverBusy())return; toPlaying=true; hideWalkup();
+  $("#toTitle").textContent=info.kind||"TURNOVER!";
+  $("#toSub").textContent=info.pickSix?"TAKEN ALL THE WAY BACK":
+    ((info.team?info.team.abbr+" BALL — ":"")+"POSSESSION FLIPS");
+  toOv.classList.remove("show"); void toOv.offsetWidth; toOv.classList.add("show");
+  playTurnoverSfx();
+  clearTimeout(triggerTurnover._t); triggerTurnover._t=setTimeout(endTurnover,6000);
+}
+function endTurnover(){clearTimeout(triggerTurnover._t);toOv.classList.remove("show");toPlaying=false;}
+
 /* season line + current hit streak + (optionally) career vs a pitcher, in ONE call */
 async function fetchBatter(id,oppId){
   try{
@@ -2438,8 +2957,21 @@ async function fetchBatter(id,oppId){
 /* ============================================================
    WIRE-UP
    ============================================================ */
-$("#demoBtn").onclick=startDemo;
+$("#demoBtn").onclick=()=>LEAGUE==="nfl"?startDemoNFL():startDemo();
 $("#backBtn").onclick=showSetup;
+$("#lgMLB").onclick=()=>setLeague("mlb");
+$("#lgNFL").onclick=()=>setLeague("nfl");
+/* NFL preview buttons */
+$("#koBtn").onclick=()=>triggerKickoff();
+$("#rzBtn").onclick=()=>triggerRedZone({team:NG.posHome?G.home:G.away,yards:12});
+$("#nmBtn").onclick=()=>triggerNoise({dd:`3RD & ${Math.max(1,NG.dist||7)}`});
+$("#tdBtn").onclick=()=>{const t=NG.posHome?G.home:G.away;
+  if(MODE==="demo"){t.score+=7;renderBoardNFL();} triggerTouchdown({team:t});};
+$("#tmBtn").onclick=()=>triggerTwoMin({q:NG.q===4?4:2});
+$("#toBtn").onclick=()=>{const kind=["INTERCEPTED!","FUMBLE!","PICK SIX!"][Math.floor(Math.random()*3)];
+  triggerTurnover({team:NG.posHome?G.away:G.home,kind,pickSix:kind==="PICK SIX!"});};
+$("#nfBtn").onclick=()=>{const hw=G.home.score>=G.away.score;
+  triggerFinal({winner:hw?G.home:G.away,aw:G.away,hm:G.home,walkoff:false});};
 $("#audioBtn").onclick=()=>{ audioInit(); setAudio(!audioOn); audioResume(); };
 updateAudioBtn();
 if(VENUE)$("#venueTag").textContent=VENUE.toUpperCase();
