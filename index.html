@@ -90,8 +90,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .topbar .status{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--dim);font-size:13px;font-weight:700}
 .venuetag{color:var(--gold);font-weight:900;letter-spacing:2px;font-size:14px}
 .venuetag:empty{display:none}
-.audiobtn{background:var(--navy2);border:1px solid var(--line);border-radius:8px;padding:5px 11px;font-size:15px;color:#fff}
-.audiobtn:hover{background:#153a78}
 .dot{width:9px;height:9px;border-radius:50%;background:#39e07f;box-shadow:0 0 10px #39e07f;animation:pulse 1.4s infinite}
 @keyframes pulse{50%{opacity:.35}}
 
@@ -1139,7 +1137,7 @@ body.nfl .nfl-dd{display:block}
 
   <div class="foot">
     Live data from the free, key-less <code>statsapi.mlb.com</code> feed. Home runs are detected from live play-by-play and trigger automatically. Best on a big screen.
-    Brand your bar's jumbotron with <code>?venue=YourBar</code> in the URL — stadium sound toggles with the 🔊 button.
+    Brand your bar's jumbotron with <code>?venue=YourBar</code> in the URL.
   </div>
 </div>
 
@@ -1151,8 +1149,7 @@ body.nfl .nfl-dd{display:block}
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.6"/><path d="M6 4c3 2 5 6 5 8s-2 6-5 8M18 4c-3 2-5 6-5 8s2 6 5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
       HOME RUN CAM
     </div>
-    <div class="status"><span class="venuetag" id="venueTag"></span><span class="dot" id="liveDot"></span><span id="statusTxt">DEMO</span>
-      <button class="audiobtn" id="audioBtn" title="Stadium sound on/off">🔊</button></div>
+    <div class="status"><span class="venuetag" id="venueTag"></span><span class="dot" id="liveDot"></span><span id="statusTxt">DEMO</span></div>
   </div>
 
   <div class="scorewrap">
@@ -1504,139 +1501,7 @@ const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");
   clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600);}
 
-/* ============================================================
-   STADIUM SOUND — synthesized with Web Audio, no files needed.
-   Organ charge, crowd swells, horn, punch-outs, the singalong.
-   Mute toggle persists (bars that run their own audio can kill it).
-   ============================================================ */
-let AC=null, masterGain=null, noiseBuf=null;
-let audioOn=(localStorage.getItem("hrcam-audio")!=="off");
-function audioInit(){
-  if(AC)return;
-  try{
-    AC=new (window.AudioContext||window.webkitAudioContext)();
-    masterGain=AC.createGain(); masterGain.gain.value=audioOn?0.5:0;
-    masterGain.connect(AC.destination);
-  }catch(e){AC=null;}
-}
-function audioResume(){ if(AC&&AC.state==="suspended")AC.resume().catch(()=>{}); }
-function setAudio(on){
-  audioOn=on; localStorage.setItem("hrcam-audio",on?"on":"off");
-  if(masterGain)masterGain.gain.value=on?0.5:0;
-  updateAudioBtn();
-}
-function updateAudioBtn(){const b=$("#audioBtn"); if(b)b.textContent=audioOn?"🔊":"🔇";}
-const NOTE={C4:261.63,D4:293.66,E4:329.63,G4:392,A4:440,C5:523.25,D5:587.33,E5:659.25,G5:784};
-/* drawbar-ish ballpark organ note */
-function organNote(freq,t0,dur,vol){
-  if(!AC)return;
-  const g=AC.createGain(); g.connect(masterGain);
-  g.gain.setValueAtTime(0.0001,t0);
-  g.gain.linearRampToValueAtTime(vol,t0+0.02);
-  g.gain.setValueAtTime(vol,Math.max(t0+0.03,t0+dur-0.06));
-  g.gain.linearRampToValueAtTime(0.0001,t0+dur);
-  [["triangle",1,.7],["sine",2,.3],["sine",3,.14]].forEach(([w,m,a])=>{
-    const o=AC.createOscillator(); o.type=w; o.frequency.value=freq*m;
-    const og=AC.createGain(); og.gain.value=a;
-    o.connect(og); og.connect(g); o.start(t0); o.stop(t0+dur+0.05);
-  });
-}
-function playSeq(seq,vol){
-  if(!AC||!audioOn)return; audioResume();
-  let t=AC.currentTime+0.05;
-  seq.forEach(([n,d])=>{organNote(NOTE[n],t,d*0.95,vol);t+=d;});
-}
-/* the classic "da da da da da DAAA … CHARGE!" */
-function playCharge(){playSeq([["G4",.17],["C5",.17],["E5",.17],["G5",.32],["E5",.17],["G5",.62]],.5);}
-/* "Take me out to the ball game…" */
-function playStretchSong(){playSeq([["C5",.5],["A4",.35],["G4",.35],["E4",.5],["G4",.55],["D4",1.15]],.42);}
-/* quick batter walk-up stab */
-function playWalkupRiff(){playSeq([["C5",.12],["E5",.12],["G5",.3]],.3);}
-/* PLAY BALL fanfare */
-function playFanfare(){playSeq([["C5",.15],["C5",.15],["C5",.15],["G5",.7]],.45);}
-function getNoise(){
-  if(noiseBuf||!AC)return noiseBuf;
-  const len=AC.sampleRate*2, b=AC.createBuffer(1,len,AC.sampleRate), d=b.getChannelData(0);
-  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
-  noiseBuf=b; return b;
-}
-/* crowd roar rising then settling */
-function playCrowd(dur,peak){
-  if(!AC||!audioOn)return; audioResume();
-  dur=dur||4; peak=peak||.45;
-  const t=AC.currentTime;
-  const src=AC.createBufferSource(); src.buffer=getNoise(); src.loop=true;
-  const f=AC.createBiquadFilter(); f.type="bandpass"; f.frequency.value=900; f.Q.value=.6;
-  const g=AC.createGain();
-  g.gain.setValueAtTime(0.001,t);
-  g.gain.exponentialRampToValueAtTime(peak,t+1.2);
-  g.gain.setValueAtTime(peak,t+dur*0.55);
-  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-  src.connect(f); f.connect(g); g.connect(masterGain);
-  src.start(t); src.stop(t+dur+0.1);
-}
-/* stadium air-horn blast */
-function playHorn(dur){
-  if(!AC||!audioOn)return; audioResume();
-  dur=dur||1.1;
-  const t=AC.currentTime+0.02;
-  [233.08,311.13,466.16].forEach(fr=>{
-    const o=AC.createOscillator(); o.type="sawtooth"; o.frequency.value=fr;
-    const g=AC.createGain();
-    g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(.22,t+.06);
-    g.gain.setValueAtTime(.22,t+dur-.25); g.gain.exponentialRampToValueAtTime(.001,t+dur);
-    o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+dur+.05);
-  });
-}
-/* punch-out thud (pitch-dropping kick) + crack on the last strike */
-function playPunch(off){
-  if(!AC||!audioOn)return;
-  const t=AC.currentTime+(off||0);
-  const o=AC.createOscillator(); o.type="sine";
-  o.frequency.setValueAtTime(160,t); o.frequency.exponentialRampToValueAtTime(45,t+.18);
-  const g=AC.createGain(); g.gain.setValueAtTime(.7,t); g.gain.exponentialRampToValueAtTime(.001,t+.22);
-  o.connect(g); g.connect(masterGain); o.start(t); o.stop(t+.25);
-}
-function playZap(off){
-  if(!AC||!audioOn)return;
-  const t=AC.currentTime+(off||0);
-  const src=AC.createBufferSource(); src.buffer=getNoise();
-  const f=AC.createBiquadFilter(); f.type="highpass"; f.frequency.value=2200;
-  const g=AC.createGain(); g.gain.setValueAtTime(.45,t); g.gain.exponentialRampToValueAtTime(.001,t+.28);
-  src.connect(f); f.connect(g); g.connect(masterGain); src.start(t); src.stop(t+.3);
-}
-function playKSequence(){
-  if(!AC||!audioOn)return; audioResume();
-  playPunch(.12); playPunch(.32); playPunch(.6); playZap(.62);
-}
-/* red-zone two-tone alarm */
-function playAlarm(){
-  if(!AC||!audioOn)return; audioResume();
-  const t=AC.currentTime;
-  for(let i=0;i<4;i++){
-    const o=AC.createOscillator(); o.type="square";
-    o.frequency.setValueAtTime(i%2?620:840,t+i*.28);
-    const g=AC.createGain();
-    g.gain.setValueAtTime(.13,t+i*.28); g.gain.exponentialRampToValueAtTime(.001,t+i*.28+.22);
-    o.connect(g); g.connect(masterGain); o.start(t+i*.28); o.stop(t+i*.28+.24);
-  }
-}
-/* two-minute-warning clock ticks */
-function playTicks(){
-  if(!AC||!audioOn)return; audioResume();
-  const t=AC.currentTime;
-  for(let i=0;i<4;i++){
-    const o=AC.createOscillator(); o.type="square"; o.frequency.value=1400;
-    const g=AC.createGain();
-    g.gain.setValueAtTime(.11,t+i*.5); g.gain.exponentialRampToValueAtTime(.001,t+i*.5+.07);
-    o.connect(g); g.connect(masterGain); o.start(t+i*.5); o.stop(t+i*.5+.08);
-  }
-}
-/* turnover chaos hit */
-function playTurnoverSfx(){
-  if(!AC||!audioOn)return; audioResume();
-  playZap(0); playPunch(.1); playZap(.4);
-}
+/* (stadium sound removed by request — the HR video's own mp4 audio is the only sound) */
 
 /* ---------- team brand colors (fallback = MLB navy) ---------- */
 const TEAM_COLOR={108:"#ba0021",109:"#a71930",110:"#df4601",111:"#bd3039",112:"#0e3386",
@@ -1830,7 +1695,7 @@ function startLiveGame(g){
   $("#statusTxt").textContent="CONNECTING…";
   $("#boardHint").textContent="Following the live feed — everything triggers automatically. The buttons replay the latest REAL moment: the last home run, the batter at the plate, the last inning-ending K.";
   showBoard(); renderBoard();
-  audioInit(); audioResume(); startAmbient();
+  startAmbient();
   livePk=g.gamePk;
   tickLive(true);
   poll=setInterval(()=>tickLive(false),15000);
@@ -1983,7 +1848,7 @@ function startDemo(){
   $("#boardHint").textContent="This is a simulated game. The first-pitch takeover plays on kickoff and a walk-up card intros each new batter — or tap the buttons to fire any cinematic.";
   G.demoBatter=null; rallyKey="";
   showBoard(); renderBoard();
-  audioInit(); audioResume(); startAmbient();
+  startAmbient();
   demoTimer=setInterval(demoTick,3200);
   setTimeout(()=>triggerAnthem({sub:`${G.away.name} at ${G.home.name}`}),500);
   setTimeout(newDemoBatter,11500);   // first walk-up after the 10.5s game open clears
@@ -2224,7 +2089,7 @@ function triggerAnthem(opts){
   anTimers.forEach(clearTimeout);
   anTimers=[
     setTimeout(()=>{anthemOv.classList.remove("p1");anthemOv.classList.add("p2");},2900),
-    setTimeout(()=>{anthemOv.classList.remove("p2");anthemOv.classList.add("p3");playFanfare();},5800),
+    setTimeout(()=>{anthemOv.classList.remove("p2");anthemOv.classList.add("p3");},5800),
     setTimeout(endAnthem, opts.dur||10500)
   ];
 }
@@ -2288,7 +2153,6 @@ function triggerWalkup(info){
   });
   wuCard.classList.remove("show"); void wuCard.offsetWidth;
   wuCard.classList.add("show");
-  playWalkupRiff();
   clearTimeout(wuHideT);
   wuHideT=setTimeout(()=>wuCard.classList.remove("show"), info.dur||12000);
 }
@@ -2354,7 +2218,6 @@ function triggerK(info){
   if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),1500);
   kOv.classList.remove("show"); void kOv.offsetWidth;
   kOv.classList.add("show");
-  playKSequence();
   clearTimeout(triggerK._t);
   triggerK._t=setTimeout(endK, info.dur||6500);
 }
@@ -2449,8 +2312,6 @@ function triggerHR2(info){
   h2AimDiagram(s);   // aim the arc + pin at the real landing spot
   hr2Ov.classList.remove("show","fire","lights","paper"); void hr2Ov.offsetWidth;
   hr2Ov.classList.add(themeKey,"show");
-  playCrowd(5.5,.45);
-  if(themeKey==="fire")setTimeout(()=>playHorn(1.1),900);   // scorchers get the horn
   // fire: launch the comet across the sky; all: ball rides the field-card arc
   if(themeKey==="fire")setTimeout(()=>{try{document.getElementById("h2cometMotion").beginElement();}catch(e){}},150);
   setTimeout(()=>{try{document.getElementById("h2motion").beginElement();}catch(e){}},T.ball);
@@ -2552,7 +2413,6 @@ function triggerStretch(opts){
   if(takeoverBusy())return;
   stretchPlaying=true; hideWalkup();
   stOv.classList.remove("show"); void stOv.offsetWidth; stOv.classList.add("show");
-  playStretchSong();
   clearTimeout(triggerStretch._t);
   triggerStretch._t=setTimeout(endStretch,(opts&&opts.dur)||7000);
 }
@@ -2575,7 +2435,6 @@ function triggerRally(info){
   $("#rSub").textContent=[`DOWN ${info.deficit||1}`,rtxt,`${info.half==="Top"?"TOP":"BOTTOM"} ${info.inning||8}`]
     .filter(Boolean).join(" • ");
   rOv.classList.remove("show"); void rOv.offsetWidth; rOv.classList.add("show");
-  playCharge();
   clearTimeout(triggerRally._t);
   triggerRally._t=setTimeout(endRally, info.dur||7500);
 }
@@ -2599,8 +2458,6 @@ function triggerFinal(info){
     ?`${winner.name} walk it off in the ${info.inning||G.inning}th!`
     :`${winner.name} defeat the ${loser.name}`);
   fOv.classList.remove("show"); void fOv.offsetWidth; fOv.classList.add("show");
-  playCrowd(6,.5);
-  if(info.walkoff&&!tie)setTimeout(()=>playHorn(1.4),500);
   clearTimeout(triggerFinal._t);
   triggerFinal._t=setTimeout(endFinal, info.dur||9000);
 }
@@ -2722,7 +2579,7 @@ function startDemoNFL(){
   $("#statusTxt").textContent="DEMO"; $("#liveDot").style.display="none";
   $("#boardHint").textContent="Simulated NFL game — every jumbotron moment fires on its own, or tap the buttons.";
   showBoard(); renderBoardNFL();
-  audioInit(); audioResume(); startAmbient();
+  startAmbient();
   setTimeout(triggerKickoff,600);
   nflDemoTimer=setInterval(nflDemoTick,3000);
 }
@@ -2765,7 +2622,7 @@ function startLiveGameNFL(id,away,home){
   $("#statusTxt").textContent="CONNECTING…";
   $("#boardHint").textContent="Following the live ESPN feed — kickoff, red zone, 3rd-down noise, touchdowns, the 2-minute warning, turnovers and the final all fire automatically.";
   showBoard(); renderBoardNFL();
-  audioInit(); audioResume(); startAmbient();
+  startAmbient();
   tickNFL(true);
   nflPoll=setInterval(()=>tickNFL(false),12000);
 }
@@ -2868,7 +2725,6 @@ function triggerKickoff(){
   if(takeoverBusy())return; koPlaying=true; hideWalkup();
   $("#koSub").textContent=`${G.away.name} @ ${G.home.name}`.toUpperCase();
   koOv.classList.remove("show"); void koOv.offsetWidth; koOv.classList.add("show");
-  playFanfare(); setTimeout(()=>playHorn(.9),2100);
   clearTimeout(triggerKickoff._t); triggerKickoff._t=setTimeout(endKickoff,6500);
 }
 function endKickoff(){clearTimeout(triggerKickoff._t);koOv.classList.remove("show");koPlaying=false;}
@@ -2878,7 +2734,6 @@ function triggerRedZone(info){
   $("#rzKick").textContent=(((info.team&&info.team.name)||"OFFENSE")+" KNOCKING").toUpperCase();
   $("#rzSub").textContent=info.yards?`${info.yards} YARDS FROM THE GOAL LINE`:"INSIDE THE 20";
   rzOv.classList.remove("show"); void rzOv.offsetWidth; rzOv.classList.add("show");
-  playAlarm();
   clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,5500);
 }
 function endRedZone(){clearTimeout(triggerRedZone._t);rzOv.classList.remove("show");rzPlaying=false;}
@@ -2888,7 +2743,6 @@ function triggerNoise(info){
   $("#nmKick").textContent=(info.dd||"3RD DOWN").toUpperCase();
   $("#nmDb").textContent="0";
   nmOv.classList.remove("show"); void nmOv.offsetWidth; nmOv.classList.add("show");
-  playCrowd(4.5,.6);
   setTimeout(()=>countUp($("#nmDb"),"112"),700);
   clearTimeout(triggerNoise._t); triggerNoise._t=setTimeout(endNoise,6000);
 }
@@ -2899,7 +2753,6 @@ function triggerTouchdown(info){
   document.documentElement.style.setProperty('--tdc',(info.team&&info.team.colorHex)||"#bf0d3e");
   $("#tdSub").textContent=(((info.team&&info.team.name)||"")+" PUT SIX ON THE BOARD").toUpperCase();
   tdOv.classList.remove("show"); void tdOv.offsetWidth; tdOv.classList.add("show");
-  playCrowd(6,.55); setTimeout(()=>playHorn(1.2),400);
   clearTimeout(triggerTouchdown._t); triggerTouchdown._t=setTimeout(endTouchdown,7500);
 }
 function endTouchdown(){clearTimeout(triggerTouchdown._t);tdOv.classList.remove("show");tdPlaying=false;}
@@ -2907,7 +2760,6 @@ function triggerTwoMin(info){
   if(takeoverBusy())return; tmPlaying=true; hideWalkup();
   $("#tmSub").textContent=(info&&info.q===4)?"FOURTH QUARTER — CRUNCH TIME":"END OF THE HALF APPROACHING";
   tmOv.classList.remove("show"); void tmOv.offsetWidth; tmOv.classList.add("show");
-  playTicks();
   clearTimeout(triggerTwoMin._t); triggerTwoMin._t=setTimeout(endTwoMin,6000);
 }
 function endTwoMin(){clearTimeout(triggerTwoMin._t);tmOv.classList.remove("show");tmPlaying=false;}
@@ -2918,7 +2770,6 @@ function triggerTurnover(info){
   $("#toSub").textContent=info.pickSix?"TAKEN ALL THE WAY BACK":
     ((info.team?info.team.abbr+" BALL — ":"")+"POSSESSION FLIPS");
   toOv.classList.remove("show"); void toOv.offsetWidth; toOv.classList.add("show");
-  playTurnoverSfx();
   clearTimeout(triggerTurnover._t); triggerTurnover._t=setTimeout(endTurnover,6000);
 }
 function endTurnover(){clearTimeout(triggerTurnover._t);toOv.classList.remove("show");toPlaying=false;}
@@ -2972,8 +2823,6 @@ $("#toBtn").onclick=()=>{const kind=["INTERCEPTED!","FUMBLE!","PICK SIX!"][Math.
   triggerTurnover({team:NG.posHome?G.away:G.home,kind,pickSix:kind==="PICK SIX!"});};
 $("#nfBtn").onclick=()=>{const hw=G.home.score>=G.away.score;
   triggerFinal({winner:hw?G.home:G.away,aw:G.away,hm:G.home,walkoff:false});};
-$("#audioBtn").onclick=()=>{ audioInit(); setAudio(!audioOn); audioResume(); };
-updateAudioBtn();
 if(VENUE)$("#venueTag").textContent=VENUE.toUpperCase();
 function demoStats(){
   const onBase=G.bases.filter(Boolean).length;
