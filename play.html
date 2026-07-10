@@ -1078,7 +1078,8 @@ body.nfl .nfl-dd{display:block}
 #tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .3s;overflow:hidden;
   background:radial-gradient(1200px 760px at 50% 112%,
     color-mix(in srgb,var(--nflOff,#e31837) 64%,#000) 0%, #0a0e15 52%, #04060a 100%)}
-#tdOverlay.show{display:block;opacity:1}
+#tdOverlay.show{display:block;opacity:1;animation:tdCam .38s ease-out 1s}   /* camera punch as the ball splits the uprights */
+@keyframes tdCam{0%{transform:scale(1)}35%{transform:scale(1.032)}100%{transform:scale(1)}}
 /* rotating stadium light rays behind the posts */
 #tdOverlay::before{content:"";position:absolute;left:50%;top:52%;width:200vmax;height:200vmax;
   margin:-100vmax;pointer-events:none;opacity:0;
@@ -1101,18 +1102,26 @@ body.nfl .nfl-dd{display:block}
    crossbar mid-screen, base pole down to the turf; text sits below it */
 .td-goal{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:1;
   width:min(56vh,500px);height:auto;opacity:0}
-#tdOverlay.show .td-goal{animation:tdGoalIn .5s cubic-bezier(.2,.9,.3,1) .15s both}
+#tdOverlay.show .td-goal{animation:tdGoalIn .5s cubic-bezier(.2,.9,.3,1) .15s both,
+  tdSway 1.4s ease-in-out 1.05s}   /* posts rock as the ball rushes past */
 @keyframes tdGoalIn{from{opacity:0;transform:translate(-50%,-36%) scale(.94)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes tdSway{0%,100%{transform:translate(-50%,-50%) rotate(0)}
+  22%{transform:translate(-50%,-50%) rotate(1.3deg)}
+  55%{transform:translate(-50%,-50%) rotate(-.9deg)}
+  80%{transform:translate(-50%,-50%) rotate(.4deg)}}
 .td-goal .tdgb,.td-goal .tdgu{fill:none;stroke:#f4c518;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;
   filter:drop-shadow(0 0 9px rgba(244,197,24,.7)) drop-shadow(0 2px 3px rgba(0,0,0,.85))}
 .td-goal .tdpad{fill:#e8622a;stroke:none}
 .td-goal .tdflag{fill:#e8622a;stroke:none;transform-box:fill-box;transform-origin:left center}
 #tdOverlay.show .td-goal .tdflag{animation:tdFlag 1.4s ease-in-out .6s infinite}
 @keyframes tdFlag{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.6) translateX(4px)}}
-#tdOverlay.show .td-goal .tdgu{animation:tdPostFlash .55s ease-out .98s both}
+#tdOverlay.show .td-goal .tdgu{animation:tdPostFlash .55s ease-out .98s both,
+  tdGlowLoop 2.2s ease-in-out 1.7s infinite}   /* stays lit, breathing */
 @keyframes tdPostFlash{0%{stroke:#f4c518;filter:drop-shadow(0 0 9px rgba(244,197,24,.6))}
   25%{stroke:#fff;filter:drop-shadow(0 0 30px #fff) drop-shadow(0 0 70px rgba(255,240,180,.95))}
   100%{stroke:#f4c518;filter:drop-shadow(0 0 14px rgba(244,197,24,.8))}}
+@keyframes tdGlowLoop{0%,100%{filter:drop-shadow(0 0 14px rgba(244,197,24,.8))}
+  50%{filter:drop-shadow(0 0 24px rgba(244,197,24,1))}}
 /* ball SPIRALS straight up through the uprights with a trail */
 .td-ball{position:absolute;left:50%;bottom:8%;width:min(4.4vw,50px);height:min(2.9vw,32px);z-index:2;
   opacity:0;background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
@@ -1121,7 +1130,9 @@ body.nfl .nfl-dd{display:block}
   background:linear-gradient(90deg,transparent 42%,#fff 46% 54%,transparent 58%);opacity:.85}
 #tdOverlay.show .td-ball{animation:tdKick 1s cubic-bezier(.25,.55,.3,1) .3s both,
   tdSpiral .28s linear .3s 3 both}
-@keyframes tdKick{0%{opacity:0;bottom:3%}8%{opacity:1}90%{opacity:1}100%{opacity:0;bottom:88%}}
+/* slight lateral drift so it reads as a kicked arc, not an elevator */
+@keyframes tdKick{0%{opacity:0;bottom:3%;margin-left:-6vw}8%{opacity:1}
+  60%{margin-left:1vw}90%{opacity:1}100%{opacity:0;bottom:88%;margin-left:0}}
 @keyframes tdSpiral{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
 .td-trail{position:absolute;left:50%;bottom:6%;width:5px;height:0;z-index:1;transform:translateX(-50%);
   background:linear-gradient(180deg,transparent,rgba(255,240,190,.9));opacity:0;
@@ -1140,6 +1151,10 @@ body.nfl .nfl-dd{display:block}
 #tdOverlay.show .td-ring{animation:tdRing .7s ease-out 1s both}
 @keyframes tdRing{0%{opacity:.9;transform:translate(-50%,-50%) scale(.25)}
   100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
+/* second shockwave in the scoring team's color */
+.td-ring2{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:min(20vh,180px);height:min(20vh,180px);border:4px solid var(--nflOff,#e31837);border-radius:50%;opacity:0}
+#tdOverlay.show .td-ring2{animation:tdRing .8s ease-out 1.18s both}
 /* text sits in the LOWER third, clear of the uprights (crosses only the pole) */
 .td2-inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:flex-end;gap:min(1.6vh,14px);text-align:center;pointer-events:none;
@@ -1630,6 +1645,7 @@ body.nfl .nfl-dd{display:block}
   <div class="td-ball"></div>
   <div class="td-burst"></div>
   <div class="td-ring"></div>
+  <div class="td-ring2"></div>
   <div class="td2-inner">
     <div class="td2-title nfp-chrome">TOUCHDOWN</div>
     <div class="td2-sub" id="tdSub"></div>
