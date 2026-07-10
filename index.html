@@ -1348,6 +1348,71 @@ body.nfl .nfl-dd{display:block}
 #toOverlay.show .po-plus{animation:anFade .4s 1.45s both}
 .po-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,24px);opacity:0}
 #toOverlay.show .po-sub{animation:anFade .4s 1.5s both}
+/* ---- interception variant: a defender leaps and snags it first ---- */
+.po2-def,.po2-iball,.po2-flash{display:none}
+#toOverlay.int .po2-def,#toOverlay.int .po2-iball,#toOverlay.int .po2-flash{display:block}
+.po2-def{position:absolute;left:50%;bottom:30%;height:min(34vh,300px);width:auto;z-index:2;
+  transform:translateX(-50%);opacity:0;
+  filter:drop-shadow(0 0 3px rgba(150,180,230,.5)) drop-shadow(0 8px 16px rgba(0,0,0,.6))}
+#toOverlay.show.int .po2-def{animation:po2Leap 1s cubic-bezier(.35,.1,.4,1) .3s both}
+@keyframes po2Leap{0%{opacity:0;transform:translateX(-50%) translateY(9vh)}
+  15%{opacity:1}
+  45%{transform:translateX(-50%) translateY(-7vh)}
+  62%{transform:translateX(-50%) translateY(-7vh)}
+  100%{opacity:1;transform:translateX(-50%) translateY(6vh)}}
+.po2-def .kb3{fill:none;stroke:#0a0d13;stroke-width:19;stroke-linecap:round;stroke-linejoin:round}
+.po2-def .kh3{fill:#0a0d13}
+.po2-iball{position:absolute;left:-6%;top:34%;width:min(3.6vw,42px);height:min(2.4vw,28px);z-index:3;
+  background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
+  box-shadow:0 0 14px rgba(255,230,180,.6);opacity:0}
+#toOverlay.show.int .po2-iball{animation:po2Throw .5s cubic-bezier(.3,.4,.6,1) .35s both,
+  anFade2 .25s .85s reverse both}
+@keyframes po2Throw{0%{opacity:0;left:-6%;top:34%}12%{opacity:1}
+  70%{top:26%}100%{opacity:1;left:47.5%;top:31%}}
+.po2-flash{position:absolute;left:50%;top:31%;width:min(16vh,150px);height:min(16vh,150px);z-index:4;
+  transform:translate(-50%,-50%);border-radius:50%;opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,#fff,rgba(255,240,190,.5) 40%,transparent 70%)}
+#toOverlay.show.int .po2-flash{animation:po2Catch .45s ease-out .82s both}
+@keyframes po2Catch{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  25%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)}}
+/* INT re-timings: the possession flip waits for the pick */
+#toOverlay.show.int .po-bar{animation:anFade .4s 1.2s both}
+#toOverlay.show.int .po-ball{animation:poSnatch .55s cubic-bezier(.6,-0.2,.3,1.5) 1.45s both}
+#toOverlay.show.int .po-ball.toHome{animation:poSnatchH .55s cubic-bezier(.6,-0.2,.3,1.5) 1.45s both}
+#toOverlay.show.int .po-streak{animation:poStreak .5s ease-out 1.5s both}
+#toOverlay.show.int .po-title{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) 1.95s both}
+#toOverlay.show.int .po-plus{animation:anFade .4s 2.3s both}
+#toOverlay.show.int .po-sub{animation:anFade .4s 2.35s both}
+
+/* ---- NFL FINAL: gridiron steel slab (MLB keeps champagne gold) ---- */
+#nf2Overlay{position:fixed;inset:0;z-index:46;display:none;opacity:0;transition:opacity .4s;overflow:hidden;
+  background:radial-gradient(1000px 640px at 50% 20%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#nf2Overlay.show{display:block;opacity:1}
+.nf2-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);text-align:center}
+#nf2Overlay.show .nfp-kick{animation:anFade .5s .9s both}
+.nf2-slab{position:relative;overflow:hidden;width:min(56vw,640px);border-radius:18px;
+  background:linear-gradient(180deg,#232b38 0%,#161c26 30%,#0e131c 100%);
+  border:1px solid rgba(255,255,255,.18);border-top:2px solid rgba(255,255,255,.3);
+  box-shadow:0 34px 90px rgba(0,0,0,.75);padding:34px 44px 30px;
+  transform:translateY(110vh)}
+#nf2Overlay.show .nf2-slab{animation:nf2Rise .8s cubic-bezier(.2,.85,.25,1) .1s both}
+@keyframes nf2Rise{from{transform:translateY(110vh)}to{transform:translateY(0)}}
+/* one slow light sweep across the metal */
+.nf2-slab::after{content:"";position:absolute;top:0;bottom:0;left:-45%;width:32%;pointer-events:none;
+  transform:skewX(-16deg);opacity:0;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.14) 45%,rgba(255,255,255,.34) 50%,rgba(255,255,255,.14) 55%,transparent)}
+#nf2Overlay.show .nf2-slab::after{animation:nf2Sweep 1.4s ease-in-out 1.2s both}
+@keyframes nf2Sweep{0%{left:-45%;opacity:1}100%{left:130%;opacity:1}}
+.nf2-logo{width:min(20vh,170px);height:min(20vh,170px);object-fit:contain;margin:0 auto;display:block;
+  filter:grayscale(1) brightness(1.7) opacity(.55) drop-shadow(0 2px 2px rgba(0,0,0,.9)) drop-shadow(0 -1px 1px rgba(255,255,255,.25))}
+.nf2-name{font-weight:900;font-style:italic;letter-spacing:1px;font-size:clamp(38px,6.5vw,84px);line-height:.95;
+  background:linear-gradient(180deg,#fff,#c9d6e2 55%,#8e9aa8);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,.7))}
+.nf2-score{color:#c6d2e0;font-weight:900;letter-spacing:4px;font-size:clamp(22px,3.4vw,44px);margin-top:8px;
+  text-shadow:0 2px 2px rgba(0,0,0,.9),0 -1px 1px rgba(255,255,255,.15)}
+.nf2-sub{color:#93a3b8;font-weight:800;letter-spacing:2px;font-size:clamp(14px,1.8vw,21px);margin-top:6px}
 
 /* toast */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;
@@ -1864,6 +1929,16 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <div id="toOverlay"><div class="po-inner">
   <div class="nfp-kick" id="poKick">TURNOVER</div>
+  <svg class="po2-def" viewBox="0 0 150 220">
+    <circle class="kh3" cx="75" cy="26" r="14"/>
+    <path class="kb3" d="M75 44 L75 118" style="stroke-width:28"/>
+    <path class="kb3" d="M70 54 L44 10" style="stroke-width:14"/>
+    <path class="kb3" d="M80 54 L106 10" style="stroke-width:14"/>
+    <path class="kb3" d="M75 120 L50 158 L68 190"/>
+    <path class="kb3" d="M75 120 L98 156 L84 192"/>
+  </svg>
+  <div class="po2-iball"></div>
+  <div class="po2-flash"></div>
   <div class="po-bar">
     <img id="poA" alt="">
     <div class="po-streak"></div>
@@ -1873,6 +1948,17 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="po-title" id="poTitle">TAKEAWAY</div>
   <div class="po-plus" id="poPlus">+6</div>
   <div class="po-sub" id="poSub"></div>
+</div></div>
+
+<!-- NFL FINAL: gridiron steel slab -->
+<div id="nf2Overlay"><div class="nf2-inner">
+  <div class="nfp-kick">FINAL WHISTLE</div>
+  <div class="nf2-slab">
+    <img class="nf2-logo" id="nf2Logo" alt="">
+    <div class="nf2-name" id="nf2Name">WINNER</div>
+    <div class="nf2-score" id="nf2Score"></div>
+    <div class="nf2-sub" id="nf2Sub"></div>
+  </div>
 </div></div>
 
 <!-- TV link panel -->
@@ -2016,7 +2102,7 @@ function showSetup(){
 function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
   if(nflPoll){clearInterval(nflPoll);nflPoll=null;} if(nflDemoTimer){clearInterval(nflDemoTimer);nflDemoTimer=null;}
   if(typeof stopAmbient==="function")stopAmbient();
-  ["endKickoff","endRedZone","endNoise","endTouchdown","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
+  ["endKickoff","endRedZone","endNoise","endTouchdown","endTwoMin","endTurnover","endFinalNFL"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(typeof endAnthem==="function")endAnthem();
   if(typeof endK==="function")endK();
   if(typeof endHR2==="function")endHR2();
@@ -2815,7 +2901,7 @@ async function replayLastHR(fn){
    ============================================================ */
 /* one central guard: no takeover ever stacks on another */
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||nf2Playing;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -3142,7 +3228,7 @@ async function tickNFL(first){
     if(st.state==="post"&&!NFLSEEN.final){
       NFLSEEN.final=true;
       const homeWon=G.home.score>G.away.score;
-      triggerFinal({winner:homeWon?G.home:G.away,aw:G.away,hm:G.home,walkoff:false});
+      triggerFinalNFL({winner:homeWon?G.home:G.away,aw:G.away,hm:G.home});
     }
   }catch(e){$("#statusTxt").textContent="RECONNECTING…";}
 }
@@ -3242,10 +3328,32 @@ function triggerTurnover(info){
   $("#poBall").classList.toggle("toHome",toHome);   // ball snatched toward the recovering side
   $("#poPlus").style.display=info.pickSix?"":"none";
   $("#poSub").textContent=((rec.name||"")+" BALL").toUpperCase();
-  toOv.classList.remove("show"); void toOv.offsetWidth; toOv.classList.add("show");
-  clearTimeout(triggerTurnover._t); triggerTurnover._t=setTimeout(endTurnover,6500);
+  const isInt=info.pickSix||/INTERCEPT/i.test(info.kind||"");   // INTs get the leaping-pick scene
+  toOv.classList.remove("show"); toOv.classList.toggle("int",isInt);
+  void toOv.offsetWidth; toOv.classList.add("show");
+  clearTimeout(triggerTurnover._t); triggerTurnover._t=setTimeout(endTurnover,isInt?7500:6500);
 }
 function endTurnover(){clearTimeout(triggerTurnover._t);toOv.classList.remove("show");toPlaying=false;}
+
+/* NFL final: gunmetal slab rises, etched winner, one light sweep */
+const nf2Ov=$("#nf2Overlay");
+let nf2Playing=false;
+function triggerFinalNFL(info){
+  info=info||{};
+  if(takeoverBusy())return; nf2Playing=true; hideWalkup();
+  const aw=info.aw||G.away, hm=info.hm||G.home;
+  const tie=aw.score===hm.score;
+  const winner=info.winner||(hm.score>aw.score?hm:aw);
+  const loser=(winner===hm)?aw:hm;
+  $("#nf2Logo").src=winner.logo||"";
+  $("#nf2Logo").style.display=winner.logo?"":"none";
+  $("#nf2Name").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
+  $("#nf2Score").textContent=`${aw.abbr} ${aw.score} — ${hm.score} ${hm.abbr}`;
+  $("#nf2Sub").textContent=tie?"TIE GAME":((winner.name||"")+" DEFEAT THE "+(loser.name||"")).toUpperCase();
+  nf2Ov.classList.remove("show"); void nf2Ov.offsetWidth; nf2Ov.classList.add("show");
+  clearTimeout(triggerFinalNFL._t); triggerFinalNFL._t=setTimeout(endFinalNFL,9000);
+}
+function endFinalNFL(){clearTimeout(triggerFinalNFL._t);nf2Ov.classList.remove("show");nf2Playing=false;}
 
 /* season line + current hit streak + (optionally) career vs a pitcher, in ONE call */
 async function fetchBatter(id,oppId){
@@ -3299,7 +3407,7 @@ $("#toBtn").onclick=()=>{const r=Math.random(); const pickSix=r<.33;
   triggerTurnover({team:NG.posHome?G.away:G.home,
     kind:(pickSix||r<.66)?"INTERCEPTION":"FUMBLE",pickSix});};
 $("#nfBtn").onclick=()=>{const hw=G.home.score>=G.away.score;
-  triggerFinal({winner:hw?G.home:G.away,aw:G.away,hm:G.home,walkoff:false});};
+  triggerFinalNFL({winner:hw?G.home:G.away,aw:G.away,hm:G.home});};
 if(VENUE)$("#venueTag").textContent=VENUE.toUpperCase();
 function demoStats(){
   const onBase=G.bases.filter(Boolean).length;
@@ -3451,13 +3559,13 @@ async function startReel(){
     if(!reelOn)break;
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
-    await reelStep(()=>triggerKickoff(), 7000);
-    await reelStep(()=>triggerRedZone({team:G.home,yards:8}), 6500);
-    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6000);
+    await reelStep(()=>triggerKickoff(), 8300);
+    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 8000);
+    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6500);
     await reelStep(()=>triggerTouchdown({team:G.home}), 8000);
-    await reelStep(()=>triggerTwoMin({q:4}), 6500);
-    await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 7000);
-    await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:false}), 9500);
+    await reelStep(()=>triggerTwoMin({q:4,toA:2,toH:1}), 6500);
+    await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 8000);
+    await reelStep(()=>triggerFinalNFL({winner:G.home,aw:G.away,hm:G.home}), 9500);
   }
 }
 
