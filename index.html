@@ -2443,9 +2443,11 @@ function triggerWalkup(info){
   if(info.avg!=null&&info.avg!=="")tiles.push(["AVG",fmtAvg(info.avg)]);
   if(info.hr!=null&&info.hr!=="")tiles.push(["HR",String(info.hr)]);
   if(info.rbi!=null&&info.rbi!=="")tiles.push(["RBI",String(info.rbi)]);
-  tiles.forEach(([k,v])=>{const d=document.createElement("div");d.className="wu-stat";
-    d.innerHTML=`<div class="v">${v}</div><div class="k">${k}</div>`;st.appendChild(d);
-  });   // final stat values shown immediately — no count-up ramp
+  tiles.forEach(([k,v],i)=>{const d=document.createElement("div");d.className="wu-stat";
+    d.innerHTML=`<div class="v"></div><div class="k">${k}</div>`;st.appendChild(d);
+    const vd=d.querySelector(".v");
+    setTimeout(()=>countUp(vd,v),450+i*150);   // numbers roll up from zero as each tile lands
+  });
   wuCard.classList.remove("show"); void wuCard.offsetWidth;
   wuCard.classList.add("show");
   clearTimeout(wuHideT);
