@@ -1073,14 +1073,14 @@ body.nfl .nfl-dd{display:block}
   font-size:clamp(16px,2vw,24px);opacity:0}
 #nmOverlay.show .dm-sub{animation:anFade .4s .9s both}
 
-/* ---- TOUCHDOWN (through the uprights): ball sails up through the goal posts,
-   they flash gold, TOUCHDOWN erupts, score bug ticks +6 ---- */
+/* ---- TOUCHDOWN (through the uprights): ball SPIRALS up through the goal
+   posts, they burst white with a shockwave ring, TOUCHDOWN erupts, +6 ---- */
 #tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .3s;overflow:hidden;
-  background:radial-gradient(1100px 780px at 50% 62%,
-    color-mix(in srgb,var(--nflOff,#e31837) 68%,#000) 0%, #0a0e15 58%, #04060a 100%)}
+  background:radial-gradient(1200px 760px at 50% 112%,
+    color-mix(in srgb,var(--nflOff,#e31837) 64%,#000) 0%, #0a0e15 52%, #04060a 100%)}
 #tdOverlay.show{display:block;opacity:1}
 /* rotating stadium light rays behind the posts */
-#tdOverlay::before{content:"";position:absolute;left:50%;top:56%;width:200vmax;height:200vmax;
+#tdOverlay::before{content:"";position:absolute;left:50%;top:52%;width:200vmax;height:200vmax;
   margin:-100vmax;pointer-events:none;opacity:0;
   background:conic-gradient(rgba(255,255,255,.12) 0 12deg,transparent 12deg 45deg,
     rgba(255,255,255,.12) 45deg 57deg,transparent 57deg 90deg,
@@ -1092,33 +1092,58 @@ body.nfl .nfl-dd{display:block}
     rgba(255,255,255,.12) 315deg 327deg,transparent 327deg 360deg)}
 #tdOverlay.show::before{animation:tdRays2 18s linear infinite, anFade2 .6s .9s both}
 @keyframes tdRays2{to{transform:rotate(360deg)}}
-/* the goal posts, centered, drawn in gold */
-.td-goal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;
-  width:min(60vh,540px);height:auto;opacity:0}
-#tdOverlay.show .td-goal{animation:anFade .4s .15s both}
-.td-goal path{fill:none;stroke:#f4c518;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 10px rgba(244,197,24,.6))}
-#tdOverlay.show .td-goal .up{animation:tdPostFlash .5s ease-out .95s both}
-@keyframes tdPostFlash{0%{stroke:#f4c518;filter:drop-shadow(0 0 10px rgba(244,197,24,.6))}
-  30%{stroke:#fff;filter:drop-shadow(0 0 26px #fff) drop-shadow(0 0 60px rgba(255,240,180,.9))}
-  100%{stroke:#f4c518;filter:drop-shadow(0 0 14px rgba(244,197,24,.75))}}
-/* the ball rockets straight up through the uprights with a trail */
-.td-ball{position:absolute;left:50%;bottom:6%;width:min(4.4vw,50px);height:min(2.9vw,32px);z-index:2;
-  transform:translateX(-50%) rotate(-18deg);opacity:0;
-  background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
+/* faint end-zone turf grounding the posts */
+.td-turf{position:absolute;left:0;right:0;bottom:0;height:16vh;z-index:0;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--nflOff,#e31837) 42%,#0a2817) 60%,#0a2817);
+  border-top:2px solid rgba(255,255,255,.18)}
+#tdOverlay.show .td-turf{animation:anFade2 .5s .2s both}
+/* the goal posts — uprights fill the upper half (ball flies through them),
+   crossbar mid-screen, base pole down to the turf; text sits below it */
+.td-goal{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:1;
+  width:min(56vh,500px);height:auto;opacity:0}
+#tdOverlay.show .td-goal{animation:tdGoalIn .5s cubic-bezier(.2,.9,.3,1) .15s both}
+@keyframes tdGoalIn{from{opacity:0;transform:translate(-50%,-36%) scale(.94)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.td-goal .tdgb,.td-goal .tdgu{fill:none;stroke:#f4c518;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 9px rgba(244,197,24,.7)) drop-shadow(0 2px 3px rgba(0,0,0,.85))}
+.td-goal .tdpad{fill:#e8622a;stroke:none}
+.td-goal .tdflag{fill:#e8622a;stroke:none;transform-box:fill-box;transform-origin:left center}
+#tdOverlay.show .td-goal .tdflag{animation:tdFlag 1.4s ease-in-out .6s infinite}
+@keyframes tdFlag{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.6) translateX(4px)}}
+#tdOverlay.show .td-goal .tdgu{animation:tdPostFlash .55s ease-out .98s both}
+@keyframes tdPostFlash{0%{stroke:#f4c518;filter:drop-shadow(0 0 9px rgba(244,197,24,.6))}
+  25%{stroke:#fff;filter:drop-shadow(0 0 30px #fff) drop-shadow(0 0 70px rgba(255,240,180,.95))}
+  100%{stroke:#f4c518;filter:drop-shadow(0 0 14px rgba(244,197,24,.8))}}
+/* ball SPIRALS straight up through the uprights with a trail */
+.td-ball{position:absolute;left:50%;bottom:8%;width:min(4.4vw,50px);height:min(2.9vw,32px);z-index:2;
+  opacity:0;background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
   box-shadow:0 0 18px rgba(255,230,180,.7)}
 .td-ball::after{content:"";position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(90deg,transparent 42%,#fff 46% 54%,transparent 58%);opacity:.8}
-#tdOverlay.show .td-ball{animation:tdKick 1s cubic-bezier(.25,.55,.3,1) .3s both}
-@keyframes tdKick{0%{opacity:0;bottom:2%}8%{opacity:1}
-  100%{opacity:0;bottom:82%;transform:translateX(-50%) rotate(-18deg) scale(.55)}}
-.td-trail{position:absolute;left:50%;bottom:8%;width:5px;height:0;z-index:1;transform:translateX(-50%);
-  background:linear-gradient(180deg,transparent,rgba(255,240,190,.85));opacity:0;
-  box-shadow:0 0 12px rgba(255,220,140,.7)}
+  background:linear-gradient(90deg,transparent 42%,#fff 46% 54%,transparent 58%);opacity:.85}
+#tdOverlay.show .td-ball{animation:tdKick 1s cubic-bezier(.25,.55,.3,1) .3s both,
+  tdSpiral .28s linear .3s 3 both}
+@keyframes tdKick{0%{opacity:0;bottom:3%}8%{opacity:1}90%{opacity:1}100%{opacity:0;bottom:88%}}
+@keyframes tdSpiral{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
+.td-trail{position:absolute;left:50%;bottom:6%;width:5px;height:0;z-index:1;transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,rgba(255,240,190,.9));opacity:0;
+  box-shadow:0 0 12px rgba(255,220,140,.75)}
 #tdOverlay.show .td-trail{animation:tdTrail 1s cubic-bezier(.25,.55,.3,1) .3s both}
-@keyframes tdTrail{0%{opacity:0;height:0}20%{opacity:.9}70%{height:64vh;opacity:.7}100%{opacity:0;height:64vh}}
+@keyframes tdTrail{0%{opacity:0;height:0}20%{opacity:.9}70%{height:72vh;opacity:.7}100%{opacity:0;height:72vh}}
+/* burst + shockwave ring at the crossbar where the ball splits the uprights */
+.td-burst{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:min(26vh,240px);height:min(26vh,240px);border-radius:50%;opacity:0;
+  background:radial-gradient(closest-side,#fff,rgba(255,240,190,.5) 40%,transparent 70%)}
+#tdOverlay.show .td-burst{animation:tdBurst .6s ease-out .95s both}
+@keyframes tdBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}
+  30%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}
+.td-ring{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
+  width:min(20vh,180px);height:min(20vh,180px);border:5px solid #fff;border-radius:50%;opacity:0}
+#tdOverlay.show .td-ring{animation:tdRing .7s ease-out 1s both}
+@keyframes tdRing{0%{opacity:.9;transform:translate(-50%,-50%) scale(.25)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
+/* text sits in the LOWER third, clear of the uprights (crosses only the pole) */
 .td2-inner{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2vh,18px);text-align:center;pointer-events:none}
+  justify-content:flex-end;gap:min(1.6vh,14px);text-align:center;pointer-events:none;
+  padding-bottom:min(11vh,90px)}
 .td2-title{font-size:clamp(56px,12.5vw,180px);line-height:.9;opacity:0}
 /* erupts up as the ball clears the uprights */
 #tdOverlay.show .td2-title{animation:td2Erupt .6s cubic-bezier(.2,1.05,.3,1) 1s both,
@@ -1593,12 +1618,18 @@ body.nfl .nfl-dd{display:block}
   <div class="dm-sub" id="dmSub"></div>
 </div></div>
 <div id="tdOverlay">
-  <svg class="td-goal" viewBox="0 0 300 345">
-    <path class="base" d="M150 340 L150 200 M70 200 L230 200"/>
-    <path class="up" d="M70 200 L70 40 M230 200 L230 40"/>
+  <div class="td-turf"></div>
+  <svg class="td-goal" viewBox="0 0 300 380">
+    <rect class="tdpad" x="131" y="350" width="38" height="16" rx="6"/>
+    <path class="tdgb" d="M150 358 L150 210 M55 210 L245 210"/>
+    <path class="tdgu" d="M55 210 L55 22 M245 210 L245 22"/>
+    <path class="tdflag" d="M55 22 L88 14 L55 33 Z"/>
+    <path class="tdflag" d="M245 22 L278 14 L245 33 Z"/>
   </svg>
   <div class="td-trail"></div>
   <div class="td-ball"></div>
+  <div class="td-burst"></div>
+  <div class="td-ring"></div>
   <div class="td2-inner">
     <div class="td2-title nfp-chrome">TOUCHDOWN</div>
     <div class="td2-sub" id="tdSub"></div>
