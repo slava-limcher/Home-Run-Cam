@@ -1270,6 +1270,39 @@ body.nfl .nfl-dd{display:block}
   background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px 20px;
   font-weight:700;opacity:0;transition:.3s;pointer-events:none}
 #toast.show{opacity:1}
+
+/* =================== TV DISPLAY MODE (chromeless jumbotron) =================== */
+.tvbtn{background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:9px 16px;
+  font-weight:800;color:#fff}
+.tvbtn:hover{background:#153a78}
+body.tvmode #setup{display:none!important}
+body.tvmode .topbar .back,body.tvmode #tvBtn{display:none}
+body.tvmode .controls{display:none}
+body.tvmode #boardHint{display:none}
+body.tvmode .scorewrap{justify-content:center}
+/* TV link panel */
+#tvpanel{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
+  background:rgba(2,6,14,.72);backdrop-filter:blur(3px)}
+#tvpanel.hidden{display:none}
+.tvp-card{position:relative;width:min(560px,92vw);background:linear-gradient(180deg,#0f2244,#08152c);
+  border:1px solid var(--line);border-radius:18px;padding:28px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6);text-align:center}
+.tvp-card h3{font-size:22px;font-weight:900;letter-spacing:1px;margin-bottom:6px}
+.tvp-card p{color:var(--dim);font-size:14px;margin-bottom:16px}
+#tvLink{width:100%;background:#04101f;border:1px solid var(--line);border-radius:10px;color:#bcd0ff;
+  padding:12px 14px;font-size:13px;font-family:monospace;margin-bottom:16px}
+.tvp-btns{display:flex;gap:12px;justify-content:center}
+.tvp-btns button{border-radius:11px;padding:12px 22px;font-weight:800;font-size:15px}
+#tvCopy{background:var(--navy2);border:1px solid var(--line);color:#fff}
+#tvCopy:hover{background:#153a78}
+#tvOpen{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff}
+#tvOpen:hover{filter:brightness(1.08)}
+.tvp-x{position:absolute;top:12px;right:14px;background:none;color:var(--dim);font-size:20px;font-weight:900}
+.tvp-x:hover{color:#fff}
+/* reel badge */
+#reelBadge{position:fixed;bottom:16px;right:18px;z-index:60;background:rgba(4,14,34,.8);
+  border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:800;letter-spacing:2px;
+  font-size:13px;color:var(--gold);pointer-events:none}
+#reelBadge.hidden{display:none}
 </style>
 </head>
 <body>
@@ -1319,6 +1352,7 @@ body.nfl .nfl-dd{display:block}
 <div id="board">
   <div class="topbar">
     <button class="back" id="backBtn">◀ Games</button>
+    <button class="tvbtn" id="tvBtn">📺 TV View</button>
     <div class="logo">
       <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.6"/><path d="M6 4c3 2 5 6 5 8s-2 6-5 8M18 4c-3 2-5 6-5 8s2 6 5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
       HOME RUN CAM
@@ -1726,6 +1760,21 @@ body.nfl .nfl-dd{display:block}
   <div class="po-plus" id="poPlus">+6</div>
   <div class="po-sub" id="poSub"></div>
 </div></div>
+
+<!-- TV link panel -->
+<div id="tvpanel" class="hidden">
+  <div class="tvp-card">
+    <button class="tvp-x" id="tvClose">✕</button>
+    <h3>📺 TV DISPLAY</h3>
+    <p>Open this link on the venue's big screen — it runs the jumbotron full-screen, no controls.</p>
+    <input id="tvLink" readonly>
+    <div class="tvp-btns">
+      <button id="tvCopy">Copy Link</button>
+      <button id="tvOpen">Open TV View ↗</button>
+    </div>
+  </div>
+</div>
+<div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <div id="toast"></div>
 
@@ -2758,13 +2807,13 @@ let nflPoll=null, nflDemoTimer=null, nflPk=null;
 let NG={q:1,clock:"15:00",sec:900,down:1,dist:10,ytez:75,posHome:false,dd:""};
 let NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:false};
 function teamLogo(t){return (t&&t.logo)||((t&&t.id&&!t.colorHex)?logoURL(t.id):transparentPx());}
-function setLeague(l){
+function applyLeagueClass(l){   // league visuals only, no schedule fetch (used by TV/reel)
   LEAGUE=l;
   document.body.classList.toggle("nfl",l==="nfl");
   $("#lgMLB").classList.toggle("on",l==="mlb");
   $("#lgNFL").classList.toggle("on",l==="nfl");
-  loadSchedule();
 }
+function setLeague(l){ applyLeagueClass(l); loadSchedule(); }
 async function loadScheduleNFL(){
   $("#dlabel").textContent=dateLabel(curDate);
   const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
@@ -3166,11 +3215,121 @@ $("#finalBtn").onclick=()=>{
   triggerFinal({winner:homeWon?G.home:G.away,walkoff,aw:G.away,hm:G.home,inning:G.inning});
 };
 
+/* ============================================================
+   TV DISPLAY + DEMO REEL
+   ============================================================ */
+function buildTvURL(){
+  const base=location.origin+location.pathname.replace(/(demo\/?|index\.html)$/,"");
+  if(MODE==="live"){
+    const pk=LEAGUE==="nfl"?nflPk:livePk;
+    return `${base}?tv=1&lg=${LEAGUE}&pk=${pk}`;
+  }
+  return `${base}?tv=1&dl=${LEAGUE||"mlb"}`;
+}
+$("#tvBtn").onclick=()=>{ $("#tvLink").value=buildTvURL(); $("#tvpanel").classList.remove("hidden"); };
+$("#tvClose").onclick=()=>$("#tvpanel").classList.add("hidden");
+$("#tvCopy").onclick=()=>{ const i=$("#tvLink"); i.select();
+  try{navigator.clipboard.writeText(i.value);}catch(e){document.execCommand&&document.execCommand("copy");}
+  toast("📺 TV link copied"); };
+$("#tvOpen").onclick=()=>window.open(buildTvURL(),"_blank");
+
+/* start a live game on the TV from just its id (rebuild teams from the feed) */
+function startLiveByPkMLB(pk){
+  MODE="live"; stopAll();
+  G.away={id:0,abbr:"AWY",name:"Away",score:0};
+  G.home={id:0,abbr:"HOM",name:"Home",score:0};
+  G.inning=1;G.half="Top";G.balls=0;G.strikes=0;G.outs=0;G.bases=[false,false,false];G.battingHome=false;
+  lastHRIndex=-1; lastBatterId=null; anthemDone=false; lastKIndex=-1;
+  LIVE={batter:null,lastHR:null,lastK:null,box:null};
+  stretchDone=false; rallyKey=""; finalDone=false; lineupDone=false;
+  document.querySelector("#board .inning .lbl").textContent="INNING";
+  $("#statusTxt").textContent="CONNECTING…";
+  showBoard(); renderBoard(); startAmbient();
+  livePk=pk; tickLive(true); poll=setInterval(()=>tickLive(false),15000);
+}
+async function startLiveByIdNFL(id){
+  try{
+    const r=await fetch(`${ESPN}/summary?event=${id}`); const j=await r.json();
+    const comp=(j.header&&j.header.competitions&&j.header.competitions[0])||{};
+    const cs=comp.competitors||[];
+    const away=nflTeamOf(cs.find(c=>c.homeAway==="away")||cs[1]||{});
+    const home=nflTeamOf(cs.find(c=>c.homeAway==="home")||cs[0]||{});
+    startLiveGameNFL(id,away,home);
+  }catch(e){ $("#statusTxt").textContent="RECONNECTING…"; }
+}
+
+/* ---- DEMO REEL: cycles every animation, forever, for a demo screen ---- */
+let reelOn=false;
+const reelSleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function reelStep(fn,ms){ if(!reelOn)return; try{fn();}catch(e){} await reelSleep(ms); }
+function reelBoardMLB(){
+  MODE="demo"; stopAll(); applyLeagueClass("mlb");
+  G.away={...DEMO_TEAMS[0],score:2}; G.home={...DEMO_TEAMS[1],score:3};
+  G.inning=7;G.half="Bottom";G.balls=1;G.strikes=2;G.outs=2;G.bases=[true,false,true];G.battingHome=true;
+  G.demoBatter=null; rallyKey="";
+  document.querySelector("#board .inning .lbl").textContent="INNING";
+  $("#statusTxt").textContent="DEMO REEL"; $("#liveDot").style.display="none";
+  showBoard(); renderBoard(); startAmbient();
+}
+function reelBoardNFL(){
+  MODE="demo"; stopAll(); applyLeagueClass("nfl");
+  G.away={abbr:"KC",name:"Chiefs",score:20,logo:"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png",colorHex:"#e31837"};
+  G.home={abbr:"BUF",name:"Bills",score:17,logo:"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png",colorHex:"#00338d"};
+  NG={q:4,clock:"2:00",sec:120,down:3,dist:7,ytez:8,posHome:true,dd:"3RD & 7 • BUF BALL"};
+  document.documentElement.style.setProperty('--nflA',G.away.colorHex);
+  document.documentElement.style.setProperty('--nflH',G.home.colorHex);
+  $("#statusTxt").textContent="DEMO REEL"; $("#liveDot").style.display="none";
+  showBoard(); renderBoardNFL(); startAmbient();
+}
+async function startReel(){
+  reelOn=true;
+  document.body.classList.add("tvmode");
+  $("#reelBadge").classList.remove("hidden");
+  const sub="Yankees at Dodgers";
+  while(reelOn){
+    // ---- MLB ----
+    reelBoardMLB(); await reelSleep(2600);
+    await reelStep(()=>triggerLineup(demoLineup()), 13500);
+    await reelStep(()=>triggerAnthem({sub}), 11000);
+    await reelStep(()=>newDemoBatter(), 7500);
+    await reelStep(()=>triggerHR2({id:592450,name:"Aaron Judge",team:G.home,stats:{distance:462,exitVelo:114,seasonHR:41,rbi:2,sprayDeg:12}}), 9000);
+    await reelStep(()=>triggerHR2({id:660271,name:"Shohei Ohtani",team:G.home,stats:{distance:405,exitVelo:108,seasonHR:33,rbi:1,sprayDeg:-8}}), 9000);
+    await reelStep(()=>triggerHR2({id:605141,name:"Mookie Betts",team:G.home,stats:{distance:365,exitVelo:101,seasonHR:19,rbi:3,sprayDeg:28}}), 9000);
+    await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",inningTxt:"END 7"}), 7000);
+    await reelStep(()=>triggerStretch(), 7500);
+    await reelStep(()=>triggerRally({team:G.away,deficit:1,bases:[true,false,true],inning:9,half:"Top"}), 8000);
+    await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:true,inning:9}), 9500);
+    if(!reelOn)break;
+    // ---- NFL ----
+    reelBoardNFL(); await reelSleep(2600);
+    await reelStep(()=>triggerKickoff(), 7000);
+    await reelStep(()=>triggerRedZone({team:G.home,yards:8}), 6500);
+    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6000);
+    await reelStep(()=>triggerTouchdown({team:G.home}), 8000);
+    await reelStep(()=>triggerTwoMin({q:4}), 6500);
+    await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 7000);
+    await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:false}), 9500);
+  }
+}
+
+/* ---- router: ?reel / ?tv / normal ---- */
+(function initRouter(){
+  const q=new URLSearchParams(location.search);
+  const reel=q.has("reel")||/\/demo\/?$/.test(location.pathname);
+  if(reel){ startReel(); return; }
+  if(q.has("tv")){
+    document.body.classList.add("tvmode");
+    const dl=q.get("dl"), lg=q.get("lg"), pk=q.get("pk");
+    if(dl){ applyLeagueClass(dl); dl==="nfl"?startDemoNFL():startDemo(); }
+    else if(lg&&pk){ applyLeagueClass(lg); lg==="nfl"?startLiveByIdNFL(pk):startLiveByPkMLB(pk); }
+    else { applyLeagueClass("mlb"); startDemo(); }
+    return;
+  }
+  loadSchedule();
+})();
+
 // preload the video quietly
 window.addEventListener("load",()=>{ try{vid.load();}catch(e){} });
-
-// initial
-loadSchedule();
 </script>
 </body>
 </html>
