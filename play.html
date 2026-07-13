@@ -1301,9 +1301,11 @@ body.nfl .nfl-dd{display:block}
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.85)) drop-shadow(0 10px 22px rgba(0,0,0,.65))}
 #xpOverlay.show .xp2-man{animation:xp2In .4s cubic-bezier(.2,.8,.3,1) both}
 @keyframes xp2In{from{opacity:0;transform:translateX(calc(-50% - 60px))}to{opacity:1;transform:translateX(-50%)}}
-.xp2-leg{transform-origin:98px 142px;transform:rotate(-50deg)}
+/* this leg's geometry runs down-forward, so POSITIVE rotation = backswing, NEGATIVE = follow-through
+   (verified via headless render — the kickoff man's convention is the opposite) */
+.xp2-leg{transform-origin:98px 142px;transform:rotate(72deg)}
 #xpOverlay.show .xp2-leg{animation:xp2Swing .3s cubic-bezier(.6,0,.3,1) .8s both}
-@keyframes xp2Swing{0%{transform:rotate(-50deg)}72%{transform:rotate(76deg)}100%{transform:rotate(68deg)}}
+@keyframes xp2Swing{0%{transform:rotate(72deg)}72%{transform:rotate(-58deg)}100%{transform:rotate(-50deg)}}
 /* the REALISTIC ball (leather gradient + seam + laces), boots up through the BIG uprights;
    spin uses the standalone `rotate` property so it can't fight the boot's transform */
 .xp2-ball{position:absolute;left:33%;bottom:13%;width:min(5vw,58px);height:auto;z-index:3;opacity:0;
@@ -1312,9 +1314,9 @@ body.nfl .nfl-dd{display:block}
   xp2Spin .9s linear .9s both}
 #xpOverlay.show.miss .xp2-ball{animation:xp2Shank .9s cubic-bezier(.3,.55,.45,1) .9s both,
   xp2Spin .9s linear .9s both}
-@keyframes xp2Boot{0%{opacity:0;left:33%;bottom:13%;transform:scale(1)}10%{opacity:1}
+@keyframes xp2Boot{0%{opacity:0;left:31.5%;bottom:11.5%;transform:scale(1)}10%{opacity:1}
   55%{bottom:44%}100%{opacity:1;left:51%;bottom:68%;transform:scale(.72)}}
-@keyframes xp2Shank{0%{opacity:0;left:33%;bottom:13%;transform:scale(1)}10%{opacity:1}
+@keyframes xp2Shank{0%{opacity:0;left:31.5%;bottom:11.5%;transform:scale(1)}10%{opacity:1}
   55%{bottom:48%}100%{opacity:1;left:36%;bottom:76%;transform:scale(.68)}}  /* hooks wide LEFT of the near post */
 @keyframes xp2Spin{to{rotate:900deg}}
 /* impact flash + ring between the BIG uprights (good only) */
@@ -2068,7 +2070,7 @@ body.tvmode .scorewrap{justify-content:center}
     <path d="M70 56 Q94 44 112 60 L106 120 Q97 132 84 127 L72 118 Z" fill="url(#xp2JerG)" stroke="#8b96a2" stroke-width="1.5"/>
     <path d="M66 64 Q90 44 116 62 L112 76 Q92 58 70 76 Z" fill="#e6ebf0"/>
     <!-- hips -->
-    <path d="M78 114 L108 118 L106 148 L84 148 Z" fill="url(#xp2PntG)"/>
+    <path d="M78 114 L108 118 L106 144 Q96 152 86 146 L82 140 Z" fill="url(#xp2PntG)"/>
     <!-- near arm, thrown forward-up -->
     <path d="M100 68 L132 84 L150 66" fill="none" stroke="url(#xp2JerG)" stroke-width="16" stroke-linecap="round"/>
     <circle cx="154" cy="62" r="8.5" fill="#c9976b"/>
