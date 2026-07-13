@@ -3289,7 +3289,7 @@ function nflDemoTick(){
         triggerTwoPoint({team:off,good:g});
       }else{const g=Math.random()<.94;                        // otherwise kick the extra point
         if(g){if(off===G.home)G.home.score+=1;else G.away.score+=1;renderBoardNFL();}
-        triggerXP({team:off,good:g});}
+        triggerXP(Object.assign({team:off,good:g},demoXPInfo(g)));}
     },8700);
   }else{
     if(NG.dist<=0){NG.down=1;NG.dist=10;}
@@ -3394,7 +3394,7 @@ async function tickNFL(first){
         else if(isTD&&/fumble/i.test(txt)){NFLSEEN.tos.add(p.id);   // scoop & score — the DEFENSE scored
           triggerTurnover({kind:"FUMBLE RETURN",six:true,team:rec});}
         else if(isTD)triggerTouchdown({team:off,scorer:tdScorer(p),stat:tdStat(p)});
-        else if(isXP)triggerXP({team:off,good:true});
+        else if(isXP){LIVE.lastXP={p,team:off};triggerXP(xpInfoFor(off,p,plays,true));}
         else if(isTP)triggerTwoPoint({team:off,good:true});
         // else: field goal / safety — marked seen, no takeover
       }else if(/(extra\s*point.*(no good|missed|blocked|failed)|(?:two|2)[-\s]?point.*(no good|failed|fails|unsuccessful))/i.test(tt+" "+(p.text||""))&&!p.scoringPlay&&!NFLSEEN.pat.has(p.id)){
@@ -3402,7 +3402,7 @@ async function tickNFL(first){
         NFLSEEN.pat.add(p.id);
         const offm=((x.d.team&&x.d.team.abbreviation)===G.home.abbr)?G.home:G.away;
         if(/(?:two|2)[-\s]?point/i.test(tt+" "+(p.text||"")))triggerTwoPoint({team:offm,good:false});
-        else triggerXP({team:offm,good:false});
+        else {LIVE.lastXP={p,team:offm,miss:true};triggerXP(xpInfoFor(offm,p,plays,false));}
       }else if(/interception|fumble recovery \(opponent\)/i.test(tt)&&!p.scoringPlay&&!NFLSEEN.tos.has(p.id)){
         NFLSEEN.tos.add(p.id);
         const off2=((x.d.team&&x.d.team.abbreviation)===G.home.abbr)?G.home:G.away;
@@ -3542,10 +3542,33 @@ function triggerXP(info){
   const team=info.team||{}, good=info.good!==false;
   document.documentElement.style.setProperty('--nflOff',team.colorHex||"#e31837");
   xpOv.classList.toggle("miss",!good);
-  $("#xpBig").textContent=good?"GOOD!":"NO GOOD";
-  $("#xpScore").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`;
+  $("#xpBig").textContent=good?"SCORED!":"MISSED!";
+  // data card: away logo+score | kicker + tonight's XP line | home score+logo
+  $("#xpALogo").src=G.away.logo||""; $("#xpHLogo").src=G.home.logo||"";
+  $("#xpALogo").style.display=G.away.logo?"":"none";
+  $("#xpHLogo").style.display=G.home.logo?"":"none";
+  $("#xpASc").textContent=`${G.away.abbr} ${G.away.score}`;
+  $("#xpHSc").textContent=`${G.home.score} ${G.home.abbr}`;
+  $("#xpKName").textContent=(info.kicker||((team.name||"")+" KICKER")).toUpperCase();
+  $("#xpKStat").textContent=(info.stat||(good?"EXTRA POINT GOOD":"EXTRA POINT NO GOOD")).toUpperCase();
   xpOv.classList.remove("show"); void xpOv.offsetWidth; xpOv.classList.add("show");
-  clearTimeout(triggerXP._t); triggerXP._t=setTimeout(endXP,4800);
+  clearTimeout(triggerXP._t); triggerXP._t=setTimeout(endXP,6200);
+}
+/* kicker name + team's XP line tonight, from the live plays array */
+function xpInfoFor(team,p,plays,good){
+  let g=0,t=0;
+  for(const y of plays){
+    const yt=((y.p.type&&y.p.type.text)||"")+" "+(y.p.text||"");
+    if(!/extra\s*point/i.test(yt))continue;
+    if(((y.d.team&&y.d.team.abbreviation)||"")!==team.abbr)continue;
+    t++; if(!/no good|missed|blocked|failed/i.test(yt))g++;
+  }
+  return {team,good,kicker:tdScorer(p),stat:t?`${g}/${t} XP TONIGHT`:""};
+}
+function demoXPInfo(good){
+  const made=2+Math.floor(Math.random()*3);
+  return {kicker:"K #"+(2+Math.floor(Math.random()*8)),
+    stat:`${good?made:made-1}/${made} XP TONIGHT`};
 }
 function endXP(){clearTimeout(triggerXP._t);xpOv.classList.remove("show");xpPlaying=false;}
 function triggerTwoPoint(info){
@@ -3649,7 +3672,12 @@ $("#tdBtn").onclick=()=>{
   else if(LIVE.lastTD)   // replay the REAL last touchdown with its scorer + stat line
     triggerTouchdown({team:LIVE.lastTD.team,scorer:tdScorer(LIVE.lastTD.p),stat:tdStat(LIVE.lastTD.p)});
   else triggerTouchdown({team:NG.posHome?G.home:G.away});};
-$("#xpBtn").onclick=()=>triggerXP({team:NG.posHome?G.home:G.away,good:true});
+$("#xpBtn").onclick=()=>{
+  if(MODE!=="demo"&&LIVE.lastXP)   // replay the REAL last extra point
+    triggerXP({team:LIVE.lastXP.team,good:!LIVE.lastXP.miss,
+      kicker:tdScorer(LIVE.lastXP.p),stat:LIVE.lastXP.miss?"EXTRA POINT NO GOOD":"EXTRA POINT GOOD"});
+  else{const g=Math.random()<.9;
+    triggerXP(Object.assign({team:NG.posHome?G.home:G.away,good:g},demoXPInfo(g)));}};
 $("#tpBtn").onclick=()=>triggerTwoPoint({team:NG.posHome?G.home:G.away,good:Math.random()<.6});
 $("#tmBtn").onclick=()=>triggerTwoMin({q:NG.q===4?4:2,
   toA:(MODE==="demo")?1+Math.floor(Math.random()*3):undefined,
@@ -3814,7 +3842,7 @@ async function startReel(){
     await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 8000);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
-    await reelStep(()=>triggerXP({team:G.home,good:true}), 5300);
+    await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 6700);
     await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 5500);
     await reelStep(()=>triggerTwoMin({q:4,toA:2,toH:1}), 6500);
     await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 8500);
