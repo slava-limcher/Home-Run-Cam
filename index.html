@@ -1102,15 +1102,35 @@ body.nfl .nfl-dd{display:block}
 .kck-venue{color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
 #koOverlay.show .kck-venue{animation:anFade .5s 2.2s both}
 
-/* ---- RED ZONE (A · Camera Push): full field zooms down to the 20 ---- */
+/* ---- RED ZONE (A · Camera Push v2): dive in from OUTSIDE the stadium, land on a big field ---- */
+/* act one: aerial night view of the stadium exterior — the camera dives into the bowl */
+.rz4-air{position:absolute;inset:0;z-index:4;pointer-events:none;transform-origin:50% 47%;
+  background:
+    radial-gradient(60% 34% at 50% 47%, rgba(130,170,230,.12), transparent 70%),
+    radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.6px),
+    linear-gradient(180deg,#05080f 0%,#0a1120 55%,#0c1526 100%);
+  background-size:auto,26px 22px,auto}
+#rzOverlay.show .rz4-air{animation:rz4Zoom 1.8s cubic-bezier(.6,.05,.5,1) both,
+  anFade2 .35s 1.5s reverse both}   /* dissolves just as the bowl fills the frame */
+@keyframes rz4Zoom{from{transform:scale(1)}to{transform:scale(7)}}
+.rz4-bowl{position:absolute;left:50%;top:47%;width:min(46vw,560px);height:min(24vw,300px);
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(closest-side, #123f22 0 37%, #0e1622 40% 64%, #1c2536 66% 84%, #0d1320 86% 100%);
+  box-shadow:0 0 90px rgba(150,190,255,.20), inset 0 0 44px rgba(0,0,0,.7)}
+.rz4-bowl::before{content:"";position:absolute;left:34%;right:34%;top:37%;bottom:37%;
+  border:2px solid rgba(255,255,255,.55);border-radius:3px;
+  background:linear-gradient(90deg, transparent 48.5%, rgba(255,255,255,.5) 48.5% 51.5%, transparent 51.5%)}
+.rz4-lt{position:absolute;width:14px;height:14px;border-radius:50%;
+  background:radial-gradient(circle,#fff 0 18%,rgba(190,215,255,.85) 30%,transparent 70%);
+  box-shadow:0 0 18px 6px rgba(190,215,255,.45)}
 .rz2-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(2vh,18px);text-align:center}
 .rz2-title{font-weight:900;letter-spacing:2px;color:#fff;font-size:clamp(48px,9vw,120px);line-height:.95;
   text-shadow:0 8px 26px rgba(0,0,0,.7);opacity:0;z-index:3}
-#rzOverlay.show .rz2-title{animation:anFade .45s 2.6s both}   /* lands after the camera push */
+#rzOverlay.show .rz2-title{animation:anFade .45s 3.5s both}   /* lands after the dive + push */
 /* the drive so far — each play marches in as a chevron toward the goal */
 .rz3-drive{display:flex;align-items:center;gap:8px;min-height:34px;opacity:0;flex-wrap:wrap;justify-content:center}
-#rzOverlay.show .rz3-drive{animation:anFade .35s .3s both}
+#rzOverlay.show .rz3-drive{animation:anFade .35s 3.6s both}
 .rz3-chev{display:flex;align-items:center;background:#0d1118;border:1px solid rgba(255,255,255,.14);
   padding:5px 16px 5px 12px;font-weight:900;font-size:clamp(13px,1.4vw,17px);color:#fff;
   opacity:0;transform:translateX(-14px);
@@ -1119,34 +1139,35 @@ body.nfl .nfl-dd{display:block}
 .rz3-chev.loss{border-left:4px solid #6b7684;color:#9aa4b1}
 #rzOverlay.show .rz3-chev{animation:rz3ChevIn .3s cubic-bezier(.2,.9,.3,1) both}   /* per-chevron inline delay */
 @keyframes rz3ChevIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
-.rz2-card{width:min(82vw,1020px);background:#0d1118;border:1px solid rgba(255,255,255,.14);border-radius:16px;
-  box-shadow:0 18px 50px rgba(0,0,0,.6);padding:18px;opacity:0;overflow:hidden}
-#rzOverlay.show .rz2-card{animation:rz2In .4s ease .15s both}
-@keyframes rz2In{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.rz2-vp{position:relative;width:100%;overflow:hidden}
+/* act two: the field, now BIG and full-bleed (no card chrome) */
+.rz2-card{width:min(97vw,1640px);background:transparent;border:none;border-radius:0;
+  padding:0;opacity:0;overflow:hidden;filter:drop-shadow(0 22px 60px rgba(0,0,0,.65))}
+#rzOverlay.show .rz2-card{animation:rz2In .45s ease 1.35s both}   /* fades in under the dissolving aerial */
+@keyframes rz2In{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
+.rz2-vp{position:relative;width:100%;overflow:hidden;border-radius:10px}
 .rz2-vp svg{display:block;width:100%;height:auto;transform-origin:88% 50%}
-/* start zoomed OUT on the whole field, push in to the red-zone end */
-#rzOverlay.show .rz2-vp svg{animation:rz2Push 1.5s cubic-bezier(.5,0,.2,1) 1.4s both}
+/* then keep pushing: whole field down to the red-zone end */
+#rzOverlay.show .rz2-vp svg{animation:rz2Push 1.5s cubic-bezier(.5,0,.2,1) 1.9s both}
 @keyframes rz2Push{0%{transform:scale(1)}100%{transform:scale(2.5)}}
 .rz2-card .fieldbg{fill:#123f22}
 .rz2-card .yl{stroke:rgba(255,255,255,.45);stroke-width:2}
 .rz2-card .gl{stroke:#fff;stroke-width:4}
 .rz2-card .hash{stroke:rgba(255,255,255,.24);stroke-width:2;stroke-dasharray:2 16}
-.rz2-card .num{fill:rgba(255,255,255,.75);font-weight:900;font-style:italic;font-size:22px}
+.rz2-card .num{fill:rgba(255,255,255,.75);font-weight:900;font-style:italic;font-size:26px}
 .rz2-card .ez{fill:var(--nflOff,#e31837)}
-#rzOverlay.show .rz2-card .ez{animation:rz2Glow 1.5s ease-in-out 2.9s infinite}
+#rzOverlay.show .rz2-card .ez{animation:rz2Glow 1.5s ease-in-out 3.9s infinite}
 @keyframes rz2Glow{0%,100%{opacity:.5}50%{opacity:.95}}
-.rz2-card .eztxt{fill:rgba(255,255,255,.9);font-weight:900;font-size:16px;letter-spacing:4px}
+.rz2-card .eztxt{fill:rgba(255,255,255,.9);font-weight:900;font-size:18px;letter-spacing:4px}
 .rz2-card .ball{fill:#8a5a2b;stroke:#fff;stroke-width:2}
 #rzBallG{opacity:0}
-#rzOverlay.show #rzBallG{animation:rz2Ball .4s cubic-bezier(.2,1.1,.3,1) 3s both}
+#rzOverlay.show #rzBallG{animation:rz2Ball .4s cubic-bezier(.2,1.1,.3,1) 4s both}
 @keyframes rz2Ball{from{opacity:0}to{opacity:1}}
 /* radar ping where the ball lands */
 #rzPing{transform-box:fill-box;transform-origin:center;opacity:0}
-#rzOverlay.show #rzPing{animation:rz2Ping 1.3s ease-out 3.1s infinite}
+#rzOverlay.show #rzPing{animation:rz2Ping 1.3s ease-out 4.1s infinite}
 @keyframes rz2Ping{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
 .rz2-sub{color:#c6d2e0;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0;z-index:3}
-#rzOverlay.show .rz2-sub{animation:anFade .4s 3.2s both}
+#rzOverlay.show .rz2-sub{animation:anFade .4s 4.25s both}
 
 /* ---- 3RD DOWN (A · Money Down): letterpress + crossing spotlights ---- */
 .dm-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
@@ -1974,26 +1995,34 @@ body.tvmode .scorewrap{justify-content:center}
     <div class="kck-venue" id="koVenue"></div>
   </div>
 </div>
-<div id="rzOverlay"><div class="rz2-inner">
+<div id="rzOverlay">
+  <div class="rz4-air">
+    <div class="rz4-bowl"></div>
+    <i class="rz4-lt" style="left:34.5%;top:38%"></i>
+    <i class="rz4-lt" style="left:64%;top:38%"></i>
+    <i class="rz4-lt" style="left:33%;top:53%"></i>
+    <i class="rz4-lt" style="left:65.5%;top:53%"></i>
+  </div>
+  <div class="rz2-inner">
   <div class="rz2-title">RED ZONE</div>
   <div class="rz3-drive" id="rzDrive"></div>
   <div class="rz2-card"><div class="rz2-vp">
-    <svg viewBox="0 0 620 150">
-      <rect class="fieldbg" x="0" y="20" width="500" height="110"/>
-      <rect class="ez" x="500" y="20" width="120" height="110"/>
-      <line class="hash" x1="0" y1="52" x2="500" y2="52"/>
-      <line class="hash" x1="0" y1="98" x2="500" y2="98"/>
-      <line class="yl" x1="50" y1="20" x2="50" y2="130"/>
-      <line class="yl" x1="150" y1="20" x2="150" y2="130"/>
-      <line class="yl" x1="250" y1="20" x2="250" y2="130"/>
-      <line class="yl" x1="350" y1="20" x2="350" y2="130"/>
-      <line class="yl" x1="420" y1="20" x2="420" y2="130"/>
-      <line class="yl" x1="460" y1="20" x2="460" y2="130"/>
-      <line class="gl" x1="500" y1="20" x2="500" y2="130"/>
-      <text class="num" x="420" y="80" text-anchor="middle">20</text>
-      <text class="num" x="460" y="80" text-anchor="middle">10</text>
-      <text class="eztxt" x="560" y="80" text-anchor="middle" transform="rotate(-90 560 78)">END ZONE</text>
-      <g id="rzBallG" transform="translate(460 75)">
+    <svg viewBox="0 0 620 190">
+      <rect class="fieldbg" x="0" y="10" width="500" height="170"/>
+      <rect class="ez" x="500" y="10" width="120" height="170"/>
+      <line class="hash" x1="0" y1="59" x2="500" y2="59"/>
+      <line class="hash" x1="0" y1="131" x2="500" y2="131"/>
+      <line class="yl" x1="50" y1="10" x2="50" y2="180"/>
+      <line class="yl" x1="150" y1="10" x2="150" y2="180"/>
+      <line class="yl" x1="250" y1="10" x2="250" y2="180"/>
+      <line class="yl" x1="350" y1="10" x2="350" y2="180"/>
+      <line class="yl" x1="420" y1="10" x2="420" y2="180"/>
+      <line class="yl" x1="460" y1="10" x2="460" y2="180"/>
+      <line class="gl" x1="500" y1="10" x2="500" y2="180"/>
+      <text class="num" x="420" y="102" text-anchor="middle">20</text>
+      <text class="num" x="460" y="102" text-anchor="middle">10</text>
+      <text class="eztxt" x="560" y="100" text-anchor="middle" transform="rotate(-90 560 95)">END ZONE</text>
+      <g id="rzBallG" transform="translate(460 95)">
         <circle id="rzPing" r="12" fill="none" stroke="#fff" stroke-width="2"/>
         <ellipse class="ball" rx="11" ry="7"/>
         <line x1="-4" y1="0" x2="4" y2="0" stroke="#fff" stroke-width="1.6"/>
@@ -3510,7 +3539,7 @@ function triggerRedZone(info){
   if(takeoverBusy())return; rzPlaying=true; hideWalkup();
   document.documentElement.style.setProperty('--nflOff',(info.team&&info.team.colorHex)||"#e31837");
   const y=Math.max(1,Math.min(20,Math.round(info.yards||18)));
-  $("#rzBallG").setAttribute("transform",`translate(${500-y*4} 75)`);   // last 20 yds = 420→500 (4px/yd)
+  $("#rzBallG").setAttribute("transform",`translate(${500-y*4} 95)`);   // last 20 yds = 420→500 (4px/yd)
   $("#rzBallYd").textContent=y;
   $("#rzSub").textContent=(((info.team&&info.team.name)||"OFFENSE")+` DRIVE • ${y} YARD${y>1?"S":""} TO THE END ZONE`).toUpperCase();
   // the drive so far: play gains march in as chevrons
@@ -3519,11 +3548,11 @@ function triggerRedZone(info){
   drv.forEach((g,i)=>{const c=document.createElement("div");
     c.className="rz3-chev "+(g<0?"loss":"gain");
     c.textContent=(g>0?"+":"")+g;
-    c.style.animationDelay=(.4+i*.09)+"s";
+    c.style.animationDelay=(3.7+i*.09)+"s";   // chevrons land after the dive + push
     dr.appendChild(c);});
   dr.style.display=drv.length?"":"none";
   rzOv.classList.remove("show"); void rzOv.offsetWidth; rzOv.classList.add("show");
-  clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,7500);
+  clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,8600);
 }
 function endRedZone(){clearTimeout(triggerRedZone._t);rzOv.classList.remove("show");rzPlaying=false;}
 function rzFakeDrive(){const n=4+Math.floor(Math.random()*4);
@@ -3888,7 +3917,7 @@ async function startReel(){
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
     await reelStep(()=>triggerKickoff(), 7000);
-    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 8000);
+    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 9100);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
     await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 6700);
