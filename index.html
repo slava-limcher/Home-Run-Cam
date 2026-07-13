@@ -1274,51 +1274,58 @@ body.nfl .nfl-dd{display:block}
   background:radial-gradient(rgba(255,255,255,.14) 1.2px,transparent 1.8px);background-size:11px 9px}
 .xp2-fall::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;
   background:linear-gradient(180deg,#10381f,#0a2817)}
-.xp2-fgoal{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(34vh,300px);height:auto}
-.xp2-fgoal path{fill:none;stroke:#f4c518;stroke-width:12;stroke-linecap:round;
-  filter:drop-shadow(0 0 10px rgba(244,197,24,.6))}
-/* the real stadium still (same asset as the TD — goal posts center frame) */
+/* the stadium still (dedicated XP backdrop; the big drawn post supplies the goal) */
 .xp2-photo{position:absolute;inset:-3%;z-index:1;opacity:0;
-  background:url("stadium.jpg") center 38%/cover no-repeat}
+  background:url("stadium2.jpg") center 45%/cover no-repeat}
 #xpOverlay.show .xp2-photo{animation:anFade2 .4s both, xp2Ken 6.5s ease-out both}
 @keyframes xp2Ken{from{transform:scale(1)}to{transform:scale(1.05)}}
 .xp2-vig{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:radial-gradient(120% 90% at 50% 45%, transparent 52%, rgba(2,4,8,.8) 100%),
     linear-gradient(180deg, rgba(2,4,8,.45), transparent 30% 68%, rgba(2,4,8,.7))}
-/* the WHITE kicker silhouette (same rig as the kickoff man, white for contrast on the photo) */
-.xp2-man{position:absolute;left:36%;bottom:9%;height:min(36vh,320px);width:auto;z-index:3;
+/* the BIG near goal post — close-camera view, uprights running past the top of frame */
+.xp2-goal{position:absolute;left:52%;top:38%;transform:translate(-50%,-50%);z-index:2;
+  width:min(62vh,560px);height:auto;opacity:0}
+#xpOverlay.show .xp2-goal{animation:xp2GoalIn .5s cubic-bezier(.2,.9,.3,1) .1s both}
+@keyframes xp2GoalIn{from{opacity:0;transform:translate(-50%,-44%) scale(.96)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.xp2-goal .xgp{fill:none;stroke:#f4c518;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 10px rgba(244,197,24,.65)) drop-shadow(0 2px 3px rgba(0,0,0,.85))}
+.xp2-goal .xgpad{fill:#e8622a}
+#xpOverlay.show:not(.miss) .xp2-goal .xgu{animation:xp2PostFlash .55s ease-out 1.78s both}
+@keyframes xp2PostFlash{0%{stroke:#f4c518;filter:drop-shadow(0 0 10px rgba(244,197,24,.6))}
+  25%{stroke:#fff;filter:drop-shadow(0 0 30px #fff) drop-shadow(0 0 66px rgba(255,240,180,.95))}
+  100%{stroke:#f4c518;filter:drop-shadow(0 0 14px rgba(244,197,24,.85))}}
+/* the REALISTIC kicker — filled, shaded vector athlete (plain white/grey kit, no numbers/marks) */
+.xp2-man{position:absolute;left:29%;bottom:5%;height:min(44vh,400px);width:auto;z-index:3;
   transform:translateX(-50%);opacity:0;
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.9)) drop-shadow(0 8px 18px rgba(0,0,0,.7))}
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.85)) drop-shadow(0 10px 22px rgba(0,0,0,.65))}
 #xpOverlay.show .xp2-man{animation:xp2In .4s cubic-bezier(.2,.8,.3,1) both}
 @keyframes xp2In{from{opacity:0;transform:translateX(calc(-50% - 60px))}to{opacity:1;transform:translateX(-50%)}}
-.xp2-man .xb{fill:none;stroke:#eef3f8;stroke-width:22;stroke-linecap:round;stroke-linejoin:round}
-.xp2-man .xh{fill:#eef3f8;stroke:none}
-.xp2-leg{transform-origin:84px 120px;transform:rotate(-48deg)}
+.xp2-leg{transform-origin:98px 142px;transform:rotate(-50deg)}
 #xpOverlay.show .xp2-leg{animation:xp2Swing .3s cubic-bezier(.6,0,.3,1) .8s both}
-@keyframes xp2Swing{0%{transform:rotate(-48deg)}72%{transform:rotate(78deg)}100%{transform:rotate(70deg)}}
-/* ball boots from the foot up through the photo's uprights (center frame);
+@keyframes xp2Swing{0%{transform:rotate(-50deg)}72%{transform:rotate(76deg)}100%{transform:rotate(68deg)}}
+/* the REALISTIC ball (leather gradient + seam + laces), boots up through the BIG uprights;
    spin uses the standalone `rotate` property so it can't fight the boot's transform */
-.xp2-ball{position:absolute;left:34%;bottom:12.5%;width:min(3.2vw,36px);height:min(2.1vw,25px);z-index:3;
-  background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
-  box-shadow:0 0 14px rgba(255,230,180,.6);opacity:0}
+.xp2-ball{position:absolute;left:33%;bottom:13%;width:min(5vw,58px);height:auto;z-index:3;opacity:0;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.7))}
 #xpOverlay.show .xp2-ball{animation:xp2Boot .9s cubic-bezier(.3,.55,.45,1) .9s both,
   xp2Spin .9s linear .9s both}
 #xpOverlay.show.miss .xp2-ball{animation:xp2Shank .9s cubic-bezier(.3,.55,.45,1) .9s both,
   xp2Spin .9s linear .9s both}
-@keyframes xp2Boot{0%{opacity:0;left:34%;bottom:12.5%;transform:scale(1)}10%{opacity:1}
-  55%{bottom:42%}100%{opacity:1;left:49%;bottom:62%;transform:scale(.48)}}
-@keyframes xp2Shank{0%{opacity:0;left:34%;bottom:12.5%;transform:scale(1)}10%{opacity:1}
-  55%{bottom:46%}100%{opacity:1;left:39.5%;bottom:70%;transform:scale(.45)}}  /* hooks wide LEFT */
+@keyframes xp2Boot{0%{opacity:0;left:33%;bottom:13%;transform:scale(1)}10%{opacity:1}
+  55%{bottom:44%}100%{opacity:1;left:51%;bottom:68%;transform:scale(.72)}}
+@keyframes xp2Shank{0%{opacity:0;left:33%;bottom:13%;transform:scale(1)}10%{opacity:1}
+  55%{bottom:48%}100%{opacity:1;left:36%;bottom:76%;transform:scale(.68)}}  /* hooks wide LEFT of the near post */
 @keyframes xp2Spin{to{rotate:900deg}}
-/* impact flash + ring between the photo's uprights (good only) */
-.xp2-flash{position:absolute;left:49.5%;top:36%;width:min(15vh,140px);height:min(15vh,140px);z-index:3;
+/* impact flash + ring between the BIG uprights (good only) */
+.xp2-flash{position:absolute;left:52%;top:30%;width:min(17vh,160px);height:min(17vh,160px);z-index:3;
   transform:translate(-50%,-50%);border-radius:50%;opacity:0;pointer-events:none;
   background:radial-gradient(closest-side,#fff,rgba(255,240,190,.5) 40%,transparent 70%)}
 #xpOverlay.show:not(.miss) .xp2-flash{animation:xp2Pop .5s ease-out 1.72s both}
 @keyframes xp2Pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
   25%{opacity:.95}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
-.xp2-ring{position:absolute;left:49.5%;top:36%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;
-  width:min(13vh,120px);height:min(13vh,120px);border:5px solid #fff;border-radius:50%;opacity:0}
+.xp2-ring{position:absolute;left:52%;top:30%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+  width:min(14vh,130px);height:min(14vh,130px);border:5px solid #fff;border-radius:50%;opacity:0}
 #xpOverlay.show:not(.miss) .xp2-ring{animation:xp2Ring .7s ease-out 1.75s both}
 @keyframes xp2Ring{0%{opacity:.9;transform:translate(-50%,-50%) scale(.25)}
   100%{opacity:0;transform:translate(-50%,-50%) scale(2.1)}}
@@ -2033,26 +2040,66 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <audio id="tdCheer" src="cheer.mp3" preload="auto"></audio>
 <div id="xpOverlay">
-  <div class="xp2-fall">
-    <svg class="xp2-fgoal" viewBox="0 0 300 320">
-      <path d="M150 300 L150 170 M55 170 L245 170"/>
-      <path d="M55 170 L55 18 M245 170 L245 18"/>
-    </svg>
-  </div>
+  <div class="xp2-fall"></div>
   <div class="xp2-photo"></div>
   <div class="xp2-vig"></div>
-  <svg class="xp2-man" viewBox="0 0 160 230">
-    <circle class="xh" cx="58" cy="32" r="15"/>
-    <path class="xb" d="M62 50 L84 118" style="stroke-width:30"/>
-    <path class="xb" d="M66 62 L33 43" style="stroke-width:16"/>
-    <path class="xb" d="M68 66 L104 92" style="stroke-width:15"/>
-    <path class="xb" d="M84 120 L74 220"/>
+  <svg class="xp2-goal" viewBox="0 0 300 380">
+    <rect class="xgpad" x="131" y="350" width="38" height="16" rx="6"/>
+    <path class="xgp" d="M150 358 L150 210 M55 210 L245 210"/>
+    <path class="xgp xgu" d="M55 210 L55 0 M245 210 L245 0"/>
+  </svg>
+  <svg class="xp2-man" viewBox="0 0 200 260">
+    <defs>
+      <linearGradient id="xp2JerG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c4cf"/>
+      </linearGradient>
+      <linearGradient id="xp2PntG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#eef1f5"/><stop offset="1" stop-color="#94a0ac"/>
+      </linearGradient>
+    </defs>
+    <!-- far arm, swung back for balance -->
+    <path d="M76 76 L46 100 L38 128" fill="none" stroke="#a9b4c0" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="37" cy="132" r="8" fill="#c9976b"/>
+    <!-- plant leg: pant thigh, sock shin, cleat -->
+    <path d="M86 140 L64 186" fill="none" stroke="url(#xp2PntG)" stroke-width="23" stroke-linecap="round"/>
+    <path d="M64 186 L57 226" fill="none" stroke="#e8ecf0" stroke-width="15" stroke-linecap="round"/>
+    <path d="M50 224 L64 224 L76 236 Q76 242 68 242 L52 240 Q46 234 50 224 Z" fill="#171b21"/>
+    <!-- torso: jersey with shoulder-pad bulk -->
+    <path d="M70 56 Q94 44 112 60 L106 120 Q97 132 84 127 L72 118 Z" fill="url(#xp2JerG)" stroke="#8b96a2" stroke-width="1.5"/>
+    <path d="M66 64 Q90 44 116 62 L112 76 Q92 58 70 76 Z" fill="#e6ebf0"/>
+    <!-- hips -->
+    <path d="M78 114 L108 118 L106 148 L84 148 Z" fill="url(#xp2PntG)"/>
+    <!-- near arm, thrown forward-up -->
+    <path d="M100 68 L132 84 L150 66" fill="none" stroke="url(#xp2JerG)" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="154" cy="62" r="8.5" fill="#c9976b"/>
+    <!-- neck + helmet with facemask -->
+    <path d="M90 52 L94 60" stroke="#c9976b" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="86" cy="32" r="21" fill="#f4f7fa" stroke="#98a3af" stroke-width="1.5"/>
+    <path d="M99 18 a21 21 0 0 1 0 28" fill="none" stroke="#cfd6dd" stroke-width="5"/>
+    <path d="M102 22 Q112 30 104 44 L97 42 Q103 32 96 25 Z" fill="#272c33"/>
+    <path d="M104 26 L112 27 M105 33 L113 33 M103 39 L111 40" fill="none" stroke="#7d8894" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="88" cy="36" r="3.4" fill="#b9c2cc"/>
+    <!-- kicking leg group (swings at the hip) -->
     <g class="xp2-leg">
-      <path class="xb" d="M84 120 L90 206"/>
-      <path class="xb" d="M90 206 L112 202" style="stroke-width:14"/>
+      <path d="M98 142 L116 190" fill="none" stroke="url(#xp2PntG)" stroke-width="23" stroke-linecap="round"/>
+      <path d="M116 190 L127 228" fill="none" stroke="#e8ecf0" stroke-width="15" stroke-linecap="round"/>
+      <path d="M120 222 L134 224 L150 234 Q152 240 144 242 L126 238 Q118 232 120 222 Z" fill="#171b21"/>
     </g>
   </svg>
-  <div class="xp2-ball"></div>
+  <svg class="xp2-ball" viewBox="0 0 64 40">
+    <defs>
+      <radialGradient id="xp2BallG" cx="35%" cy="28%" r="85%">
+        <stop offset="0%" stop-color="#b57a3d"/><stop offset="55%" stop-color="#8a5426"/>
+        <stop offset="100%" stop-color="#552f10"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="32" cy="20" rx="30" ry="18.5" fill="url(#xp2BallG)" stroke="#38200a" stroke-width="1.6"/>
+    <path d="M6 15 Q32 3 58 15" fill="none" stroke="#4a2a10" stroke-width="1.4" opacity=".85"/>
+    <ellipse cx="23" cy="12" rx="12" ry="5" fill="#fff" opacity=".16"/>
+    <path d="M18 20 L46 20" stroke="#f4f6f8" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M23 16.5 L23 23.5 M29 16 L29 24 M35 16 L35 24 M41 16.5 L41 23.5"
+      stroke="#f4f6f8" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
   <div class="xp2-flash"></div>
   <div class="xp2-ring"></div>
   <div class="xp2-top">
