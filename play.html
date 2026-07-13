@@ -837,23 +837,80 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #finalOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .5s;overflow:hidden;
   background:radial-gradient(900px 620px at 50% 30%, #241b0c 0%, #120d06 55%, #070502 100%)}
 #finalOverlay.show{display:block;opacity:1}
-#finalOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(560px 380px at 50% 40%, rgba(212,160,23,.16), transparent 70%)}
+/* per-league stadium background (NFL = photo, MLB = drawn night ballpark) with a slow push-in */
+.fg-bg{position:absolute;inset:-4%;z-index:0;opacity:0;pointer-events:none;background-position:center 42%;
+  background-size:cover;background-repeat:no-repeat}
+#finalOverlay.nfl .fg-bg{background-image:url("stadium.jpg")}
+#finalOverlay.mlb .fg-bg{
+  background:
+    radial-gradient(52% 30% at 17% 6%, rgba(214,232,255,.6), transparent 62%),
+    radial-gradient(52% 30% at 83% 6%, rgba(214,232,255,.6), transparent 62%),
+    radial-gradient(130% 80% at 50% 122%, #16451f 0%, #0c2a16 32%, transparent 60%),
+    radial-gradient(rgba(255,255,255,.09) 1.3px, transparent 1.9px),
+    linear-gradient(180deg,#0a1730 0%,#0b1a2c 46%,#0f2418 100%);
+  background-size:auto,auto,auto,11px 11px,auto;
+  background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat}
+#finalOverlay.show .fg-bg{animation:anFade2 .6s both, fgKen 9s ease-out both}
+@keyframes fgKen{from{transform:scale(1)}to{transform:scale(1.08)}}
+/* dark vignette + warm center glow so the gold reads over the scene */
+#finalOverlay::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    radial-gradient(680px 460px at 50% 42%, rgba(212,160,23,.22), transparent 66%),
+    radial-gradient(120% 92% at 50% 46%, transparent 34%, rgba(6,4,1,.88) 100%),
+    linear-gradient(180deg, rgba(6,4,1,.6), rgba(6,4,1,.32) 42%, rgba(6,4,1,.74))}
+/* rotating gold light rays behind the medallion */
+.fg-rays{position:absolute;left:50%;top:42%;width:200vmax;height:200vmax;margin:-100vmax;z-index:1;opacity:0;
+  pointer-events:none;
+  background:conic-gradient(rgba(245,214,123,.16) 0 7deg,transparent 7deg 30deg,
+    rgba(245,214,123,.16) 30deg 37deg,transparent 37deg 60deg,
+    rgba(245,214,123,.16) 60deg 67deg,transparent 67deg 90deg,
+    rgba(245,214,123,.16) 90deg 97deg,transparent 97deg 120deg,
+    rgba(245,214,123,.16) 120deg 127deg,transparent 127deg 150deg,
+    rgba(245,214,123,.16) 150deg 157deg,transparent 157deg 180deg,
+    rgba(245,214,123,.16) 180deg 187deg,transparent 187deg 210deg,
+    rgba(245,214,123,.16) 210deg 217deg,transparent 217deg 240deg,
+    rgba(245,214,123,.16) 240deg 247deg,transparent 247deg 270deg,
+    rgba(245,214,123,.16) 270deg 277deg,transparent 277deg 300deg,
+    rgba(245,214,123,.16) 300deg 307deg,transparent 307deg 330deg,
+    rgba(245,214,123,.16) 330deg 337deg,transparent 337deg 360deg)}
+#finalOverlay.show .fg-rays{animation:fgRaysSpin 26s linear infinite, anFade2 .9s .5s both}
+@keyframes fgRaysSpin{to{transform:rotate(360deg)}}
+/* gold shockwave radiating from the medallion on the drop */
+.fg-shock{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:1;pointer-events:none;
+  width:min(34vh,300px);height:min(34vh,300px);border:6px solid rgba(245,214,123,.9);border-radius:50%;opacity:0}
+#finalOverlay.show .fg-shock{animation:fgShock .85s ease-out .6s both}
+@keyframes fgShock{0%{opacity:.9;transform:translate(-50%,-50%) scale(.3)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
+/* white/gold screen pop as the medallion lands */
+.fg-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 42%, rgba(255,242,205,.92), transparent 56%)}
+#finalOverlay.show .fg-flash{animation:fgFlash .6s ease-out .58s both}
+@keyframes fgFlash{0%{opacity:0}22%{opacity:.9}100%{opacity:0}}
+/* falling confetti (built in JS, gold/white + winner accent) */
+.fg-confetti{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.fg-confetti i{position:absolute;top:0;border-radius:1px;opacity:0;
+  animation-name:fgConfFall;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes fgConfFall{0%{opacity:0;transform:translate3d(0,-9vh,0) rotate(0)}
+  8%{opacity:1}90%{opacity:1}100%{opacity:.85;transform:translate3d(var(--dx,0),112vh,0) rotate(var(--spin,540deg))}}
 .fg-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.8vh,16px);text-align:center;padding:20px}
 .fg-kick{color:#e9c968;font-weight:900;letter-spacing:12px;font-size:clamp(13px,1.9vw,24px);opacity:0}
 #finalOverlay.show .fg-kick{animation:anFade .6s .25s both}
 .fg-medalrow{display:flex;align-items:center;gap:min(2.6vw,28px)}
-.fg-medal{position:relative;width:min(32vh,280px);height:min(32vh,280px);border-radius:50%;
+.fg-medal{position:relative;width:min(40vh,360px);height:min(40vh,360px);border-radius:50%;
   background:conic-gradient(from 210deg,#8a6a1f,#f5d67b 20%,#b8860b 45%,#f7e6a2 70%,#8a6a1f);
-  box-shadow:0 18px 60px rgba(0,0,0,.7),0 0 44px rgba(212,160,23,.35);opacity:0}
-#finalOverlay.show .fg-medal{animation:fgIn .8s cubic-bezier(.2,.9,.3,1) .4s both}
-@keyframes fgIn{from{opacity:0;transform:scale(.55) rotate(-10deg)}to{opacity:1;transform:none}}
+  box-shadow:0 22px 70px rgba(0,0,0,.72),0 0 54px rgba(212,160,23,.4);opacity:0}
+#finalOverlay.show .fg-medal{animation:fgIn .8s cubic-bezier(.2,.9,.3,1) .4s both,
+  fgPulse 2.2s ease-in-out 1.4s infinite}
+@keyframes fgIn{from{opacity:0;transform:scale(.5) rotate(-12deg)}
+  62%{opacity:1;transform:scale(1.08) rotate(2deg)}to{opacity:1;transform:none}}
+@keyframes fgPulse{0%,100%{box-shadow:0 22px 70px rgba(0,0,0,.72),0 0 54px rgba(212,160,23,.4)}
+  50%{box-shadow:0 22px 70px rgba(0,0,0,.72),0 0 92px rgba(245,214,123,.72)}}
 .fg-disc{position:absolute;inset:12px;border-radius:50%;display:grid;place-items:center;
   background:radial-gradient(circle at 35% 30%, #241b0c, #0d0905 72%);
   border:2px solid rgba(245,214,123,.5)}
 .fg-disc img{width:62%;height:62%;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(0,0,0,.85))}
-.fg-laurel{width:min(11vh,96px);height:auto;opacity:0}
+.fg-laurel{width:min(14vh,124px);height:auto;opacity:0}
 .fg-laurel.flip{transform:scaleX(-1)}
 #finalOverlay.show .fg-laurel{animation:anFade2 .4s .7s both}
 .fg-laurel .stem{stroke-dasharray:100;stroke-dashoffset:100}
@@ -868,7 +925,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #finalOverlay.show .fg-laurel ellipse:nth-of-type(6){animation-delay:1.40s}
 #finalOverlay.show .fg-laurel ellipse:nth-of-type(7){animation-delay:1.48s}
 #finalOverlay.show .fg-laurel ellipse:nth-of-type(8){animation-delay:1.56s}
-.fg-title{font-weight:900;line-height:.95;letter-spacing:3px;font-size:clamp(40px,7.5vw,110px);
+.fg-title{font-weight:900;line-height:.95;letter-spacing:3px;font-size:clamp(52px,9.5vw,150px);
   background:
     linear-gradient(110deg, transparent 42%, rgba(255,244,200,.95) 50%, transparent 58%) no-repeat,
     linear-gradient(180deg,#f7e6a2,#d4a017 55%,#8a6a1f);
@@ -879,8 +936,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   anShine2 3s linear 2s infinite}
 @keyframes fgTitleIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .fg-plaque{background:linear-gradient(180deg,#171006,#0c0803);border:2px solid #b8860b;border-radius:10px;
-  padding:12px 36px;color:#f3e8c8;font-family:Georgia,'Times New Roman',serif;font-weight:700;
-  letter-spacing:3px;font-size:clamp(24px,4.2vw,52px);
+  padding:14px 44px;color:#f3e8c8;font-family:Georgia,'Times New Roman',serif;font-weight:700;
+  letter-spacing:3px;font-size:clamp(28px,5vw,62px);
   box-shadow:inset 0 2px 10px rgba(0,0,0,.9),0 10px 30px rgba(0,0,0,.6);opacity:0}
 #finalOverlay.show .fg-plaque{animation:anFade .6s 1.5s both}
 .fg-sub{color:#cbb87a;font-family:Georgia,'Times New Roman',serif;font-style:italic;
@@ -1784,6 +1841,11 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ FINAL / WALK-OFF — CHAMPAGNE GOLD ============ -->
 <div id="finalOverlay">
+  <div class="fg-bg"></div>
+  <div class="fg-rays"></div>
+  <div class="fg-shock"></div>
+  <div class="fg-flash"></div>
+  <div class="fg-confetti" id="fConfetti"></div>
   <div class="fg-inner">
     <div class="fg-kick" id="fKick">FINAL</div>
     <div class="fg-medalrow">
@@ -2970,6 +3032,18 @@ function triggerRally(info){
 function endRally(){ clearTimeout(triggerRally._t); rOv.classList.remove("show"); rallyPlaying=false; }
 
 /* info = {winner, walkoff, aw, hm, inning} */
+function fgConfetti(accent){   // gold/white rain + a touch of the winner's color
+  const pal=["#f5d67b","#ffffff","#e9c968","#d4a017"]; if(accent){pal.push(accent,accent);}
+  let h="";
+  for(let i=0;i<32;i++){
+    const c=pal[Math.floor(Math.random()*pal.length)];
+    const w=5+Math.floor(Math.random()*6), tall=Math.random()<.42;
+    h+=`<i style="left:${(Math.random()*100).toFixed(1)}%;width:${w}px;height:${tall?Math.round(w*2.6):w}px;`
+      +`background:${c};--dx:${(Math.random()*24-12).toFixed(0)}vw;--spin:${360+Math.floor(Math.random()*760)}deg;`
+      +`animation-duration:${(2.6+Math.random()*1.8).toFixed(2)}s;animation-delay:${(Math.random()*2.1).toFixed(2)}s"></i>`;
+  }
+  return h;
+}
 function triggerFinal(info){
   info=info||{};
   if(takeoverBusy())return;
@@ -2981,16 +3055,20 @@ function triggerFinal(info){
   $("#fCrest").src=teamLogo(winner);
   $("#fKick").textContent="FINAL";
   fOv.classList.toggle("walkoff",!!(info.walkoff&&!tie));   // red ribbon on the medallion
+  fOv.classList.toggle("nfl",LEAGUE==="nfl");               // per-league stadium background
+  fOv.classList.toggle("mlb",LEAGUE!=="nfl");
   $("#fTitle").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
   $("#fScore").textContent=`${aw.abbr} ${aw.score} — ${hm.score} ${hm.abbr}`;
   $("#fSub").textContent=tie?"":(info.walkoff
     ?`${winner.name} walk it off in the ${info.inning||G.inning}th!`
     :`${winner.name} defeat the ${loser.name}`);
+  $("#fConfetti").innerHTML=fgConfetti(winner.colorHex||winner.color||"");  // celebratory rain
   fOv.classList.remove("show"); void fOv.offsetWidth; fOv.classList.add("show");
   clearTimeout(triggerFinal._t);
   triggerFinal._t=setTimeout(endFinal, info.dur||9000);
 }
-function endFinal(){ clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false; }
+function endFinal(){ clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false;
+  const c=$("#fConfetti"); if(c)c.innerHTML=""; }
 
 /* ============================================================
    LINEUP REVEAL — pre-game starting nines on the chalkboard
