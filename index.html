@@ -441,7 +441,7 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .k-hero img{position:relative;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:bottom left;
   filter:drop-shadow(0 14px 30px rgba(0,0,0,.75))}
 .k-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(1.6vh,14px);text-align:center;padding-left:min(26vw,340px)}
+  justify-content:center;gap:min(1.6vh,14px);text-align:center}
 /* camera "punch" — the whole card kicks on each K hit */
 #kOverlay.show .k-inner{animation:kPunch 1.3s linear .1s both}
 @keyframes kPunch{0%,8%{transform:scale(1)}11%{transform:scale(1.03)}17%{transform:scale(1)}
@@ -496,44 +496,35 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #kOverlay.show .kc3-yer span:nth-child(6){animation-delay:2.25s}
 #kOverlay.show .kc3-yer span:nth-child(7){animation-delay:2.31s}
 @keyframes kc3Yer{0%{opacity:0;transform:scaleX(2.4)}55%{opacity:1;transform:scaleX(.92)}100%{opacity:1;transform:scaleX(1)}}
-/* squash the word on the OUT! impact */
-#kOverlay.show .kc3-yer{animation:kc3Squash .4s ease-out 3.0s both}
-@keyframes kc3Squash{0%{transform:scaleY(1)}30%{transform:scaleY(.86) scaleX(1.04)}100%{transform:scaleY(1)}}
-/* beat 3 — giant rubber stamp; scale 3 covers the frame, hard-lands to a headline */
-.kc3-out{font-weight:900;font-style:italic;letter-spacing:2px;line-height:.85;
-  font-size:clamp(60px,12vw,150px);opacity:0;color:#fff;
-  text-shadow:0 0 18px #35c7ff,0 0 46px rgba(53,140,255,.85),0 6px 0 rgba(6,18,32,.6);
-  transform:rotate(-8deg) scale(3)}
-#kOverlay.show .kc3-out{animation:kc3Stamp .55s cubic-bezier(.3,1.25,.4,1) 2.75s both,
-  kc3OutGlow 1.7s ease-in-out 3.4s infinite}
-@keyframes kc3Stamp{0%{opacity:0;transform:rotate(-8deg) scale(3)}
+/* beat 3 — OUT!: the whole screen slams to black and a red stamp holds ~2.5s */
+.kc3-black{position:absolute;inset:0;z-index:6;background:#000;opacity:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center}
+#kOverlay.show .kc3-black{animation:kc3Black 2.95s ease-out 2.5s both}
+@keyframes kc3Black{0%{opacity:0}8%{opacity:1}88%{opacity:1}100%{opacity:0}}
+.kc3-redout{font-weight:900;font-style:italic;letter-spacing:2px;line-height:.85;
+  font-size:clamp(90px,18vw,270px);color:#ff2436;opacity:0;transform:rotate(-8deg) scale(3);
+  text-shadow:0 0 26px rgba(255,40,60,.9),0 0 74px rgba(220,10,40,.7),0 8px 0 rgba(60,0,6,.55)}
+#kOverlay.show .kc3-redout{animation:kc3RedStamp .5s cubic-bezier(.3,1.25,.4,1) 2.72s both,
+  kc3RedGlow 1.6s ease-in-out 3.3s infinite}
+@keyframes kc3RedStamp{0%{opacity:0;transform:rotate(-8deg) scale(3)}
   22%{opacity:1}70%{transform:rotate(-8deg) scale(.9)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}
-@keyframes kc3OutGlow{0%,100%{text-shadow:0 0 18px #35c7ff,0 0 46px rgba(53,140,255,.85),0 6px 0 rgba(6,18,32,.6)}
-  50%{text-shadow:0 0 30px #7fe0ff,0 0 70px rgba(53,140,255,1),0 6px 0 rgba(6,18,32,.6)}}
-/* white/blue pop on the stamp's impact */
-.kc3-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
-  background:radial-gradient(circle at 50% 42%, rgba(230,248,255,.95), rgba(90,180,255,.4) 45%, transparent 72%)}
-#kOverlay.show .kc3-flash{animation:kc3Flash .45s ease-out 3.0s both}
-@keyframes kc3Flash{0%{opacity:0}30%{opacity:.9}100%{opacity:0}}
-/* shockwave ring at the stamp */
-.kc3-shock{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.25);z-index:4;pointer-events:none;
-  width:min(30vh,300px);height:min(30vh,300px);border:5px solid #7fe0ff;border-radius:50%;opacity:0}
-#kOverlay.show .kc3-shock{animation:kc3ShockR .7s ease-out 3.02s both}
-@keyframes kc3ShockR{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
+@keyframes kc3RedGlow{0%,100%{text-shadow:0 0 26px rgba(255,40,60,.9),0 0 74px rgba(220,10,40,.7),0 8px 0 rgba(60,0,6,.55)}
+  50%{text-shadow:0 0 42px rgba(255,90,100,1),0 0 108px rgba(220,10,40,.95),0 8px 0 rgba(60,0,6,.55)}}
+/* the pitcher card resumes after the black lifts (~5.4s) */
 .k-sub{color:#7fe0ff;font-weight:900;letter-spacing:4px;font-size:clamp(14px,1.7vw,20px);opacity:0}
-#kOverlay.show .k-sub{animation:anFade .5s 3.35s both}
+#kOverlay.show .k-sub{animation:anFade .5s 5.4s both}
 .k-name{font-weight:900;color:#eafaff;font-size:clamp(24px,3.4vw,46px);opacity:0;margin-top:min(1.6vh,14px);
   text-shadow:0 3px 14px rgba(0,0,0,.7)}
-#kOverlay.show .k-name{animation:anFade .5s 3.5s both}
+#kOverlay.show .k-name{animation:anFade .5s 5.55s both}
 .k-meta{color:#a9c6e8;font-weight:700;font-size:clamp(15px,1.6vw,19px);display:flex;gap:10px;opacity:0}
 .k-meta .num{color:#7fe0ff;font-weight:900}
-#kOverlay.show .k-meta{animation:anFade .5s 3.55s both}
+#kOverlay.show .k-meta{animation:anFade .5s 5.6s both}
 .k-stats{display:flex;gap:26px;margin-top:min(1.4vh,12px)}
 .k-stat{opacity:0;transform:translateY(14px);transition:.4s}
 #kOverlay.show .k-stat{opacity:1;transform:none}
-#kOverlay.show .k-stat:nth-child(1){transition-delay:3.6s}
-#kOverlay.show .k-stat:nth-child(2){transition-delay:3.72s}
+#kOverlay.show .k-stat:nth-child(1){transition-delay:5.65s}
+#kOverlay.show .k-stat:nth-child(2){transition-delay:5.77s}
+#kOverlay.show .k-stat:nth-child(3){transition-delay:5.89s}
 .k-stat .v{font-weight:900;color:#eafaff;font-size:clamp(22px,3vw,36px);line-height:1}
 .k-stat .k{color:#7fe0ff;font-weight:800;letter-spacing:2px;font-size:clamp(11px,1.1vw,13px);margin-top:3px}
 @media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
@@ -1869,14 +1860,11 @@ body.tvmode .scorewrap{justify-content:center}
     </g>
   </svg>
   <div class="k-hero"><div class="k-spot"></div><img id="kShot" alt=""></div>
-  <div class="kc3-flash"></div>
-  <div class="kc3-shock"></div>
   <div class="k-inner">
     <div class="k-row"><span class="kk">K</span><span class="kk">K</span><span class="kk k3">K</span></div>
     <div class="kc3-call">
       <div class="kc3-str">STRIKE&nbsp;THREE…</div>
       <div class="kc3-yer"><span>Y</span><span>E</span><span>R</span><span>R</span><span>R</span><span>R</span><span>R</span></div>
-      <div class="kc3-out">OUT!</div>
     </div>
     <div class="k-sub" id="kSub">SIDE RETIRED</div>
     <div class="k-name" id="kName">—</div>
@@ -1884,8 +1872,11 @@ body.tvmode .scorewrap{justify-content:center}
     <div class="k-stats">
       <div class="k-stat"><div class="v" id="kSO">—</div><div class="k">SEASON K</div></div>
       <div class="k-stat"><div class="v" id="kERA">—</div><div class="k">ERA</div></div>
+      <div class="k-stat"><div class="v" id="kMPH">—</div><div class="k">MPH</div></div>
     </div>
   </div>
+  <!-- OUT!: the whole screen goes black and stamps red for ~2.5s, then the card resumes -->
+  <div class="kc3-black"><span class="kc3-redout">OUT!</span></div>
 </div>
 
 <!-- ============ HOME RUN V2 — DISTANCE-TIERED (fire 440+ / lights 380–439 / paper <380) ============ -->
@@ -2738,7 +2729,8 @@ function demoLineup(){
   };
   return {teams:{away:mk(DEMO_ROSTER.away,DEMO_EXTRA.away),home:mk(DEMO_ROSTER.home,DEMO_EXTRA.home)}};
 }
-function demoKStats(){return {so:90+Math.floor(Math.random()*130), era:(2+Math.random()*2.8).toFixed(2)};}
+function demoKStats(){return {so:90+Math.floor(Math.random()*130), era:(2+Math.random()*2.8).toFixed(2),
+  mph:88+Math.floor(Math.random()*12)};}
 function battingTeam(){return G.battingHome?G.home:G.away;}
 let demoAbEnded=false;   // set by a terminal at-bat event this tick
 function demoTick(){
@@ -3039,13 +3031,15 @@ function triggerK(info){
   $("#kNum").textContent=info.number?("#"+info.number):"";
   $("#kTeam").textContent=team.name||"";
   $("#kSub").textContent=info.inningTxt?("SIDE RETIRED • "+info.inningTxt):"SIDE RETIRED";
-  $("#kSO").textContent="—"; $("#kERA").textContent="—";
-  if(info.so!=null&&info.so!=="")setTimeout(()=>countUp($("#kSO"),String(info.so)),3600);
-  if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),3720);
+  $("#kSO").textContent="—"; $("#kERA").textContent="—"; $("#kMPH").textContent="—";
+  // stats count up AFTER the black-out OUT! stamp clears (~5.4s)
+  if(info.so!=null&&info.so!=="")setTimeout(()=>countUp($("#kSO"),String(info.so)),5700);
+  if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),5820);
+  if(info.mph!=null&&info.mph!=="")setTimeout(()=>countUp($("#kMPH"),String(info.mph)),5940);
   kOv.classList.remove("show"); void kOv.offsetWidth;
   kOv.classList.add("show");
   clearTimeout(triggerK._t);
-  triggerK._t=setTimeout(endK, info.dur||7500);
+  triggerK._t=setTimeout(endK, info.dur||8500);
 }
 function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
 
@@ -3179,7 +3173,13 @@ function kInfoFromPlay(p){
   const half=(p.about&&p.about.halfInning)||"";
   const team=(half==="top")?G.home:G.away;         // top: away bats, so HOME pitches
   const inn=(p.about&&p.about.inning)||G.inning;
-  return {id:pit.id,name:pit.fullName||"",team,
+  // strike-three pitch speed from the last pitch event
+  let mph="";
+  const evs=p.playEvents||[];
+  for(let i=evs.length-1;i>=0;i--){
+    if(evs[i].isPitch&&evs[i].pitchData&&evs[i].pitchData.startSpeed){mph=Math.round(evs[i].pitchData.startSpeed);break;}
+  }
+  return {id:pit.id,name:pit.fullName||"",team,mph,
     inningTxt:(half==="top"?"MIDDLE ":"END ")+inn};
 }
 function fireLiveK(play){
@@ -3994,7 +3994,7 @@ async function startReel(){
     await reelStep(()=>triggerHR2({id:592450,name:"Aaron Judge",team:G.home,stats:{distance:462,exitVelo:114,seasonHR:41,rbi:2,sprayDeg:12}}), 9000);
     await reelStep(()=>triggerHR2({id:660271,name:"Shohei Ohtani",team:G.home,stats:{distance:405,exitVelo:108,seasonHR:33,rbi:1,sprayDeg:-8}}), 9000);
     await reelStep(()=>triggerHR2({id:605141,name:"Mookie Betts",team:G.home,stats:{distance:365,exitVelo:101,seasonHR:19,rbi:3,sprayDeg:28}}), 9000);
-    await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",inningTxt:"END 7"}), 8000);
+    await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",mph:95,inningTxt:"END 7"}), 9000);
     await reelStep(()=>triggerStretch(), 7500);
     await reelStep(()=>triggerRally({team:G.away,deficit:1,bases:[true,false,true],inning:9,half:"Top"}), 8000);
     await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:true,inning:9}), 9500);
