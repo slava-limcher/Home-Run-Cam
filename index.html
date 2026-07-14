@@ -3716,7 +3716,7 @@ function triggerRedZone(info){
   const wl=fvX(80), wr=fvX(100), entry=fvX(100-y);
   const w=$("#rzWash"); w.style.left=wl+"%"; w.style.width=(wr-wl)+"%";
   $("#rzEntry").style.left=entry+"%";
-  const z=$("#rzZoom"); z.style.transformOrigin=((wl+wr)/2).toFixed(1)+"% 50%"; z.style.setProperty("--fvS",2.1);
+  const z=$("#rzZoom"); z.style.transformOrigin=((fvX(50)+fvX(100))/2).toFixed(1)+"% 50%"; z.style.setProperty("--fvS","1.7");   // frame the 50→goal half so the 10–50 lines show
   $("#rzSub").textContent=(((info.team&&info.team.name)||"OFFENSE")+` DRIVE • ${y} YARD${y>1?"S":""} TO THE END ZONE`).toUpperCase();
   const dr=$("#rzDrive"); dr.innerHTML="";
   const drv=(info.plays||[]).filter(g=>typeof g==="number").slice(-9);
@@ -3750,7 +3750,7 @@ function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow firs
   const losX=fvX(100-ytez), fdX=fvX(100-(ytez-dist));
   $("#dmLos").style.left=losX+"%"; $("#dmFd").style.left=fdX+"%";
   const z=$("#dmZoom"); z.style.transformOrigin=((losX+fdX)/2).toFixed(1)+"% 50%";
-  z.style.setProperty("--fvS",Math.min(2.6,70/(Math.abs(losX-fdX)+18)).toFixed(2));
+  z.style.setProperty("--fvS","1.8");   // gentle push-in — keeps the surrounding 10–50 yard lines in frame
   nmOv.classList.remove("show","frozen","zoomed"); void nmOv.offsetWidth; nmOv.classList.add("show");
   const v=$("#dmVid"); try{v.muted=true;v.currentTime=FV_START;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
   nmTimers.forEach(clearTimeout);
