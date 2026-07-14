@@ -212,8 +212,12 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   .hrfx-kick,.hrfx-sub{justify-content:center}
   .hrfx-stat{min-width:92px;padding:8px 14px}
 }
-.skip{position:absolute;top:18px;right:20px;z-index:3;background:rgba(0,0,0,.45);
-  border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 16px;font-weight:800;font-size:13px;color:#fff}
+/* ONE global skip button — sits above every overlay, appears whenever a takeover is on-screen */
+#skipAll{position:fixed;top:20px;right:22px;z-index:60;display:none;align-items:center;gap:6px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.32);border-radius:11px;
+  padding:9px 18px;font-weight:800;font-size:14px;color:#fff;cursor:pointer;letter-spacing:.5px;
+  backdrop-filter:blur(3px);box-shadow:0 6px 20px rgba(0,0,0,.45)}
+#skipAll:hover{background:rgba(0,0,0,.74);border-color:rgba(255,255,255,.5)}
 
 /* =================== ANTHEM / FIRST PITCH — 3-SCENE GAME OPEN ===================
    p1: away team panel wipes across   p2: home team panel wipes across
@@ -221,7 +225,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #anthemOverlay{position:fixed;inset:0;z-index:48;display:none;background:#02081a;
   opacity:0;transition:opacity .45s;overflow:hidden}
 #anthemOverlay.show{display:block;opacity:1}
-#anthemOverlay .skip{z-index:8}
 
 /* ---- scenes 1 & 2: full-screen team intro panels ---- */
 .an-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -614,7 +617,6 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 .h2-inner{position:relative;z-index:4;height:calc(100% - 52px);display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.5vh,13px);text-align:center;pointer-events:none;
   padding-left:min(26vw,340px);padding-right:min(26vw,340px)}
-#hr2Overlay .skip{z-index:7}
 #hr2Overlay.fire.show .h2-inner{animation:h2punch .45s .55s both}
 @keyframes h2punch{0%{transform:scale(1)}35%{transform:scale(1.045)}100%{transform:scale(1)}}
 .h2-kick{display:inline-flex;align-items:center;gap:10px;font-weight:900;
@@ -1736,7 +1738,6 @@ body.tvmode .scorewrap{justify-content:center}
 <!-- ============ HR VIDEO OVERLAY ============ -->
 <div id="hrOverlay">
   <video id="hrVideo" playsinline preload="auto" src="homerun.mp4"></video>
-  <button class="skip" id="skipBtn">Skip ⏭</button>
   <div class="hrfx" id="hrName">
     <div class="hrfx-glow" id="hrGlow"></div>
     <div class="hrfx-hero">
@@ -1756,7 +1757,6 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ ANTHEM / FIRST PITCH — 3-SCENE GAME OPEN ============ -->
 <div id="anthemOverlay">
-  <button class="skip" id="anthemSkip">Skip ⏭</button>
   <div class="an-panel away">
     <img class="crest" id="anP1Crest" alt="">
     <div class="tx"><div class="lbl">AWAY</div><div class="nm" id="anP1Name">Away</div></div>
@@ -1836,7 +1836,6 @@ body.tvmode .scorewrap{justify-content:center}
     </circle>
   </svg>
   <div class="h2-flash"></div>
-  <button class="skip" id="hr2Skip">Skip ⏭</button>
   <div class="h2-hero"><div class="h2-spot"></div><img id="h2Shot" alt=""></div>
   <div class="h2-field">
     <svg viewBox="0 0 400 380">
@@ -2203,6 +2202,9 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="po-sub" id="poSub"></div>
 </div></div>
 
+<!-- ONE global skip button (shown whenever any takeover is on-screen) -->
+<button id="skipAll">Skip ⏭</button>
+
 <!-- TV link panel -->
 <div id="tvpanel" class="hidden">
   <div class="tvp-card">
@@ -2354,6 +2356,14 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endFinal==="function")endFinal();
   if(typeof endLineup==="function")endLineup();
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");} }
+
+/* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
+function skipTakeover(){
+  ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup"]
+    .forEach(f=>{if(typeof window[f]==="function")window[f]();});
+  if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
+}
 
 function renderBoard(){
   $("#awayCrest").src=G.away.id?logoURL(G.away.id):transparentPx();
@@ -2802,7 +2812,9 @@ function endHomeRun(){
   hrPlaying=false;
 }
 vid.addEventListener("ended",endHomeRun);
-$("#skipBtn").onclick=endHomeRun;
+/* global skip: dismiss the current takeover; visible whenever one is playing (never during the auto reel) */
+$("#skipAll").onclick=skipTakeover;
+setInterval(()=>{const b=$("#skipAll"); if(b)b.style.display=(takeoverBusy()&&!reelOn)?"flex":"none";},250);
 
 /* ============================================================
    ANTHEM / FIRST PITCH TAKEOVER
@@ -2838,7 +2850,6 @@ function endAnthem(){
   anthemOv.classList.remove("show","p1","p2","p3");
   anthemPlaying=false;
 }
-$("#anthemSkip").onclick=endAnthem;
 
 /* ============================================================
    WALK-UP (NEW BATTER) LOWER THIRD
@@ -3059,7 +3070,6 @@ function triggerHR2(info){
   triggerHR2._t=setTimeout(endHR2, info.dur||8500);
 }
 function endHR2(){ clearTimeout(triggerHR2._t); hr2Ov.classList.remove("show"); hr2Playing=false; }
-$("#hr2Skip").onclick=endHR2;
 /* season pitching line for the K card */
 async function fetchPitcher(id){
   try{
