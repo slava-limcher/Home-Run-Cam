@@ -1146,7 +1146,7 @@ body.nfl .nfl-dd{display:block}
 .ko3-helm.a{color:var(--nflA,#e31837)} .ko3-helm.h{color:var(--nflH,#00338d)}
 .ko3-hsvg{width:100%;height:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
 .ko3-helm.h .ko3-hsvg{transform:scaleX(-1)}   /* home faces left; decal img is NOT flipped */
-.ko3-decal{position:absolute;width:26%;height:26%;left:48%;top:42%;transform:translate(-50%,-50%);
+.ko3-decal{position:absolute;width:24%;height:24%;left:42%;top:40%;transform:translate(-50%,-50%);
   object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
 /* --- PHASE 1/2: team intro panels (anthem-style wipe + drift) --- */
 .ko3-panel{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
@@ -2079,27 +2079,51 @@ body.tvmode .scorewrap{justify-content:center}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <filter id="ko3HSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
   <g id="ko3HelmShape">
-    <path fill="currentColor" d="M56 150 C 44 74, 106 36, 164 39 C 214 42, 246 74, 245 113 C 245 127, 240 133, 229 134 C 217 138, 213 149, 215 159 C 219 174, 233 180, 253 184 C 257 199, 247 209, 227 208 L 150 209 C 90 209, 58 196, 56 166 C 55 160, 55 155, 56 150 Z"/>
-    <path fill="#000" opacity=".3" filter="url(#ko3HSoft)" d="M214 140 Q210 160 220 176 Q232 182 246 182 Q230 168 228 150 Z"/>
-    <path fill="#000" opacity=".26" filter="url(#ko3HSoft)" d="M58 150 C 56 188, 96 204, 150 207 L 150 209 C 92 209, 58 196, 56 166 Z"/>
-    <path fill="#fff" opacity=".32" filter="url(#ko3HSoft)" d="M76 70 C 112 44, 164 44, 200 66 C 168 58, 118 64, 92 96 Z"/>
-    <ellipse cx="126" cy="62" rx="22" ry="12" fill="#fff" opacity=".5" filter="url(#ko3HSoft)"/>
-    <path fill="none" stroke="#fff" stroke-width="14" opacity=".85" stroke-linecap="round" d="M84 50 C 130 34, 180 40, 220 78"/>
-    <path stroke="#000" stroke-width="4" opacity=".28" stroke-linecap="round" d="M156 56 L156 72 M176 60 L176 76"/>
-    <circle cx="126" cy="150" r="16" fill="#171018"/>
-    <circle cx="126" cy="150" r="16" fill="none" stroke="#000" stroke-width="3" opacity=".35"/>
-    <ellipse cx="122" cy="146" rx="6" ry="4" fill="#fff" opacity=".15"/>
-    <g stroke-linecap="round" fill="none">
-      <path stroke="#5f666f" stroke-width="12" d="M250 116 C 270 138, 270 168, 252 188"/>
-      <path stroke="#e2e7ed" stroke-width="5" d="M250 116 C 270 138, 270 168, 252 188"/>
-      <path stroke="#5f666f" stroke-width="11" d="M212 134 L258 132"/>
-      <path stroke="#e2e7ed" stroke-width="4" d="M212 134 L258 132"/>
-      <path stroke="#5f666f" stroke-width="11" d="M210 157 L260 158"/>
-      <path stroke="#e2e7ed" stroke-width="4" d="M210 157 L260 158"/>
-      <path stroke="#5f666f" stroke-width="11" d="M214 180 L256 182"/>
-      <path stroke="#e2e7ed" stroke-width="4" d="M214 180 L256 182"/>
-      <circle cx="213" cy="134" r="4" fill="#8b929b"/><circle cx="211" cy="157" r="4" fill="#8b929b"/><circle cx="215" cy="180" r="4" fill="#8b929b"/>
+    <!-- shell: high round crown, brow, carved face opening, tucked jaw, low back wrap -->
+    <path fill="currentColor" d="M54 148 C 42 70, 104 28, 162 31 C 216 34, 248 70, 249 106 C 250 114, 246 120, 238 122 L 212 126 C 204 150, 204 172, 212 192 L 200 204 C 190 210, 176 210, 166 206 L 150 208 C 92 210, 56 194, 54 148 Z"/>
+    <!-- carved face opening (recess a step lighter than the cage so bars silhouette) -->
+    <path fill="#1a2130" d="M212 126 C 232 122, 242 124, 246 132 C 250 152, 248 174, 240 192 C 230 198, 220 198, 212 192 C 204 172, 204 150, 212 126 Z"/>
+    <!-- crown flex-panel recess + shell seams -->
+    <path fill="#000" opacity=".1" d="M118 42 C 156 32, 198 38, 224 62 C 200 48, 158 44, 126 54 Z"/>
+    <path fill="none" stroke="#000" opacity=".22" stroke-width="2.5" d="M116 44 C 156 32, 200 40, 226 64"/>
+    <path fill="none" stroke="#000" opacity=".18" stroke-width="2.5" d="M92 66 C 120 90, 148 100, 190 100"/>
+    <!-- vents -->
+    <path stroke="#000" stroke-width="5" opacity=".4" stroke-linecap="round" d="M138 52 L134 66 M158 50 L156 64 M108 88 L100 98"/>
+    <!-- form shadow bottom/back -->
+    <path fill="#000" opacity=".27" filter="url(#ko3HSoft)" d="M56 148 C 54 186, 96 204, 150 206 L 150 208 C 92 210, 56 194, 54 148 Z"/>
+    <!-- occlusion where shell meets the recess -->
+    <path fill="#000" opacity=".3" filter="url(#ko3HSoft)" d="M212 126 Q204 158 212 192 L 218 190 Q 211 158 218 128 Z"/>
+    <!-- specular swoosh + hot spot -->
+    <path fill="#fff" opacity=".3" filter="url(#ko3HSoft)" d="M74 66 C 110 40, 162 40, 198 62 C 166 54, 116 60, 90 92 Z"/>
+    <ellipse cx="124" cy="58" rx="22" ry="12" fill="#fff" opacity=".45" filter="url(#ko3HSoft)"/>
+    <!-- ear hole + side hardware bolt -->
+    <circle cx="120" cy="148" r="13" fill="#14090c"/>
+    <ellipse cx="117" cy="145" rx="5" ry="3.5" fill="#fff" opacity=".14"/>
+    <circle cx="168" cy="170" r="6" fill="#d7dde3"/><circle cx="168" cy="170" r="6" fill="none" stroke="#000" opacity=".3" stroke-width="2"/>
+    <!-- dark visor: glossy band in the upper half of the opening -->
+    <path fill="#070a12" d="M211 127 C 232 123, 243 125, 247 133 C 249 145, 248 154, 245 160 C 227 162, 214 158, 209 151 C 208 142, 209 134, 211 127 Z"/>
+    <path fill="#a9cdf2" opacity=".55" d="M214 131 L242 127 L233 141 L211 144 Z"/>
+    <path fill="#fff" opacity=".22" d="M211 147 L244 144 L242 150 L212 152 Z"/>
+    <!-- black cage in front: perimeter, 3 horizontals, vertical strut (two-stroke tubes) -->
+    <g fill="none" stroke-linecap="round">
+      <path stroke="#15181d" stroke-width="13" d="M242 110 C 278 128, 280 178, 252 202"/>
+      <path stroke="#525b66" stroke-width="4"  d="M242 110 C 278 128, 280 178, 252 202"/>
+      <path stroke="#15181d" stroke-width="11" d="M204 134 L266 132"/>
+      <path stroke="#525b66" stroke-width="3.5" d="M204 134 L266 132"/>
+      <path stroke="#15181d" stroke-width="11" d="M202 158 L268 158"/>
+      <path stroke="#525b66" stroke-width="3.5" d="M202 158 L268 158"/>
+      <path stroke="#15181d" stroke-width="11" d="M206 182 L262 184"/>
+      <path stroke="#525b66" stroke-width="3.5" d="M206 182 L262 184"/>
+      <path stroke="#15181d" stroke-width="10" d="M250 122 C 258 148, 256 178, 246 198"/>
+      <path stroke="#525b66" stroke-width="3" d="M250 122 C 258 148, 256 178, 246 198"/>
     </g>
+    <!-- white mounting hardware: brow clip, side clamps, chin cup -->
+    <rect x="230" y="102" width="18" height="10" rx="4" fill="#e8ecf0"/>
+    <rect x="198" y="128" width="12" height="12" rx="4" fill="#e8ecf0"/>
+    <rect x="196" y="152" width="12" height="12" rx="4" fill="#e8ecf0"/>
+    <path fill="#e8ecf0" d="M240 198 q10 12 22 10 q-4 10 -16 8 q-10 -4 -12 -14 Z"/>
+    <!-- rim light back edge -->
+    <path fill="none" stroke="#fff" stroke-width="3" opacity=".2" stroke-linecap="round" d="M60 100 C 70 56, 116 34, 160 33"/>
   </g>
 </defs></svg>
 <div id="koOverlay">
