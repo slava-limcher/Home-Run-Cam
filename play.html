@@ -1193,36 +1193,30 @@ body.nfl .nfl-dd{display:block}
   color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
 #koOverlay.p3 .ko3-venue{animation:anFade .5s 1.45s both}
 
-/* ---- RED ZONE (A · Camera Push v2): dive in from OUTSIDE the stadium, land on a big field ---- */
-/* act one: aerial night view of the stadium exterior — the camera dives into the bowl */
-.rz4-air{position:absolute;inset:0;z-index:4;pointer-events:none;transform-origin:50% 47%;
-  background:
-    radial-gradient(60% 34% at 50% 47%, rgba(130,170,230,.12), transparent 70%),
-    radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.6px),
-    linear-gradient(180deg,#05080f 0%,#0a1120 55%,#0c1526 100%);
-  background-size:auto,26px 22px,auto}
-#rzOverlay.show .rz4-air{animation:rz4Zoom 1.8s cubic-bezier(.6,.05,.5,1) both,
-  anFade2 .35s 1.5s reverse both}   /* dissolves just as the bowl fills the frame */
-@keyframes rz4Zoom{from{transform:scale(1)}to{transform:scale(7)}}
-.rz4-bowl{position:absolute;left:50%;top:47%;width:min(46vw,560px);height:min(24vw,300px);
-  transform:translate(-50%,-50%);border-radius:50%;
-  background:radial-gradient(closest-side, #123f22 0 37%, #0e1622 40% 64%, #1c2536 66% 84%, #0d1320 86% 100%);
-  box-shadow:0 0 90px rgba(150,190,255,.20), inset 0 0 44px rgba(0,0,0,.7)}
-.rz4-bowl::before{content:"";position:absolute;left:34%;right:34%;top:37%;bottom:37%;
-  border:2px solid rgba(255,255,255,.55);border-radius:3px;
-  background:linear-gradient(90deg, transparent 48.5%, rgba(255,255,255,.5) 48.5% 51.5%, transparent 51.5%)}
-.rz4-lt{position:absolute;width:14px;height:14px;border-radius:50%;
-  background:radial-gradient(circle,#fff 0 18%,rgba(190,215,255,.85) 30%,transparent 70%);
-  box-shadow:0 0 18px 6px rgba(190,215,255,.45)}
-.rz2-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2vh,18px);text-align:center}
+/* ===== SHARED field-video scene (3rd down + red zone): dive video -> freeze -> lines -> zoom ===== */
+.fv-scene{position:absolute;inset:0;z-index:1;overflow:hidden}
+.fv-zoom{position:absolute;inset:0;transform-origin:50% 50%}   /* JS sets origin + --fvS */
+.fv-zoom>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a1a10}
+.fv-line{position:absolute;top:9%;bottom:9%;width:5px;margin-left:-2.5px;opacity:0;border-radius:3px;z-index:3}
+.fv-line.blue{background:#2d7dff;box-shadow:0 0 14px #2d7dff,0 0 5px #fff}
+.fv-line.yellow{background:#f7d500;box-shadow:0 0 14px #f7d500,0 0 5px #fff}
+.fv-wash{position:absolute;top:9%;bottom:9%;opacity:0;z-index:2;
+  background:linear-gradient(90deg,rgba(227,24,55,.5),rgba(227,24,55,.3) 16%,rgba(227,24,55,.3));
+  border-left:5px solid rgba(255,70,100,.9);box-shadow:inset 0 0 40px rgba(120,0,20,.4)}
+#nmOverlay.frozen .fv-line,#rzOverlay.frozen .fv-line,#rzOverlay.frozen .fv-wash{animation:fvIn .4s ease-out both}
+@keyframes fvIn{from{opacity:0}to{opacity:1}}
+#nmOverlay.zoomed .fv-zoom,#rzOverlay.zoomed .fv-zoom{animation:fvZoom 1.2s cubic-bezier(.4,0,.2,1) both}
+@keyframes fvZoom{from{transform:scale(1)}to{transform:scale(var(--fvS,2))}}
+
+/* ---- RED ZONE (video field + transparent red-zone wash + blue entry line) ---- */
+.rz2-inner{position:absolute;inset:0;z-index:4;pointer-events:none;display:flex;flex-direction:column;
+  align-items:center;text-align:center;padding:6vh 4vw}
 .rz2-title{font-weight:900;letter-spacing:2px;color:#fff;font-size:clamp(48px,9vw,120px);line-height:.95;
-  text-shadow:0 8px 26px rgba(0,0,0,.7);opacity:0;z-index:3}
-#rzOverlay.show .rz2-title{animation:anFade .45s 3.5s both}   /* lands after the dive + push */
-/* the drive so far — each play marches in as a chevron toward the goal */
-.rz3-drive{display:flex;align-items:center;gap:8px;min-height:34px;opacity:0;flex-wrap:wrap;justify-content:center}
-#rzOverlay.show .rz3-drive{animation:anFade .35s 3.6s both}
-.rz3-chev{display:flex;align-items:center;background:#0d1118;border:1px solid rgba(255,255,255,.14);
+  text-shadow:0 6px 26px rgba(0,0,0,.85);opacity:0;margin-top:2vh}
+#rzOverlay.show .rz2-title{animation:anFade .45s 7.1s both}
+.rz3-drive{display:flex;align-items:center;gap:8px;min-height:34px;opacity:0;flex-wrap:wrap;justify-content:center;margin-top:min(1.6vh,14px)}
+#rzOverlay.show .rz3-drive{animation:anFade .35s 7.3s both}
+.rz3-chev{display:flex;align-items:center;background:rgba(13,17,24,.82);border:1px solid rgba(255,255,255,.16);
   padding:5px 16px 5px 12px;font-weight:900;font-size:clamp(13px,1.4vw,17px);color:#fff;
   opacity:0;transform:translateX(-14px);
   clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
@@ -1230,76 +1224,21 @@ body.nfl .nfl-dd{display:block}
 .rz3-chev.loss{border-left:4px solid #6b7684;color:#9aa4b1}
 #rzOverlay.show .rz3-chev{animation:rz3ChevIn .3s cubic-bezier(.2,.9,.3,1) both}   /* per-chevron inline delay */
 @keyframes rz3ChevIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
-/* act two: the field, now BIG and full-bleed (no card chrome) */
-.rz2-card{width:min(97vw,1640px);background:transparent;border:none;border-radius:0;
-  padding:0;opacity:0;overflow:hidden;filter:drop-shadow(0 22px 60px rgba(0,0,0,.65))}
-#rzOverlay.show .rz2-card{animation:rz2In .45s ease 1.35s both}   /* fades in under the dissolving aerial */
-@keyframes rz2In{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:none}}
-.rz2-vp{position:relative;width:100%;overflow:hidden;border-radius:10px}
-.rz2-vp svg{display:block;width:100%;height:auto;transform-origin:88% 50%}
-/* then keep pushing: whole field down to the red-zone end */
-#rzOverlay.show .rz2-vp svg{animation:rz2Push 1.5s cubic-bezier(.5,0,.2,1) 1.9s both}
-@keyframes rz2Push{0%{transform:scale(1)}100%{transform:scale(2.5)}}
-.rz2-card .fieldbg{fill:#123f22}
-.rz2-card .yl{stroke:rgba(255,255,255,.45);stroke-width:2}
-.rz2-card .gl{stroke:#fff;stroke-width:4}
-.rz2-card .hash{stroke:rgba(255,255,255,.24);stroke-width:2;stroke-dasharray:2 16}
-.rz2-card .num{fill:rgba(255,255,255,.75);font-weight:900;font-style:italic;font-size:26px}
-.rz2-card .ez{fill:var(--nflOff,#e31837)}
-#rzOverlay.show .rz2-card .ez{animation:rz2Glow 1.5s ease-in-out 3.9s infinite}
-@keyframes rz2Glow{0%,100%{opacity:.5}50%{opacity:.95}}
-.rz2-card .eztxt{fill:rgba(255,255,255,.9);font-weight:900;font-size:18px;letter-spacing:4px}
-.rz2-card .ball{fill:#8a5a2b;stroke:#fff;stroke-width:2}
-#rzBallG{opacity:0}
-#rzOverlay.show #rzBallG{animation:rz2Ball .4s cubic-bezier(.2,1.1,.3,1) 4s both}
-@keyframes rz2Ball{from{opacity:0}to{opacity:1}}
-/* radar ping where the ball lands */
-#rzPing{transform-box:fill-box;transform-origin:center;opacity:0}
-#rzOverlay.show #rzPing{animation:rz2Ping 1.3s ease-out 4.1s infinite}
-@keyframes rz2Ping{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(3)}}
-.rz2-sub{color:#c6d2e0;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0;z-index:3}
-#rzOverlay.show .rz2-sub{animation:anFade .4s 4.25s both}
+.rz2-sub{color:#fff;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0;margin-top:auto;
+  text-shadow:0 3px 14px rgba(0,0,0,.85)}
+#rzOverlay.show .rz2-sub{animation:anFade .4s 7.8s both}
 
-/* ---- 3RD DOWN (A · Money Down): letterpress + crossing spotlights ---- */
-.dm-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2.2vh,20px);text-align:center;overflow:hidden}
-#nmOverlay.show .nfp-kick{animation:anFade .4s .15s both}
-/* two spotlight beams sweeping across, crossing over the text */
-.dm-beam{position:absolute;top:-30%;left:50%;width:16vw;height:150%;z-index:1;pointer-events:none;
-  transform-origin:50% 0;mix-blend-mode:screen;filter:blur(10px);opacity:.5;
-  background:linear-gradient(to bottom,rgba(220,232,248,.55),rgba(220,232,248,.05) 65%,transparent);
-  clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)}
-.dm-beam.l{margin-left:-26vw;animation:dmBeamL 4s ease-in-out infinite}
-.dm-beam.r{margin-left:10vw;animation:dmBeamR 4.6s ease-in-out infinite}
-@keyframes dmBeamL{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(14deg)}}
-@keyframes dmBeamR{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-14deg)}}
-.dm-ghost{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;
-  width:min(50vh,460px);height:min(50vh,460px);object-fit:contain;opacity:.1;pointer-events:none}
-.dm-money{position:relative;z-index:2;font-weight:900;font-style:italic;line-height:.95;
-  font-size:clamp(58px,11vw,168px);letter-spacing:-2px;
-  color:#e7edf5;text-shadow:0 2px 0 #aeb9c6,0 4px 0 #8b97a6,0 6px 0 #6b7684,0 16px 34px rgba(0,0,0,.75);opacity:0}
-#nmOverlay.show .dm-money{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) .35s both}
-.dm-kicker2{position:relative;z-index:2;color:var(--gold);font-weight:900;letter-spacing:8px;
-  font-size:clamp(18px,2.6vw,34px);opacity:0}
-#nmOverlay.show .dm-kicker2{animation:anFade .4s .7s both}
-/* the chain gang: links stretch from post to post, marker at the sticks */
-.dm2-chain{display:flex;align-items:center;width:min(56vw,640px);opacity:0;position:relative;z-index:2}
-#nmOverlay.show .dm2-chain{animation:anFade .35s .7s both}
-.dm2-post{flex:0 0 auto;width:16px;height:min(9vh,74px);border-radius:8px;position:relative;
-  background:linear-gradient(180deg,#ff8a1f,#e8622a);box-shadow:0 6px 16px rgba(0,0,0,.5)}
-.dm2-post::after{content:"";position:absolute;left:0;right:0;top:42%;height:16%;background:#0b0e13;opacity:.55}
-.dm2-links{flex:1;height:10px;margin:0 -2px;transform-origin:left center;transform:scaleX(0);
-  background:radial-gradient(circle at 7px 5px, #c9d6e2 3px, rgba(201,214,226,.25) 4px, transparent 5px);
-  background-size:14px 10px;background-repeat:repeat-x;
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
-#nmOverlay.show .dm2-links{animation:dm2Stretch .7s cubic-bezier(.3,1.15,.4,1) .85s both}
-@keyframes dm2Stretch{from{transform:scaleX(0)}70%{transform:scaleX(1.04)}100%{transform:scaleX(1)}}
-.dm2-tag{position:absolute;right:-10px;top:-38px;background:var(--gold);color:#08243f;font-weight:900;
-  border-radius:8px;padding:4px 14px;font-size:clamp(12px,1.4vw,17px);opacity:0;white-space:nowrap}
-#nmOverlay.show .dm2-tag{animation:anFade .3s 1.5s both}
-.dm-sub{position:relative;z-index:2;color:#c6d2e0;font-weight:800;letter-spacing:2px;
-  font-size:clamp(16px,2vw,24px);opacity:0}
-#nmOverlay.show .dm-sub{animation:anFade .4s 1.75s both}
+/* ---- 3RD DOWN (video field + blue line-of-scrimmage + yellow first-down line) ---- */
+.dm-inner{position:absolute;inset:0;z-index:4;pointer-events:none;display:flex;flex-direction:column;
+  align-items:center;text-align:center;padding:7vh 4vw}
+.dm-kicker2{color:var(--gold);font-weight:900;letter-spacing:8px;font-size:clamp(18px,2.6vw,34px);opacity:0}
+#nmOverlay.show .dm-kicker2{animation:anFade .4s 7.0s both}
+.dm-money{font-weight:900;font-style:italic;line-height:.95;font-size:clamp(52px,9.5vw,150px);letter-spacing:-2px;
+  color:#e7edf5;text-shadow:0 2px 0 #aeb9c6,0 4px 0 #8b97a6,0 6px 0 #6b7684,0 16px 34px rgba(0,0,0,.85);opacity:0;margin-top:1vh}
+#nmOverlay.show .dm-money{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) 7.1s both}
+.dm-sub{color:#fff;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,24px);opacity:0;margin-top:auto;
+  text-shadow:0 3px 14px rgba(0,0,0,.85)}
+#nmOverlay.show .dm-sub{animation:anFade .4s 7.6s both}
 
 /* ---- TOUCHDOWN (through the uprights): ball SPIRALS up through the goal
    posts, they burst white with a shockwave ring, TOUCHDOWN erupts, +6 ---- */
@@ -2208,56 +2147,29 @@ body.tvmode .scorewrap{justify-content:center}
   </div>
 </div>
 <div id="rzOverlay">
-  <div class="rz4-air">
-    <div class="rz4-bowl"></div>
-    <i class="rz4-lt" style="left:34.5%;top:38%"></i>
-    <i class="rz4-lt" style="left:64%;top:38%"></i>
-    <i class="rz4-lt" style="left:33%;top:53%"></i>
-    <i class="rz4-lt" style="left:65.5%;top:53%"></i>
-  </div>
-  <div class="rz2-inner">
-  <div class="rz2-title">RED ZONE</div>
-  <div class="rz3-drive" id="rzDrive"></div>
-  <div class="rz2-card"><div class="rz2-vp">
-    <svg viewBox="0 0 620 190">
-      <rect class="fieldbg" x="0" y="10" width="500" height="170"/>
-      <rect class="ez" x="500" y="10" width="120" height="170"/>
-      <line class="hash" x1="0" y1="59" x2="500" y2="59"/>
-      <line class="hash" x1="0" y1="131" x2="500" y2="131"/>
-      <line class="yl" x1="50" y1="10" x2="50" y2="180"/>
-      <line class="yl" x1="150" y1="10" x2="150" y2="180"/>
-      <line class="yl" x1="250" y1="10" x2="250" y2="180"/>
-      <line class="yl" x1="350" y1="10" x2="350" y2="180"/>
-      <line class="yl" x1="420" y1="10" x2="420" y2="180"/>
-      <line class="yl" x1="460" y1="10" x2="460" y2="180"/>
-      <line class="gl" x1="500" y1="10" x2="500" y2="180"/>
-      <text class="num" x="420" y="102" text-anchor="middle">20</text>
-      <text class="num" x="460" y="102" text-anchor="middle">10</text>
-      <text class="eztxt" x="560" y="100" text-anchor="middle" transform="rotate(-90 560 95)">END ZONE</text>
-      <g id="rzBallG" transform="translate(460 95)">
-        <circle id="rzPing" r="12" fill="none" stroke="#fff" stroke-width="2"/>
-        <ellipse class="ball" rx="11" ry="7"/>
-        <line x1="-4" y1="0" x2="4" y2="0" stroke="#fff" stroke-width="1.6"/>
-        <text id="rzBallYd" y="-16" text-anchor="middle" fill="#fff" font-weight="900" font-size="16"></text>
-      </g>
-    </svg>
+  <div class="fv-scene"><div class="fv-zoom" id="rzZoom">
+    <video id="rzVid" src="field.mp4" poster="field_last.jpg" muted playsinline preload="auto"></video>
+    <div class="fv-wash" id="rzWash"></div>
+    <div class="fv-line blue" id="rzEntry"></div>
   </div></div>
-  <div class="rz2-sub" id="rzSub"></div>
-</div></div>
-<div id="nmOverlay"><div class="dm-inner">
-  <div class="dm-beam l"></div>
-  <div class="dm-beam r"></div>
-  <img class="dm-ghost" id="dmGhost" alt="">
-  <div class="dm-kicker2">MONEY DOWN</div>
-  <div class="dm-money" id="dmTxt">3RD &amp; 7</div>
-  <div class="dm2-chain">
-    <div class="dm2-post"></div>
-    <div class="dm2-links"></div>
-    <div class="dm2-post"></div>
-    <div class="dm2-tag" id="dmToGo"></div>
+  <div class="rz2-inner">
+    <div class="rz2-title">RED ZONE</div>
+    <div class="rz3-drive" id="rzDrive"></div>
+    <div class="rz2-sub" id="rzSub"></div>
   </div>
-  <div class="dm-sub" id="dmSub"></div>
-</div></div>
+</div>
+<div id="nmOverlay">
+  <div class="fv-scene"><div class="fv-zoom" id="dmZoom">
+    <video id="dmVid" src="field.mp4" poster="field_last.jpg" muted playsinline preload="auto"></video>
+    <div class="fv-line blue" id="dmLos"></div>
+    <div class="fv-line yellow" id="dmFd"></div>
+  </div></div>
+  <div class="dm-inner">
+    <div class="dm-kicker2">MONEY DOWN</div>
+    <div class="dm-money" id="dmTxt">3RD &amp; 7</div>
+    <div class="dm-sub" id="dmSub"></div>
+  </div>
+</div>
 <div id="tdOverlay">
   <div class="td4-fall">
     <svg class="td4-fgoal" viewBox="0 0 300 380">
@@ -3606,7 +3518,7 @@ function nflDemoTick(){
     else{NG.down++;
       if(NG.down>4){NG.posHome=!NG.posHome;NG.ytez=100-NG.ytez;NG.down=1;NG.dist=10;NFLSEEN.rzDrive=null;}}
     if(NG.down===3&&Math.random()<.5)triggerNoise({dd:`3RD & ${Math.max(1,NG.dist)}`,
-      defTeam:NG.posHome?G.away:G.home});
+      defTeam:NG.posHome?G.away:G.home, ytez:NG.ytez, dist:NG.dist});
     if(NG.ytez<=20&&NFLSEEN.rzDrive!=="demo"){NFLSEEN.rzDrive="demo";
       triggerRedZone({team:off,yards:Math.max(1,NG.ytez),plays:rzFakeDrive()});}
   }
@@ -3737,7 +3649,8 @@ async function tickNFL(first){
     if(st.state==="in"&&last&&last.p.end&&last.p.end.down===3&&NFLSEEN.noisePlay!==last.p.id){
       NFLSEEN.noisePlay=last.p.id;
       triggerNoise({dd:(last.p.end.shortDownDistanceText||"3RD DOWN").toUpperCase(),
-        defTeam:NG.posHome?G.away:G.home});
+        defTeam:NG.posHome?G.away:G.home,
+        ytez:last.p.end.yardsToEndzone, dist:last.p.end.distance});
     }
     // two-minute warning (clock-derived per spec fallback)
     const secs=clockSecs(NG.clock);
@@ -3790,43 +3703,63 @@ function triggerKickoff(info){
 }
 function endKickoff(){ko3Timers.forEach(clearTimeout);ko3Timers=[];
   koOv.classList.remove("show","p1","p2","p3");koPlaying=false;}
+/* ===== field-video calibration (field.mp4 final frame; goal-to-goal linear map) ===== */
+const FV_START=5;   // start playback mid-dive so the beat is ~5s
+function fvX(d){return 13+Math.max(0,Math.min(100,d))*0.74;}   // d = yards from LEFT goal -> screen x%
+let nmTimers=[], rzTimers=[];
 function triggerRedZone(info){
   info=info||{};
   if(takeoverBusy())return; rzPlaying=true; hideWalkup();
   document.documentElement.style.setProperty('--nflOff',(info.team&&info.team.colorHex)||"#e31837");
-  const y=Math.max(1,Math.min(20,Math.round(info.yards||18)));
-  $("#rzBallG").setAttribute("transform",`translate(${500-y*4} 95)`);   // last 20 yds = 420→500 (4px/yd)
-  $("#rzBallYd").textContent=y;
+  const y=Math.max(1,Math.min(20,Math.round(info.yards||18)));   // yards-to-endzone at entry
+  // red-zone wash = last 20 yds (d 80→100); blue entry line where they crossed in (d=100−y)
+  const wl=fvX(80), wr=fvX(100), entry=fvX(100-y);
+  const w=$("#rzWash"); w.style.left=wl+"%"; w.style.width=(wr-wl)+"%";
+  $("#rzEntry").style.left=entry+"%";
+  const z=$("#rzZoom"); z.style.transformOrigin=((wl+wr)/2).toFixed(1)+"% 50%"; z.style.setProperty("--fvS",2.1);
   $("#rzSub").textContent=(((info.team&&info.team.name)||"OFFENSE")+` DRIVE • ${y} YARD${y>1?"S":""} TO THE END ZONE`).toUpperCase();
-  // the drive so far: play gains march in as chevrons
   const dr=$("#rzDrive"); dr.innerHTML="";
   const drv=(info.plays||[]).filter(g=>typeof g==="number").slice(-9);
   drv.forEach((g,i)=>{const c=document.createElement("div");
     c.className="rz3-chev "+(g<0?"loss":"gain");
     c.textContent=(g>0?"+":"")+g;
-    c.style.animationDelay=(3.7+i*.09)+"s";   // chevrons land after the dive + push
+    c.style.animationDelay=(7.3+i*.09)+"s";   // chevrons land after the zoom settles
     dr.appendChild(c);});
   dr.style.display=drv.length?"":"none";
-  rzOv.classList.remove("show"); void rzOv.offsetWidth; rzOv.classList.add("show");
-  clearTimeout(triggerRedZone._t); triggerRedZone._t=setTimeout(endRedZone,8600);
+  rzOv.classList.remove("show","frozen","zoomed"); void rzOv.offsetWidth; rzOv.classList.add("show");
+  const v=$("#rzVid"); try{v.muted=true;v.currentTime=FV_START;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+  rzTimers.forEach(clearTimeout);
+  rzTimers=[setTimeout(()=>rzOv.classList.add("frozen"),5300),
+            setTimeout(()=>rzOv.classList.add("zoomed"),5800),
+            setTimeout(endRedZone,11000)];
 }
-function endRedZone(){clearTimeout(triggerRedZone._t);rzOv.classList.remove("show");rzPlaying=false;}
+function endRedZone(){rzTimers.forEach(clearTimeout);rzTimers=[];const v=$("#rzVid");if(v)v.pause();
+  rzOv.classList.remove("show","frozen","zoomed");rzPlaying=false;}
 function rzFakeDrive(){const n=4+Math.floor(Math.random()*4);
   return Array.from({length:n},()=>Math.floor(Math.random()*24)-4);}
-function triggerNoise(info){   // 3rd-down chain-gang marker
+function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow first-down line
   info=info||{};
   if(takeoverBusy())return; nmPlaying=true; hideWalkup();
   const def=info.defTeam||{};
   document.documentElement.style.setProperty('--nflDef',def.colorHex||"#00338d");
-  $("#dmGhost").src=def.logo||"";
   $("#dmTxt").textContent=(info.dd||"3RD & LONG").toUpperCase();
-  const toGo=/&\s*(\d+)/.exec(info.dd||"");
-  $("#dmToGo").textContent=toGo?`${toGo[1]} TO GO`:"TO THE STICKS";
   $("#dmSub").textContent=((def.name||"DEFENSE")+" DEFENSE ON THE FIELD").toUpperCase();
-  nmOv.classList.remove("show"); void nmOv.offsetWidth; nmOv.classList.add("show");
-  clearTimeout(triggerNoise._t); triggerNoise._t=setTimeout(endNoise,6000);
+  // blue LOS at the ball; yellow first-down line = dist yds CLOSER to the right goal (offense drives right)
+  const ytez=Math.max(1,Math.min(99,Math.round(info.ytez!=null?info.ytez:45)));
+  const dist=Math.max(1,Math.min(ytez,Math.round(info.dist!=null?info.dist:10)));
+  const losX=fvX(100-ytez), fdX=fvX(100-(ytez-dist));
+  $("#dmLos").style.left=losX+"%"; $("#dmFd").style.left=fdX+"%";
+  const z=$("#dmZoom"); z.style.transformOrigin=((losX+fdX)/2).toFixed(1)+"% 50%";
+  z.style.setProperty("--fvS",Math.min(2.6,70/(Math.abs(losX-fdX)+18)).toFixed(2));
+  nmOv.classList.remove("show","frozen","zoomed"); void nmOv.offsetWidth; nmOv.classList.add("show");
+  const v=$("#dmVid"); try{v.muted=true;v.currentTime=FV_START;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+  nmTimers.forEach(clearTimeout);
+  nmTimers=[setTimeout(()=>nmOv.classList.add("frozen"),5300),
+            setTimeout(()=>nmOv.classList.add("zoomed"),5800),
+            setTimeout(endNoise,10000)];
 }
-function endNoise(){clearTimeout(triggerNoise._t);nmOv.classList.remove("show");nmPlaying=false;}
+function endNoise(){nmTimers.forEach(clearTimeout);nmTimers=[];const v=$("#dmVid");if(v)v.pause();
+  nmOv.classList.remove("show","frozen","zoomed");nmPlaying=false;}
 function triggerTouchdown(info){
   info=info||{};
   if(takeoverBusy())return; tdPlaying=true; hideWalkup();
@@ -3999,7 +3932,7 @@ $("#lgNFL").onclick=()=>setLeague("nfl");
 $("#koBtn").onclick=()=>triggerKickoff();
 $("#rzBtn").onclick=()=>triggerRedZone({team:NG.posHome?G.home:G.away,yards:12,plays:rzFakeDrive()});
 $("#nmBtn").onclick=()=>triggerNoise({dd:`3RD & ${Math.max(1,NG.dist||7)}`,
-  defTeam:NG.posHome?G.away:G.home});
+  defTeam:NG.posHome?G.away:G.home, ytez:NG.ytez||45, dist:NG.dist||7});
 $("#tdBtn").onclick=()=>{
   if(MODE==="demo"){const t=NG.posHome?G.home:G.away; t.score+=6; renderBoardNFL();
     triggerTouchdown(Object.assign({team:t},demoTDInfo()));}
@@ -4173,8 +4106,8 @@ async function startReel(){
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
     await reelStep(()=>triggerKickoff(), 11700);
-    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 9100);
-    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6500);
+    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 11500);
+    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 10500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
     await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 6700);
     await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 5500);
