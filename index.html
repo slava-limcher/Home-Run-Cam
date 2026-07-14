@@ -1087,27 +1087,44 @@ body.nfl .nfl-dd{display:block}
   22%{transform:translate(-11px,8px) scale(1.06)}35%{transform:translate(10px,-7px) scale(1.06)}
   50%{transform:translate(-7px,5px) scale(1.035)}66%{transform:translate(4px,-3px) scale(1.02)}
   100%{transform:translate(0,0) scale(1)}}
-/* --- PHASE 0: the coin toss --- */
-.ko3-toss{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(2.2vh,18px);pointer-events:none;text-align:center}
+/* --- PHASE 0: the coin toss (a hand thumb-flicks the coin up, it spins, lands) --- */
+.ko3-toss{position:absolute;inset:0;z-index:3;pointer-events:none}
 #koOverlay.p1 .ko3-toss,#koOverlay.p2 .ko3-toss,#koOverlay.p3 .ko3-toss{display:none}
-#koOverlay.show .ko3-toss .nfp-kick{animation:anFade .5s .3s both}
-.ko3-coinwrap{width:min(26vh,240px);height:min(26vh,240px);perspective:900px}
+.ko3-tosskick{position:absolute;top:9%;left:0;right:0;text-align:center}
+#koOverlay.show .ko3-tosskick{animation:anFade .5s .3s both}
+/* the hand + coin group flicks, then fades so the result can take center */
+.ko3-tossaction{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);
+  width:min(44vh,420px);height:min(38vh,360px)}
+#koOverlay.show .ko3-tossaction{animation:ko3Action 2.6s ease both}
+@keyframes ko3Action{0%{opacity:0}6%{opacity:1}82%{opacity:1}100%{opacity:0}}
+.ko3-hand{position:absolute;inset:0;width:100%;height:100%;
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.55))}
+.ko3-hand .sk{fill:#e3a878;stroke:#141414;stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.ko3-hand .ln{fill:none;stroke:#141414;stroke-width:4;stroke-linecap:round}
+.ko3-thumb{transform-origin:300px 216px}
+#koOverlay.show .ko3-thumb{animation:ko3Thumb .5s cubic-bezier(.3,.85,.4,1) .35s both}
+@keyframes ko3Thumb{0%{transform:rotate(0)}30%{transform:rotate(-24deg)}58%{transform:rotate(12deg)}100%{transform:rotate(0)}}
+/* the 3D coin rests on the thumb, then flicks up and spins */
+.ko3-coinwrap{position:absolute;left:75%;top:34%;transform:translate(-50%,-50%);
+  width:min(16vh,150px);height:min(16vh,150px);perspective:900px}
 .ko3-spin{position:relative;width:100%;height:100%;transform-style:preserve-3d;--ko3end:1980deg}
 .ko3-spin.tails{--ko3end:2160deg}
-#koOverlay.show .ko3-spin{animation:ko3Flip 1.7s cubic-bezier(.3,.7,.4,1) .45s both}
+#koOverlay.show .ko3-spin{animation:ko3Flip 1.7s cubic-bezier(.3,.6,.4,1) .45s both}
 @keyframes ko3Flip{
   0%{transform:translateY(0) rotateX(0) scale(1)}
-  12%{transform:translateY(-20vh) rotateX(520deg) scale(1)}
-  50%{transform:translateY(-26vh) rotateX(1260deg) scale(1)}
+  10%{transform:translateY(-30vh) rotateX(500deg) scale(1)}
+  50%{transform:translateY(-46vh) rotateX(1260deg) scale(1)}
   82%{transform:translateY(0) rotateX(var(--ko3end)) scale(1.06)}
   90%{transform:translateY(0) rotateX(var(--ko3end)) scale(.93)}
   100%{transform:translateY(0) rotateX(var(--ko3end)) scale(1)}}
 .ko3-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:grid;place-items:center;
   background:conic-gradient(from 210deg,#8a6a1f,#f5d67b 20%,#b8860b 45%,#f7e6a2 70%,#8a6a1f);
-  box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 0 0 7px rgba(0,0,0,.16),inset 0 0 26px rgba(0,0,0,.3)}
+  box-shadow:0 10px 26px rgba(0,0,0,.6),inset 0 0 0 6px rgba(0,0,0,.16),inset 0 0 20px rgba(0,0,0,.3)}
 .ko3-face.b{transform:rotateX(180deg)}
-.ko3-face .em{font-size:min(13vh,120px);line-height:1;color:#5b430f;filter:drop-shadow(0 1px 0 rgba(255,240,190,.5))}
+.ko3-face .em{font-size:min(8vh,74px);line-height:1;color:#5b430f;filter:drop-shadow(0 1px 0 rgba(255,240,190,.5))}
+/* result / winner / pick — centered, revealed after the coin lands */
+.ko3-results{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:min(2.2vh,18px);text-align:center;padding:0 6vw}
 .ko3-res{font-size:clamp(40px,7vw,96px);line-height:.9;opacity:0}
 #koOverlay.show .ko3-res{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.3s both, nfpShine 2.6s linear 2.9s infinite}
 .ko3-win{display:flex;align-items:center;gap:14px;color:#fff;font-weight:900;font-size:clamp(20px,2.8vw,38px);opacity:0}
@@ -2058,14 +2075,31 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="koOverlay">
   <!-- phase 0: the coin toss -->
   <div class="ko3-toss">
-    <div class="nfp-kick">THE COIN TOSS</div>
-    <div class="ko3-coinwrap"><div class="ko3-spin" id="ko3Spin">
-      <div class="ko3-face f"><span class="em">★</span></div>
-      <div class="ko3-face b"><span class="em">✦</span></div>
-    </div></div>
-    <div class="ko3-res nfp-chrome" id="ko3Res">HEADS!</div>
-    <div class="ko3-win"><img id="ko3WinLogo" alt=""><span id="ko3WinName"></span></div>
-    <div class="ko3-say" id="ko3Say"></div>
+    <div class="nfp-kick ko3-tosskick">THE COIN TOSS</div>
+    <div class="ko3-tossaction">
+      <svg class="ko3-hand" viewBox="0 0 460 380">
+        <path class="sk" d="M8 372 L8 250 Q8 214 58 208 L210 196 L214 372 Z"/>
+        <path class="sk" d="M188 214 Q184 150 262 150 Q346 150 356 210 L360 292 Q360 344 288 342 Q206 340 198 280 Z"/>
+        <path class="ln" d="M214 214 Q286 196 350 214"/>
+        <path class="ln" d="M300 250 L358 250"/>
+        <path class="ln" d="M300 288 L358 286"/>
+        <path class="ln" d="M300 322 L356 318"/>
+        <path class="sk" d="M352 226 q26 4 26 30 q0 26 -26 28 Z"/>
+        <g class="ko3-thumb">
+          <path class="sk" d="M300 216 Q296 166 320 150 Q346 132 360 156 Q372 178 352 206 Q334 226 300 216 Z"/>
+          <path class="ln" d="M338 158 Q350 162 350 178"/>
+        </g>
+      </svg>
+      <div class="ko3-coinwrap"><div class="ko3-spin" id="ko3Spin">
+        <div class="ko3-face f"><span class="em">★</span></div>
+        <div class="ko3-face b"><span class="em">✦</span></div>
+      </div></div>
+    </div>
+    <div class="ko3-results">
+      <div class="ko3-res nfp-chrome" id="ko3Res">HEADS!</div>
+      <div class="ko3-win"><img id="ko3WinLogo" alt=""><span id="ko3WinName"></span></div>
+      <div class="ko3-say" id="ko3Say"></div>
+    </div>
   </div>
   <!-- phase 1: away team panel -->
   <div class="ko3-panel a"><div class="ko3-pcontent">
