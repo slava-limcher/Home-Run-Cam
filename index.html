@@ -1097,10 +1097,7 @@ body.nfl .nfl-dd{display:block}
   width:min(44vh,420px);height:min(38vh,360px)}
 #koOverlay.show .ko3-tossaction{animation:ko3Action 2.6s ease both}
 @keyframes ko3Action{0%{opacity:0}6%{opacity:1}82%{opacity:1}100%{opacity:0}}
-.ko3-hand{position:absolute;inset:0;width:100%;height:100%;
-  filter:drop-shadow(0 12px 24px rgba(0,0,0,.55))}
-.ko3-hand .sk{fill:#e3a878;stroke:#141414;stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.ko3-hand .ln{fill:none;stroke:#141414;stroke-width:4;stroke-linecap:round}
+.ko3-hand{position:absolute;inset:0;width:100%;height:100%}
 .ko3-thumb{transform-origin:300px 216px}
 #koOverlay.show .ko3-thumb{animation:ko3Thumb .5s cubic-bezier(.3,.85,.4,1) .35s both}
 @keyframes ko3Thumb{0%{transform:rotate(0)}30%{transform:rotate(-24deg)}58%{transform:rotate(12deg)}100%{transform:rotate(0)}}
@@ -1117,11 +1114,22 @@ body.nfl .nfl-dd{display:block}
   82%{transform:translateY(0) rotateX(var(--ko3end)) scale(1.06)}
   90%{transform:translateY(0) rotateX(var(--ko3end)) scale(.93)}
   100%{transform:translateY(0) rotateX(var(--ko3end)) scale(1)}}
+/* struck-metal coin: radial gold + reeded rim + raised inner rim + embossed emblem + sheen */
 .ko3-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:grid;place-items:center;
-  background:conic-gradient(from 210deg,#8a6a1f,#f5d67b 20%,#b8860b 45%,#f7e6a2 70%,#8a6a1f);
-  box-shadow:0 10px 26px rgba(0,0,0,.6),inset 0 0 0 6px rgba(0,0,0,.16),inset 0 0 20px rgba(0,0,0,.3)}
-.ko3-face.b{transform:rotateX(180deg)}
-.ko3-face .em{font-size:min(8vh,74px);line-height:1;color:#5b430f;filter:drop-shadow(0 1px 0 rgba(255,240,190,.5))}
+  background:radial-gradient(circle at 32% 26%,#fdf0b8,#e7c14c 42%,#b8860b 74%,#8a6a1f);
+  box-shadow:inset 3px 3px 6px rgba(255,248,210,.7),inset -4px -4px 9px rgba(90,64,10,.85),0 10px 26px rgba(0,0,0,.55)}
+.ko3-face.f{transform:translateZ(6px)}
+.ko3-face.b{transform:rotateX(180deg) translateZ(6px)}
+.ko3-face::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:repeating-conic-gradient(#8a6a1f 0 3deg,#f5d67b 3deg 6deg);
+  -webkit-mask:radial-gradient(closest-side,transparent 87%,#000 88%);mask:radial-gradient(closest-side,transparent 87%,#000 88%)}
+.ko3-face::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:linear-gradient(122deg,transparent 40%,rgba(255,255,255,.28) 49%,transparent 58%)}
+.ko3-face .em{position:relative;z-index:2;font-size:min(8vh,74px);line-height:1;color:#a9800f;
+  text-shadow:-1px -1px 0 #fff6d0,1px 1px 0 #6b4c0c}
+/* thin dark rim disc between the two faces so a metal edge shows mid-spin */
+.ko3-edge{position:absolute;inset:0;border-radius:50%;transform:translateZ(0);
+  background:radial-gradient(circle at 50% 50%,#9a761c,#6b4f12);box-shadow:inset 0 0 12px rgba(0,0,0,.5)}
 /* result / winner / pick — centered, revealed after the coin lands */
 .ko3-results{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
   display:flex;flex-direction:column;align-items:center;gap:min(2.2vh,18px);text-align:center;padding:0 6vw}
@@ -1138,13 +1146,8 @@ body.nfl .nfl-dd{display:block}
 .ko3-helm.a{color:var(--nflA,#e31837)} .ko3-helm.h{color:var(--nflH,#00338d)}
 .ko3-hsvg{width:100%;height:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
 .ko3-helm.h .ko3-hsvg{transform:scaleX(-1)}   /* home faces left; decal img is NOT flipped */
-.ko3-helm .shell{fill:currentColor;stroke:rgba(0,0,0,.35);stroke-width:2}
-.ko3-helm .fm{fill:none;stroke:#c8ccd2;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
-.ko3-helm .ear{fill:rgba(0,0,0,.55)}
-.ko3-helm .stripe{fill:none;stroke:#fff;stroke-width:13;stroke-linecap:round;opacity:.9}
-.ko3-helm .gloss{fill:none;stroke:#fff;stroke-width:9;stroke-linecap:round;opacity:.22}
-.ko3-decal{position:absolute;width:29%;height:29%;left:46%;top:40%;object-fit:contain;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.ko3-decal{position:absolute;width:26%;height:26%;left:48%;top:42%;transform:translate(-50%,-50%);
+  object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}
 /* --- PHASE 1/2: team intro panels (anthem-style wipe + drift) --- */
 .ko3-panel{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
   gap:min(4vw,56px);visibility:hidden;overflow:hidden}
@@ -2072,26 +2075,72 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 
 <!-- ============ NFL BROADCAST PACKAGE OVERLAYS ============ -->
+<!-- shared realistic helmet shape (authored once, tinted per team via currentColor, used 4x) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="ko3HSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+  <g id="ko3HelmShape">
+    <path fill="currentColor" d="M56 150 C 44 74, 106 36, 164 39 C 214 42, 246 74, 245 113 C 245 127, 240 133, 229 134 C 217 138, 213 149, 215 159 C 219 174, 233 180, 253 184 C 257 199, 247 209, 227 208 L 150 209 C 90 209, 58 196, 56 166 C 55 160, 55 155, 56 150 Z"/>
+    <path fill="#000" opacity=".3" filter="url(#ko3HSoft)" d="M214 140 Q210 160 220 176 Q232 182 246 182 Q230 168 228 150 Z"/>
+    <path fill="#000" opacity=".26" filter="url(#ko3HSoft)" d="M58 150 C 56 188, 96 204, 150 207 L 150 209 C 92 209, 58 196, 56 166 Z"/>
+    <path fill="#fff" opacity=".32" filter="url(#ko3HSoft)" d="M76 70 C 112 44, 164 44, 200 66 C 168 58, 118 64, 92 96 Z"/>
+    <ellipse cx="126" cy="62" rx="22" ry="12" fill="#fff" opacity=".5" filter="url(#ko3HSoft)"/>
+    <path fill="none" stroke="#fff" stroke-width="14" opacity=".85" stroke-linecap="round" d="M84 50 C 130 34, 180 40, 220 78"/>
+    <path stroke="#000" stroke-width="4" opacity=".28" stroke-linecap="round" d="M156 56 L156 72 M176 60 L176 76"/>
+    <circle cx="126" cy="150" r="16" fill="#171018"/>
+    <circle cx="126" cy="150" r="16" fill="none" stroke="#000" stroke-width="3" opacity=".35"/>
+    <ellipse cx="122" cy="146" rx="6" ry="4" fill="#fff" opacity=".15"/>
+    <g stroke-linecap="round" fill="none">
+      <path stroke="#5f666f" stroke-width="12" d="M250 116 C 270 138, 270 168, 252 188"/>
+      <path stroke="#e2e7ed" stroke-width="5" d="M250 116 C 270 138, 270 168, 252 188"/>
+      <path stroke="#5f666f" stroke-width="11" d="M212 134 L258 132"/>
+      <path stroke="#e2e7ed" stroke-width="4" d="M212 134 L258 132"/>
+      <path stroke="#5f666f" stroke-width="11" d="M210 157 L260 158"/>
+      <path stroke="#e2e7ed" stroke-width="4" d="M210 157 L260 158"/>
+      <path stroke="#5f666f" stroke-width="11" d="M214 180 L256 182"/>
+      <path stroke="#e2e7ed" stroke-width="4" d="M214 180 L256 182"/>
+      <circle cx="213" cy="134" r="4" fill="#8b929b"/><circle cx="211" cy="157" r="4" fill="#8b929b"/><circle cx="215" cy="180" r="4" fill="#8b929b"/>
+    </g>
+  </g>
+</defs></svg>
 <div id="koOverlay">
   <!-- phase 0: the coin toss -->
   <div class="ko3-toss">
     <div class="nfp-kick ko3-tosskick">THE COIN TOSS</div>
     <div class="ko3-tossaction">
       <svg class="ko3-hand" viewBox="0 0 460 380">
-        <path class="sk" d="M8 372 L8 250 Q8 214 58 208 L210 196 L214 372 Z"/>
-        <path class="sk" d="M188 214 Q184 150 262 150 Q346 150 356 210 L360 292 Q360 344 288 342 Q206 340 198 280 Z"/>
-        <path class="ln" d="M214 214 Q286 196 350 214"/>
-        <path class="ln" d="M300 250 L358 250"/>
-        <path class="ln" d="M300 288 L358 286"/>
-        <path class="ln" d="M300 322 L356 318"/>
-        <path class="sk" d="M352 226 q26 4 26 30 q0 26 -26 28 Z"/>
-        <g class="ko3-thumb">
-          <path class="sk" d="M300 216 Q296 166 320 150 Q346 132 360 156 Q372 178 352 206 Q334 226 300 216 Z"/>
-          <path class="ln" d="M338 158 Q350 162 350 178"/>
+        <defs>
+          <linearGradient id="ko3SkinG" x1="0" y1="0" x2="0.5" y2="1">
+            <stop offset="0" stop-color="#f4cfa8"/><stop offset="0.5" stop-color="#e2a97e"/><stop offset="1" stop-color="#bd7d50"/>
+          </linearGradient>
+          <radialGradient id="ko3FistG" cx="0.4" cy="0.26" r="0.85">
+            <stop offset="0" stop-color="#f4cda6"/><stop offset="0.55" stop-color="#dda276"/><stop offset="1" stop-color="#ac6d3b"/>
+          </radialGradient>
+          <filter id="ko3Soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+        </defs>
+        <ellipse cx="272" cy="352" rx="128" ry="24" fill="#000" opacity=".35" filter="url(#ko3Soft)"/>
+        <path fill="url(#ko3SkinG)" d="M0 372 L0 252 Q0 218 54 212 L188 202 L196 372 Z"/>
+        <path fill="none" stroke="#8a5a34" stroke-width="3" opacity=".2" d="M66 240 q60 -12 118 -10"/>
+        <path fill="url(#ko3FistG)" d="M182 214 Q176 146 260 146 Q348 146 360 208 L364 292 Q364 348 286 346 Q198 344 190 280 Z"/>
+        <path fill="url(#ko3FistG)" d="M304 216 q52 -1 54 30 q1 20 -14 27 l-40 0 Z"/>
+        <path fill="url(#ko3FistG)" d="M304 250 q50 0 51 28 q0 18 -13 24 l-38 0 Z"/>
+        <path fill="url(#ko3FistG)" d="M303 282 q47 0 48 26 q0 17 -13 22 l-35 0 Z"/>
+        <path fill="url(#ko3FistG)" d="M300 312 q42 1 43 22 q0 14 -12 18 l-31 0 Z"/>
+        <g filter="url(#ko3Soft)" opacity=".55" stroke="#6b4022" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M306 247 L354 246"/><path d="M305 279 L352 279"/><path d="M303 309 L348 309"/>
         </g>
+        <path fill="#6b4022" opacity=".3" filter="url(#ko3Soft)" d="M300 340 q30 8 60 2 l0 8 q-32 6 -60 -2 Z"/>
+        <path fill="none" stroke="#fff" stroke-width="6" opacity=".17" stroke-linecap="round" d="M216 208 Q288 188 352 208"/>
+        <path fill="none" stroke="#fff" stroke-width="4" opacity=".13" stroke-linecap="round" d="M312 232 q26 -3 44 2"/>
+        <g class="ko3-thumb">
+          <path fill="url(#ko3SkinG)" d="M298 216 Q290 160 320 144 Q350 126 366 153 Q380 178 356 208 Q336 228 298 216 Z"/>
+          <ellipse cx="348" cy="156" rx="15" ry="10" fill="#f6dcc2" transform="rotate(30 348 156)"/>
+          <path fill="none" stroke="#8a5a34" stroke-width="3" opacity=".28" filter="url(#ko3Soft)" d="M300 214 Q314 199 326 200"/>
+        </g>
+        <path fill="none" stroke="#fff" stroke-width="3" opacity=".2" stroke-linecap="round" d="M198 166 Q222 146 262 145 Q322 144 354 176"/>
       </svg>
       <div class="ko3-coinwrap"><div class="ko3-spin" id="ko3Spin">
         <div class="ko3-face f"><span class="em">★</span></div>
+        <div class="ko3-edge"></div>
         <div class="ko3-face b"><span class="em">✦</span></div>
       </div></div>
     </div>
@@ -2104,15 +2153,7 @@ body.tvmode .scorewrap{justify-content:center}
   <!-- phase 1: away team panel -->
   <div class="ko3-panel a"><div class="ko3-pcontent">
     <div class="ko3-helm a">
-      <svg class="ko3-hsvg" viewBox="0 0 260 220">
-        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
-        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
-        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
-        <circle class="ear" cx="122" cy="120" r="13"/>
-        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
-        <path class="fm" d="M158 134 L220 132"/>
-        <path class="fm" d="M156 152 L212 154"/>
-      </svg>
+      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
       <img class="ko3-decal" id="ko3DecalPA" alt="">
     </div>
     <div class="ko3-pname" id="ko3PAName">AWAY</div>
@@ -2121,42 +2162,18 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="ko3-panel h"><div class="ko3-pcontent">
     <div class="ko3-pname" id="ko3PHName">HOME</div>
     <div class="ko3-helm h">
-      <svg class="ko3-hsvg" viewBox="0 0 260 220">
-        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
-        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
-        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
-        <circle class="ear" cx="122" cy="120" r="13"/>
-        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
-        <path class="fm" d="M158 134 L220 132"/>
-        <path class="fm" d="M156 152 L212 154"/>
-      </svg>
+      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
       <img class="ko3-decal" id="ko3DecalPH" alt="">
     </div>
   </div></div>
   <!-- phase 3: the helmet clash -->
   <div class="ko3-clash">
     <div class="ko3-helm a">
-      <svg class="ko3-hsvg" viewBox="0 0 260 220">
-        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
-        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
-        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
-        <circle class="ear" cx="122" cy="120" r="13"/>
-        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
-        <path class="fm" d="M158 134 L220 132"/>
-        <path class="fm" d="M156 152 L212 154"/>
-      </svg>
+      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
       <img class="ko3-decal" id="ko3DecalCA" alt="">
     </div>
     <div class="ko3-helm h">
-      <svg class="ko3-hsvg" viewBox="0 0 260 220">
-        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
-        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
-        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
-        <circle class="ear" cx="122" cy="120" r="13"/>
-        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
-        <path class="fm" d="M158 134 L220 132"/>
-        <path class="fm" d="M156 152 L212 154"/>
-      </svg>
+      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
       <img class="ko3-decal" id="ko3DecalCH" alt="">
     </div>
     <div class="ko3-impact"></div>
