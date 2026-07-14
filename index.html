@@ -394,7 +394,20 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   background:
     radial-gradient(900px 560px at 50% -12%, rgba(53,140,255,.22), transparent 60%),
     linear-gradient(160deg,#05070d 0%,#0a1526 55%,#061019 100%)}
-#kOverlay.show{display:block;opacity:1}
+#kOverlay.show{display:block;opacity:1;animation:kc3Shake 3.3s linear both}
+/* whole-scene camera shake: a jolt on the 3rd strike + a bigger one on the OUT! stamp
+   (scale bumps during bursts keep the fixed overlay's edges covered) */
+@keyframes kc3Shake{
+  0%,17%{transform:translate(0,0) scale(1)}
+  19%{transform:translate(6px,-5px) scale(1.035)}
+  22%{transform:translate(-6px,4px) scale(1.035)}
+  25%{transform:translate(3px,3px) scale(1.02)}
+  28%,85%{transform:translate(0,0) scale(1)}
+  87%{transform:translate(-10px,7px) scale(1.06)}
+  90%{transform:translate(9px,-7px) scale(1.06)}
+  93%{transform:translate(-6px,5px) scale(1.04)}
+  96%{transform:translate(3px,-3px) scale(1.02)}
+  98%,100%{transform:translate(0,0) scale(1)}}
 /* driving rain streaks */
 #kOverlay::before{content:"";position:absolute;inset:-25%;opacity:.12;pointer-events:none;
   background:repeating-linear-gradient(100deg,rgba(160,220,255,.5) 0 2px,transparent 2px 64px);
@@ -405,14 +418,17 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #kOverlay.show::after{animation:kFlashes 1.15s linear both}
 @keyframes kFlashes{0%,9%{opacity:0}12%{opacity:.4}17%{opacity:0}
   26%{opacity:0}29%{opacity:.45}34%{opacity:0}
-  49%{opacity:0}53%{opacity:.8}60%{opacity:.15}66%{opacity:0}100%{opacity:0}}
-/* lightning bolts — one per strike, third leaves a residual glow */
+  49%{opacity:0}53%{opacity:.95}60%{opacity:.15}66%{opacity:0}100%{opacity:0}}
+/* forked lightning — one bolt per strike (trunk + branches), third leaves a residual glow */
 .k-bolts{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
-.k-bolts path{fill:none;stroke:#dff6ff;stroke-width:6;stroke-linejoin:miter;opacity:0;
-  filter:drop-shadow(0 0 8px rgba(80,190,255,.95)) drop-shadow(0 0 26px rgba(53,140,255,.7))}
-#kOverlay.show .k-bolts path:nth-child(1){animation:kBolt .9s .12s both}
-#kOverlay.show .k-bolts path:nth-child(2){animation:kBolt .9s .32s both}
-#kOverlay.show .k-bolts path:nth-child(3){animation:kBolt 1s .58s both, kResidual 2.4s ease-in-out 1.7s infinite}
+.k-bolts g{opacity:0}
+.k-bolts .trunk{fill:none;stroke:#ffffff;stroke-width:9;stroke-linejoin:round;stroke-linecap:round;
+  filter:drop-shadow(0 0 5px #35c7ff) drop-shadow(0 0 16px #35c7ff) drop-shadow(0 0 36px rgba(53,140,255,.7))}
+.k-bolts .branch{fill:none;stroke:#eaf7ff;stroke-width:4;stroke-linejoin:round;stroke-linecap:round;
+  filter:drop-shadow(0 0 4px #35c7ff) drop-shadow(0 0 12px rgba(53,140,255,.6))}
+#kOverlay.show .k-bolts g:nth-child(1){animation:kBolt .9s .12s both}
+#kOverlay.show .k-bolts g:nth-child(2){animation:kBolt .9s .32s both}
+#kOverlay.show .k-bolts g:nth-child(3){animation:kBolt 1s .58s both, kResidual 2.4s ease-in-out 1.7s infinite}
 @keyframes kBolt{0%{opacity:0}6%{opacity:1}14%{opacity:.15}20%{opacity:1}34%{opacity:.3}100%{opacity:.14}}
 @keyframes kResidual{0%,100%{opacity:.14}45%{opacity:.34}55%{opacity:.2}70%{opacity:.3}}
 /* pitcher cutout under an electric glow */
@@ -457,26 +473,67 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #kOverlay.show .k-row::after{animation:kRing .65s ease-out .66s both}
 @keyframes kRing{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}
   100%{opacity:0;transform:translate(-50%,-50%) scale(1.9)}}
-/* warning-sign stamp */
-.k-title{font-weight:900;letter-spacing:8px;font-size:clamp(22px,3.6vw,46px);color:#eafaff;
-  border:3px solid #35c7ff;border-radius:8px;padding:10px 30px;background:rgba(8,18,32,.72);
-  box-shadow:0 0 24px rgba(53,140,255,.5), inset 0 0 18px rgba(53,140,255,.25);
-  text-shadow:0 0 12px rgba(127,224,255,.8);opacity:0}
-#kOverlay.show .k-title{animation:kStamp .4s cubic-bezier(.2,1.2,.3,1) .85s both}
-@keyframes kStamp{from{opacity:0;transform:scale(1.7)}to{opacity:1;transform:scale(1)}}
+/* ---- THE CALL: "STRIKE THREE…" hangs, "YERRRRR" stretches, "OUT!" stamps ---- */
+.kc3-call{display:flex;flex-direction:column;align-items:center;gap:min(1vh,8px);line-height:.9}
+/* beat 1 — cold flat white, letter-spacing eases in */
+.kc3-str{font-weight:900;letter-spacing:4px;font-size:clamp(16px,2.4vw,30px);color:#eafaff;opacity:0;
+  text-shadow:0 0 12px rgba(127,224,255,.7)}
+#kOverlay.show .kc3-str{animation:kc3Str .5s ease-out 1.05s both}
+@keyframes kc3Str{0%{opacity:0;letter-spacing:16px}60%{opacity:1}100%{opacity:1;letter-spacing:4px}}
+/* beat 2 — huge italic chrome-blue, each letter stretches in (the ump dragging the call) */
+.kc3-yer{display:inline-flex;justify-content:center;font-weight:900;font-style:italic;line-height:.9;
+  font-size:clamp(56px,11vh,130px);letter-spacing:-1px}
+.kc3-yer span{display:inline-block;opacity:0;transform-origin:left center;
+  background:linear-gradient(180deg,#ffffff,#bfefff 45%,#35c7ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 14px rgba(120,210,255,.9)) drop-shadow(0 0 34px rgba(53,140,255,.55))}
+#kOverlay.show .kc3-yer span{animation:kc3Yer .5s cubic-bezier(.3,1.4,.4,1) both}
+#kOverlay.show .kc3-yer span:nth-child(1){animation-delay:1.95s}
+#kOverlay.show .kc3-yer span:nth-child(2){animation-delay:2.01s}
+#kOverlay.show .kc3-yer span:nth-child(3){animation-delay:2.07s}
+#kOverlay.show .kc3-yer span:nth-child(4){animation-delay:2.13s}
+#kOverlay.show .kc3-yer span:nth-child(5){animation-delay:2.19s}
+#kOverlay.show .kc3-yer span:nth-child(6){animation-delay:2.25s}
+#kOverlay.show .kc3-yer span:nth-child(7){animation-delay:2.31s}
+@keyframes kc3Yer{0%{opacity:0;transform:scaleX(2.4)}55%{opacity:1;transform:scaleX(.92)}100%{opacity:1;transform:scaleX(1)}}
+/* squash the word on the OUT! impact */
+#kOverlay.show .kc3-yer{animation:kc3Squash .4s ease-out 3.0s both}
+@keyframes kc3Squash{0%{transform:scaleY(1)}30%{transform:scaleY(.86) scaleX(1.04)}100%{transform:scaleY(1)}}
+/* beat 3 — giant rubber stamp; scale 3 covers the frame, hard-lands to a headline */
+.kc3-out{font-weight:900;font-style:italic;letter-spacing:2px;line-height:.85;
+  font-size:clamp(60px,12vw,150px);opacity:0;color:#fff;
+  text-shadow:0 0 18px #35c7ff,0 0 46px rgba(53,140,255,.85),0 6px 0 rgba(6,18,32,.6);
+  transform:rotate(-8deg) scale(3)}
+#kOverlay.show .kc3-out{animation:kc3Stamp .55s cubic-bezier(.3,1.25,.4,1) 2.75s both,
+  kc3OutGlow 1.7s ease-in-out 3.4s infinite}
+@keyframes kc3Stamp{0%{opacity:0;transform:rotate(-8deg) scale(3)}
+  22%{opacity:1}70%{transform:rotate(-8deg) scale(.9)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}
+@keyframes kc3OutGlow{0%,100%{text-shadow:0 0 18px #35c7ff,0 0 46px rgba(53,140,255,.85),0 6px 0 rgba(6,18,32,.6)}
+  50%{text-shadow:0 0 30px #7fe0ff,0 0 70px rgba(53,140,255,1),0 6px 0 rgba(6,18,32,.6)}}
+/* white/blue pop on the stamp's impact */
+.kc3-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 42%, rgba(230,248,255,.95), rgba(90,180,255,.4) 45%, transparent 72%)}
+#kOverlay.show .kc3-flash{animation:kc3Flash .45s ease-out 3.0s both}
+@keyframes kc3Flash{0%{opacity:0}30%{opacity:.9}100%{opacity:0}}
+/* shockwave ring at the stamp */
+.kc3-shock{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.25);z-index:4;pointer-events:none;
+  width:min(30vh,300px);height:min(30vh,300px);border:5px solid #7fe0ff;border-radius:50%;opacity:0}
+#kOverlay.show .kc3-shock{animation:kc3ShockR .7s ease-out 3.02s both}
+@keyframes kc3ShockR{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
 .k-sub{color:#7fe0ff;font-weight:900;letter-spacing:4px;font-size:clamp(14px,1.7vw,20px);opacity:0}
-#kOverlay.show .k-sub{animation:anFade .5s 1.15s both}
+#kOverlay.show .k-sub{animation:anFade .5s 3.35s both}
 .k-name{font-weight:900;color:#eafaff;font-size:clamp(24px,3.4vw,46px);opacity:0;margin-top:min(1.6vh,14px);
   text-shadow:0 3px 14px rgba(0,0,0,.7)}
-#kOverlay.show .k-name{animation:anFade .5s 1.25s both}
+#kOverlay.show .k-name{animation:anFade .5s 3.5s both}
 .k-meta{color:#a9c6e8;font-weight:700;font-size:clamp(15px,1.6vw,19px);display:flex;gap:10px;opacity:0}
 .k-meta .num{color:#7fe0ff;font-weight:900}
-#kOverlay.show .k-meta{animation:anFade .5s 1.35s both}
+#kOverlay.show .k-meta{animation:anFade .5s 3.55s both}
 .k-stats{display:flex;gap:26px;margin-top:min(1.4vh,12px)}
 .k-stat{opacity:0;transform:translateY(14px);transition:.4s}
 #kOverlay.show .k-stat{opacity:1;transform:none}
-#kOverlay.show .k-stat:nth-child(1){transition-delay:1.4s}
-#kOverlay.show .k-stat:nth-child(2){transition-delay:1.55s}
+#kOverlay.show .k-stat:nth-child(1){transition-delay:3.6s}
+#kOverlay.show .k-stat:nth-child(2){transition-delay:3.72s}
 .k-stat .v{font-weight:900;color:#eafaff;font-size:clamp(22px,3vw,36px);line-height:1}
 .k-stat .k{color:#7fe0ff;font-weight:800;letter-spacing:2px;font-size:clamp(11px,1.1vw,13px);margin-top:3px}
 @media (max-width:760px){ .k-hero{display:none} .k-inner{padding-left:0} }
@@ -1795,14 +1852,32 @@ body.tvmode .scorewrap{justify-content:center}
 <!-- ============ STRIKEOUT — HIGH VOLTAGE PUNCH-OUT ============ -->
 <div id="kOverlay">
   <svg class="k-bolts" viewBox="0 0 1600 900" preserveAspectRatio="none">
-    <path d="M340 -20 L285 205 L352 228 L258 478 L330 502 L228 790"/>
-    <path d="M846 -20 L788 188 L862 212 L756 468 L842 492 L716 820"/>
-    <path d="M1336 -20 L1276 198 L1352 222 L1246 498 L1322 522 L1198 835"/>
+    <g>
+      <path class="trunk" d="M340 -20 L285 205 L352 228 L258 478 L330 502 L228 790"/>
+      <path class="branch" d="M352 228 L436 302 L402 360"/>
+      <path class="branch" d="M258 478 L186 542 L214 596"/>
+    </g>
+    <g>
+      <path class="trunk" d="M846 -20 L788 188 L862 212 L756 468 L842 492 L716 820"/>
+      <path class="branch" d="M862 212 L946 280 L912 342"/>
+      <path class="branch" d="M756 468 L684 528 L710 586"/>
+    </g>
+    <g>
+      <path class="trunk" d="M1336 -20 L1276 198 L1352 222 L1246 498 L1322 522 L1198 835"/>
+      <path class="branch" d="M1352 222 L1436 292 L1402 352"/>
+      <path class="branch" d="M1246 498 L1174 560 L1200 616"/>
+    </g>
   </svg>
   <div class="k-hero"><div class="k-spot"></div><img id="kShot" alt=""></div>
+  <div class="kc3-flash"></div>
+  <div class="kc3-shock"></div>
   <div class="k-inner">
     <div class="k-row"><span class="kk">K</span><span class="kk">K</span><span class="kk k3">K</span></div>
-    <div class="k-title">PUNCHED&nbsp;OUT</div>
+    <div class="kc3-call">
+      <div class="kc3-str">STRIKE&nbsp;THREE…</div>
+      <div class="kc3-yer"><span>Y</span><span>E</span><span>R</span><span>R</span><span>R</span><span>R</span><span>R</span></div>
+      <div class="kc3-out">OUT!</div>
+    </div>
     <div class="k-sub" id="kSub">SIDE RETIRED</div>
     <div class="k-name" id="kName">—</div>
     <div class="k-meta"><span class="num" id="kNum"></span><span id="kTeam"></span></div>
@@ -2965,12 +3040,12 @@ function triggerK(info){
   $("#kTeam").textContent=team.name||"";
   $("#kSub").textContent=info.inningTxt?("SIDE RETIRED • "+info.inningTxt):"SIDE RETIRED";
   $("#kSO").textContent="—"; $("#kERA").textContent="—";
-  if(info.so!=null&&info.so!=="")setTimeout(()=>countUp($("#kSO"),String(info.so)),1350);
-  if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),1500);
+  if(info.so!=null&&info.so!=="")setTimeout(()=>countUp($("#kSO"),String(info.so)),3600);
+  if(info.era)setTimeout(()=>countUp($("#kERA"),String(info.era)),3720);
   kOv.classList.remove("show"); void kOv.offsetWidth;
   kOv.classList.add("show");
   clearTimeout(triggerK._t);
-  triggerK._t=setTimeout(endK, info.dur||6500);
+  triggerK._t=setTimeout(endK, info.dur||7500);
 }
 function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
 
@@ -3919,7 +3994,7 @@ async function startReel(){
     await reelStep(()=>triggerHR2({id:592450,name:"Aaron Judge",team:G.home,stats:{distance:462,exitVelo:114,seasonHR:41,rbi:2,sprayDeg:12}}), 9000);
     await reelStep(()=>triggerHR2({id:660271,name:"Shohei Ohtani",team:G.home,stats:{distance:405,exitVelo:108,seasonHR:33,rbi:1,sprayDeg:-8}}), 9000);
     await reelStep(()=>triggerHR2({id:605141,name:"Mookie Betts",team:G.home,stats:{distance:365,exitVelo:101,seasonHR:19,rbi:3,sprayDeg:28}}), 9000);
-    await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",inningTxt:"END 7"}), 7000);
+    await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",inningTxt:"END 7"}), 8000);
     await reelStep(()=>triggerStretch(), 7500);
     await reelStep(()=>triggerRally({team:G.away,deficit:1,bases:[true,false,true],inning:9,half:"Top"}), 8000);
     await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:true,inning:9}), 9500);
