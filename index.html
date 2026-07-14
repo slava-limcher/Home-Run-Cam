@@ -1079,78 +1079,99 @@ body.nfl .nfl-dd{display:block}
 @keyframes nfpSlam{from{opacity:0;transform:scale(1.9)}to{opacity:1;transform:scale(1)}}
 @keyframes nfpShine{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
 
-/* ---- KICKOFF (Kicker scene): a silhouette boots the ball up, KICKOFF! slams ---- */
-#koOverlay{background:linear-gradient(180deg,#0a1120 0%,#0c1526 40%,#0c1c12 76%,#061206 100%)}
-#koOverlay.show{animation:kckCam .4s ease-out 1s}   /* camera punch at foot contact */
-@keyframes kckCam{0%{transform:scale(1)}34%{transform:scale(1.03)}100%{transform:scale(1)}}
-/* stadium bowl: stands with static crowd-dot texture (dots = texture, not particles) */
-.kck-stadium{position:absolute;left:0;right:0;top:0;height:62%;pointer-events:none;opacity:0;
-  background:
-    radial-gradient(rgba(255,255,255,.12) 1.4px,transparent 2px),
-    linear-gradient(180deg,#101c34 0%,#0c1728 58%,#0a1320 100%);
-  background-size:13px 13px,100% 100%;
-  -webkit-mask-image:linear-gradient(180deg,#000 0 70%,transparent 100%);
-  mask-image:linear-gradient(180deg,#000 0 70%,transparent 100%)}
-#koOverlay.show .kck-stadium{animation:anFade2 .5s .1s both}
-/* darker upper-deck band for a tiered feel */
-.kck-deck{position:absolute;left:0;right:0;top:15%;height:11%;pointer-events:none;opacity:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.42),transparent);
-  border-bottom:2px solid rgba(255,255,255,.06)}
-#koOverlay.show .kck-deck{animation:anFade2 .5s .1s both}
-/* stadium light banks glowing from the top corners */
-.kck-light{position:absolute;top:-10%;width:36vw;height:44vh;pointer-events:none;filter:blur(55px);opacity:0;
-  background:radial-gradient(closest-side,rgba(200,222,255,.5),transparent 72%)}
-.kck-light.l{left:-8%}.kck-light.r{right:-8%}
-#koOverlay.show .kck-light{animation:anFade2 .7s .1s both}
-/* field */
-.kck-turf{position:absolute;left:0;right:0;bottom:0;height:30%;pointer-events:none;opacity:0;overflow:hidden;
-  border-top:3px solid rgba(255,255,255,.35);
-  background:
-    repeating-linear-gradient(90deg,transparent 0 calc(16.66% - 3px),rgba(255,255,255,.42) calc(16.66% - 3px) 16.66%),
-    linear-gradient(180deg,#17532c 0%,#103d21 46%,#0a2817 100%)}
-#koOverlay.show .kck-turf{animation:anFade2 .5s .1s both}
-/* backlight so the dark silhouette reads against the field */
-.kck-backlight{position:absolute;left:24%;bottom:14%;width:min(46vh,420px);height:min(46vh,420px);
-  transform:translate(-50%,20%);border-radius:50%;pointer-events:none;filter:blur(30px);opacity:0;
-  background:radial-gradient(closest-side,rgba(150,182,235,.5),transparent 70%)}
-#koOverlay.show .kck-backlight{animation:anFade2 .6s .15s both}
-/* the kicker silhouette */
-.kck-man{position:absolute;left:24%;bottom:24%;height:min(46vh,420px);width:auto;z-index:2;
-  transform:translateX(-50%);opacity:0}
-#koOverlay.show .kck-man{animation:kckIn .45s cubic-bezier(.2,.8,.3,1) 0s both}
-@keyframes kckIn{from{opacity:0;transform:translateX(calc(-50% - 70px))}to{opacity:1;transform:translateX(-50%)}}
-.kck-man{filter:drop-shadow(0 0 3px rgba(150,180,230,.55)) drop-shadow(0 6px 14px rgba(0,0,0,.6))}
-.kck-man .body{fill:none;stroke:#0a0d13;stroke-width:22;stroke-linecap:round;stroke-linejoin:round}
-.kck-man .head{fill:#0a0d13;stroke:none}
-.kck-leg{transform-origin:84px 120px;transform:rotate(-48deg)}
-#koOverlay.show .kck-leg{animation:kckSwing .3s cubic-bezier(.6,0,.3,1) .9s both}
-@keyframes kckSwing{0%{transform:rotate(-48deg)}72%{transform:rotate(78deg)}100%{transform:rotate(70deg)}}
-/* the ball: starts at the foot, boots up and off the top-right with spin */
-.kck-ball{position:absolute;left:22%;bottom:27.5%;width:min(3.6vw,42px);height:min(2.4vw,28px);z-index:3;
-  background:radial-gradient(closest-side,#b3782f,#6e4413);border-radius:50%;border:2px solid #fff;
-  box-shadow:0 0 16px rgba(255,230,180,.65);opacity:0}
-.kck-ball::after{content:"";position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(90deg,transparent 42%,#fff 46% 54%,transparent 58%);opacity:.85}
-#koOverlay.show .kck-ball{animation:kckBoot 1.1s cubic-bezier(.22,.5,.4,1) 1s both,
-  kckSpin .3s linear 1s 4 both}
-@keyframes kckBoot{0%{opacity:0;left:22%;bottom:27.5%}
-  6%{opacity:1}88%{opacity:1}100%{opacity:0;left:64%;bottom:106%}}
-@keyframes kckSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-/* light trail rising along the flight */
-.kck-trail{position:absolute;left:22%;bottom:27.5%;width:5px;height:0;z-index:2;transform-origin:bottom;
-  transform:rotate(20deg);opacity:0;
-  background:linear-gradient(180deg,transparent,rgba(255,240,190,.9));box-shadow:0 0 12px rgba(255,220,140,.7)}
-#koOverlay.show .kck-trail{animation:kckTrail 1.1s cubic-bezier(.22,.5,.4,1) 1s both}
-@keyframes kckTrail{0%{opacity:0;height:0}18%{opacity:.85}70%{height:70vh;opacity:.6}100%{opacity:0;height:70vh}}
-/* center text stack */
-.kck-center{position:absolute;left:0;right:0;top:12%;z-index:4;pointer-events:none;display:flex;
-  flex-direction:column;align-items:center;gap:min(1.6vh,14px);text-align:center}
-#koOverlay.show .kck-center .nfp-kick{animation:anFade .5s .5s both}
-.kck-title{font-size:clamp(56px,13vw,188px);line-height:.9;opacity:0}
-#koOverlay.show .kck-title{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 1.7s both,
-  nfpShine 2.8s linear 2.4s infinite}
-.kck-venue{color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
-#koOverlay.show .kck-venue{animation:anFade .5s 2.2s both}
+/* ---- KICKOFF v4 "The Toss & The Clash": coin flip -> team panels -> helmet clash ---- */
+#koOverlay{background:radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+/* whole-scene camera shake on the helmet clash (scale bumps keep the fixed overlay's edges covered) */
+#koOverlay.p3{animation:ko3Shake .45s ease-out .5s both}
+@keyframes ko3Shake{0%,10%{transform:translate(0,0) scale(1)}
+  22%{transform:translate(-11px,8px) scale(1.06)}35%{transform:translate(10px,-7px) scale(1.06)}
+  50%{transform:translate(-7px,5px) scale(1.035)}66%{transform:translate(4px,-3px) scale(1.02)}
+  100%{transform:translate(0,0) scale(1)}}
+/* --- PHASE 0: the coin toss --- */
+.ko3-toss{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2.2vh,18px);pointer-events:none;text-align:center}
+#koOverlay.p1 .ko3-toss,#koOverlay.p2 .ko3-toss,#koOverlay.p3 .ko3-toss{display:none}
+#koOverlay.show .ko3-toss .nfp-kick{animation:anFade .5s .3s both}
+.ko3-coinwrap{width:min(26vh,240px);height:min(26vh,240px);perspective:900px}
+.ko3-spin{position:relative;width:100%;height:100%;transform-style:preserve-3d;--ko3end:1980deg}
+.ko3-spin.tails{--ko3end:2160deg}
+#koOverlay.show .ko3-spin{animation:ko3Flip 1.7s cubic-bezier(.3,.7,.4,1) .45s both}
+@keyframes ko3Flip{
+  0%{transform:translateY(0) rotateX(0) scale(1)}
+  12%{transform:translateY(-20vh) rotateX(520deg) scale(1)}
+  50%{transform:translateY(-26vh) rotateX(1260deg) scale(1)}
+  82%{transform:translateY(0) rotateX(var(--ko3end)) scale(1.06)}
+  90%{transform:translateY(0) rotateX(var(--ko3end)) scale(.93)}
+  100%{transform:translateY(0) rotateX(var(--ko3end)) scale(1)}}
+.ko3-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:grid;place-items:center;
+  background:conic-gradient(from 210deg,#8a6a1f,#f5d67b 20%,#b8860b 45%,#f7e6a2 70%,#8a6a1f);
+  box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 0 0 7px rgba(0,0,0,.16),inset 0 0 26px rgba(0,0,0,.3)}
+.ko3-face.b{transform:rotateX(180deg)}
+.ko3-face .em{font-size:min(13vh,120px);line-height:1;color:#5b430f;filter:drop-shadow(0 1px 0 rgba(255,240,190,.5))}
+.ko3-res{font-size:clamp(40px,7vw,96px);line-height:.9;opacity:0}
+#koOverlay.show .ko3-res{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.3s both, nfpShine 2.6s linear 2.9s infinite}
+.ko3-win{display:flex;align-items:center;gap:14px;color:#fff;font-weight:900;font-size:clamp(20px,2.8vw,38px);opacity:0}
+.ko3-win img{width:clamp(38px,4vw,56px);height:clamp(38px,4vw,56px);object-fit:contain}
+#koOverlay.show .ko3-win{animation:anFade .5s 2.65s both}
+.ko3-say{color:var(--gold);font-weight:900;font-style:italic;font-size:clamp(22px,3.4vw,46px);opacity:0;
+  text-shadow:0 3px 14px rgba(0,0,0,.6)}
+#koOverlay.show .ko3-say{animation:anFade .5s 2.95s both}
+/* --- shared helmet (drawn shell tinted by team color; logo decal is the data layer) --- */
+.ko3-helm{position:relative}
+.ko3-helm.a{color:var(--nflA,#e31837)} .ko3-helm.h{color:var(--nflH,#00338d)}
+.ko3-hsvg{width:100%;height:100%;display:block;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.ko3-helm.h .ko3-hsvg{transform:scaleX(-1)}   /* home faces left; decal img is NOT flipped */
+.ko3-helm .shell{fill:currentColor;stroke:rgba(0,0,0,.35);stroke-width:2}
+.ko3-helm .fm{fill:none;stroke:#c8ccd2;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.ko3-helm .ear{fill:rgba(0,0,0,.55)}
+.ko3-helm .stripe{fill:none;stroke:#fff;stroke-width:13;stroke-linecap:round;opacity:.9}
+.ko3-helm .gloss{fill:none;stroke:#fff;stroke-width:9;stroke-linecap:round;opacity:.22}
+.ko3-decal{position:absolute;width:29%;height:29%;left:46%;top:40%;object-fit:contain;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+/* --- PHASE 1/2: team intro panels (anthem-style wipe + drift) --- */
+.ko3-panel{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
+  gap:min(4vw,56px);visibility:hidden;overflow:hidden}
+.ko3-panel.a{background:linear-gradient(115deg,color-mix(in srgb,var(--nflA,#e31837) 60%,#05070d),#05070d 72%)}
+.ko3-panel.h{background:linear-gradient(245deg,color-mix(in srgb,var(--nflH,#00338d) 60%,#05070d),#05070d 72%)}
+.ko3-panel::before{content:"";position:absolute;inset:-25%;opacity:.09;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 26px);animation:anStripes 2.6s linear infinite}
+#koOverlay.p1 .ko3-panel.a{visibility:visible;animation:ko3WipeL 1.7s cubic-bezier(.3,.7,.2,1) both}
+#koOverlay.p2 .ko3-panel.h{visibility:visible;animation:ko3WipeR 1.7s cubic-bezier(.3,.7,.2,1) both}
+@keyframes ko3WipeL{0%{clip-path:inset(0 100% 0 0)}16%,84%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+@keyframes ko3WipeR{0%{clip-path:inset(0 0 0 100%)}16%,84%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 100% 0 100%)}}
+.ko3-pcontent{display:flex;align-items:center;gap:min(4vw,56px)}
+#koOverlay.p1 .ko3-panel.a .ko3-pcontent{animation:ko3DriftL 1.7s ease both}
+#koOverlay.p2 .ko3-panel.h .ko3-pcontent{animation:ko3DriftR 1.7s ease both}
+@keyframes ko3DriftL{0%{opacity:0;transform:translateX(-60px)}18%,82%{opacity:1;transform:none}100%{opacity:0;transform:translateX(45px)}}
+@keyframes ko3DriftR{0%{opacity:0;transform:translateX(60px)}18%,82%{opacity:1;transform:none}100%{opacity:0;transform:translateX(-45px)}}
+.ko3-panel .ko3-helm{width:min(34vh,320px);height:min(34vh,320px)}
+.ko3-pname{font-weight:900;font-size:clamp(40px,7.5vw,110px);line-height:.95;color:#fff;letter-spacing:-1px;
+  text-shadow:0 6px 22px rgba(0,0,0,.6)}
+/* --- PHASE 3: the helmet clash --- */
+.ko3-clash{position:absolute;inset:0;z-index:2;visibility:hidden}
+#koOverlay.p3 .ko3-clash{visibility:visible}
+.ko3-clash .ko3-helm{position:absolute;top:50%;left:50%;width:min(36vh,340px);height:min(36vh,340px)}
+#koOverlay.p3 .ko3-clash .ko3-helm.a{animation:ko3FlyA .55s cubic-bezier(.5,0,.75,1) .15s both}
+#koOverlay.p3 .ko3-clash .ko3-helm.h{animation:ko3FlyH .55s cubic-bezier(.5,0,.75,1) .15s both}
+@keyframes ko3FlyA{0%{transform:translate(-150vw,-50%)}72%{transform:translate(-104%,-50%)}100%{transform:translate(-162%,-50%)}}
+@keyframes ko3FlyH{0%{transform:translate(150vw,-50%)}72%{transform:translate(4%,-50%)}100%{transform:translate(62%,-50%)}}
+.ko3-impact{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+  width:min(40vh,380px);height:min(40vh,380px);border-radius:50%;opacity:0;
+  background:radial-gradient(closest-side,#fff,rgba(255,240,190,.6) 38%,transparent 70%)}
+#koOverlay.p3 .ko3-impact{animation:ko3Impact .5s ease-out .55s both}
+@keyframes ko3Impact{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}22%{opacity:.95}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
+.ko3-ring1,.ko3-ring2{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.25);z-index:3;
+  border-radius:50%;opacity:0;pointer-events:none;width:min(30vh,280px);height:min(30vh,280px)}
+.ko3-ring1{border:5px solid #fff} .ko3-ring2{border:4px solid var(--gold)}
+#koOverlay.p3 .ko3-ring1{animation:ko3Ring .7s ease-out .55s both}
+#koOverlay.p3 .ko3-ring2{animation:ko3Ring .8s ease-out .67s both}
+@keyframes ko3Ring{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
+.ko3-title{position:absolute;left:0;right:0;top:16%;z-index:4;text-align:center;
+  font-size:clamp(56px,13vw,188px);line-height:.9;opacity:0}
+#koOverlay.p3 .ko3-title{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) .95s both, nfpShine 2.8s linear 1.7s infinite}
+.ko3-venue{position:absolute;left:0;right:0;bottom:14%;z-index:4;text-align:center;
+  color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
+#koOverlay.p3 .ko3-venue{animation:anFade .5s 1.45s both}
 
 /* ---- RED ZONE (A · Camera Push v2): dive in from OUTSIDE the stadium, land on a big field ---- */
 /* act one: aerial night view of the stadium exterior — the camera dives into the bowl */
@@ -2035,29 +2056,80 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ NFL BROADCAST PACKAGE OVERLAYS ============ -->
 <div id="koOverlay">
-  <div class="kck-light l"></div>
-  <div class="kck-light r"></div>
-  <div class="kck-stadium"></div>
-  <div class="kck-deck"></div>
-  <div class="kck-turf"></div>
-  <div class="kck-backlight"></div>
-  <svg class="kck-man" viewBox="0 0 160 230">
-    <circle class="head" cx="58" cy="32" r="15"/>
-    <path class="body" d="M62 50 L84 118" style="stroke-width:30"/>
-    <path class="body" d="M66 62 L33 43" style="stroke-width:16"/>
-    <path class="body" d="M68 66 L104 92" style="stroke-width:15"/>
-    <path class="body" d="M84 120 L74 220"/>
-    <g class="kck-leg">
-      <path class="body" d="M84 120 L90 206"/>
-      <path class="body" d="M90 206 L112 202" style="stroke-width:14"/>
-    </g>
-  </svg>
-  <div class="kck-trail"></div>
-  <div class="kck-ball"></div>
-  <div class="kck-center">
-    <div class="nfp-kick">GAME ON</div>
-    <div class="kck-title nfp-chrome">KICKOFF!</div>
-    <div class="kck-venue" id="koVenue"></div>
+  <!-- phase 0: the coin toss -->
+  <div class="ko3-toss">
+    <div class="nfp-kick">THE COIN TOSS</div>
+    <div class="ko3-coinwrap"><div class="ko3-spin" id="ko3Spin">
+      <div class="ko3-face f"><span class="em">★</span></div>
+      <div class="ko3-face b"><span class="em">✦</span></div>
+    </div></div>
+    <div class="ko3-res nfp-chrome" id="ko3Res">HEADS!</div>
+    <div class="ko3-win"><img id="ko3WinLogo" alt=""><span id="ko3WinName"></span></div>
+    <div class="ko3-say" id="ko3Say"></div>
+  </div>
+  <!-- phase 1: away team panel -->
+  <div class="ko3-panel a"><div class="ko3-pcontent">
+    <div class="ko3-helm a">
+      <svg class="ko3-hsvg" viewBox="0 0 260 220">
+        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
+        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
+        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
+        <circle class="ear" cx="122" cy="120" r="13"/>
+        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
+        <path class="fm" d="M158 134 L220 132"/>
+        <path class="fm" d="M156 152 L212 154"/>
+      </svg>
+      <img class="ko3-decal" id="ko3DecalPA" alt="">
+    </div>
+    <div class="ko3-pname" id="ko3PAName">AWAY</div>
+  </div></div>
+  <!-- phase 2: home team panel -->
+  <div class="ko3-panel h"><div class="ko3-pcontent">
+    <div class="ko3-pname" id="ko3PHName">HOME</div>
+    <div class="ko3-helm h">
+      <svg class="ko3-hsvg" viewBox="0 0 260 220">
+        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
+        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
+        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
+        <circle class="ear" cx="122" cy="120" r="13"/>
+        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
+        <path class="fm" d="M158 134 L220 132"/>
+        <path class="fm" d="M156 152 L212 154"/>
+      </svg>
+      <img class="ko3-decal" id="ko3DecalPH" alt="">
+    </div>
+  </div></div>
+  <!-- phase 3: the helmet clash -->
+  <div class="ko3-clash">
+    <div class="ko3-helm a">
+      <svg class="ko3-hsvg" viewBox="0 0 260 220">
+        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
+        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
+        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
+        <circle class="ear" cx="122" cy="120" r="13"/>
+        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
+        <path class="fm" d="M158 134 L220 132"/>
+        <path class="fm" d="M156 152 L212 154"/>
+      </svg>
+      <img class="ko3-decal" id="ko3DecalCA" alt="">
+    </div>
+    <div class="ko3-helm h">
+      <svg class="ko3-hsvg" viewBox="0 0 260 220">
+        <path class="shell" d="M44 128 C 36 64, 92 30, 150 32 C 198 34, 230 64, 234 110 C 235 126, 231 134, 216 136 C 216 152, 208 162, 190 164 L 150 166 C 90 174, 48 170, 44 128 Z"/>
+        <path class="stripe" d="M72 46 C 122 28, 178 36, 220 80"/>
+        <path class="gloss" d="M84 54 C 122 42, 168 48, 200 78"/>
+        <circle class="ear" cx="122" cy="120" r="13"/>
+        <path class="fm" d="M214 120 C 230 132, 230 154, 216 164"/>
+        <path class="fm" d="M158 134 L220 132"/>
+        <path class="fm" d="M156 152 L212 154"/>
+      </svg>
+      <img class="ko3-decal" id="ko3DecalCH" alt="">
+    </div>
+    <div class="ko3-impact"></div>
+    <div class="ko3-ring1"></div>
+    <div class="ko3-ring2"></div>
+    <div class="ko3-title nfp-chrome">KICKOFF!</div>
+    <div class="ko3-venue" id="koVenue"></div>
   </div>
 </div>
 <div id="rzOverlay">
@@ -3534,7 +3606,7 @@ async function tickNFL(first){
     // kickoff (first one ever seen)
     if(!NFLSEEN.kickoff){
       const ko=plays.find(x=>/kickoff/i.test((x.p.type&&x.p.type.text)||""));
-      if(ko){NFLSEEN.kickoff=true;triggerKickoff();}
+      if(ko){NFLSEEN.kickoff=true;triggerKickoff({recv:(NG.posHome?G.home:G.away),choice:"RECEIVE",live:true});}
     }
     // touchdowns + pick-sixes + turnovers
     for(const x of plays){
@@ -3612,13 +3684,37 @@ let xpPlaying=false,tpPlaying=false;
 const koOv=$("#koOverlay"),rzOv=$("#rzOverlay"),nmOv=$("#nmOverlay"),
       tdOv=$("#tdOverlay"),tmOv=$("#tmOverlay"),toOv=$("#toOverlay");
 let koPlaying=false,rzPlaying=false,nmPlaying=false,tdPlaying=false,tmPlaying=false,toPlaying=false;
-function triggerKickoff(){
+let ko3Timers=[];
+/* coin toss -> team panels -> helmet clash -> KICKOFF!   info={recv,call,choice,live} all optional */
+function triggerKickoff(info){
+  info=info||{};
   if(takeoverBusy())return; koPlaying=true; hideWalkup();
+  const aw=G.away, hm=G.home, live=!!info.live;
+  const tails=info.call?(/tails/i.test(info.call)):(Math.random()<.5);
+  const winner=info.recv||(Math.random()<.5?aw:hm);
+  const receives=info.choice?!/defer/i.test(info.choice):(Math.random()<.85);
+  $("#ko3Spin").classList.toggle("tails",tails);
+  $("#ko3Res").textContent=live?"TOSS DECIDED":(tails?"TAILS!":"HEADS!");
+  $("#ko3WinLogo").src=winner.logo||""; $("#ko3WinLogo").style.display=winner.logo?"":"none";
+  $("#ko3WinName").textContent=((winner.name||"")+" WIN THE TOSS").toUpperCase();
+  $("#ko3Say").textContent=receives?"“WE’LL RECEIVE!”":"“WE DEFER.”";
+  // panel + clash decals (logo = data layer; blank cleanly when missing)
+  [["#ko3DecalPA",aw],["#ko3DecalCA",aw],["#ko3DecalPH",hm],["#ko3DecalCH",hm]].forEach(([id,t])=>{
+    $(id).src=t.logo||""; $(id).style.display=t.logo?"":"none";});
+  $("#ko3PAName").textContent=(aw.name||"AWAY").toUpperCase();
+  $("#ko3PHName").textContent=(hm.name||"HOME").toUpperCase();
   $("#koVenue").textContent=(LIVE.venue||"").toUpperCase();
-  koOv.classList.remove("show"); void koOv.offsetWidth; koOv.classList.add("show");
-  clearTimeout(triggerKickoff._t); triggerKickoff._t=setTimeout(endKickoff,6500);
+  koOv.classList.remove("show","p1","p2","p3"); void koOv.offsetWidth; koOv.classList.add("show");
+  ko3Timers.forEach(clearTimeout);
+  ko3Timers=[
+    setTimeout(()=>koOv.classList.add("p1"),3600),
+    setTimeout(()=>{koOv.classList.remove("p1");koOv.classList.add("p2");},5300),
+    setTimeout(()=>{koOv.classList.remove("p2");koOv.classList.add("p3");},7000),
+    setTimeout(endKickoff,11200)
+  ];
 }
-function endKickoff(){clearTimeout(triggerKickoff._t);koOv.classList.remove("show");koPlaying=false;}
+function endKickoff(){ko3Timers.forEach(clearTimeout);ko3Timers=[];
+  koOv.classList.remove("show","p1","p2","p3");koPlaying=false;}
 function triggerRedZone(info){
   info=info||{};
   if(takeoverBusy())return; rzPlaying=true; hideWalkup();
@@ -4001,7 +4097,7 @@ async function startReel(){
     if(!reelOn)break;
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
-    await reelStep(()=>triggerKickoff(), 7000);
+    await reelStep(()=>triggerKickoff(), 11700);
     await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 9100);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away}), 6500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
