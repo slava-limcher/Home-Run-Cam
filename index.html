@@ -501,15 +501,13 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   display:flex;align-items:center;justify-content:center}
 #kOverlay.show .kc3-black{animation:kc3Black 2.95s ease-out 2.5s both}
 @keyframes kc3Black{0%{opacity:0}8%{opacity:1}88%{opacity:1}100%{opacity:0}}
+/* matte marker red — muted, no neon glow, just a faint ink-soft edge */
 .kc3-redout{font-weight:900;font-style:italic;letter-spacing:2px;line-height:.85;
-  font-size:clamp(90px,18vw,270px);color:#ff2436;opacity:0;transform:rotate(-8deg) scale(3);
-  text-shadow:0 0 26px rgba(255,40,60,.9),0 0 74px rgba(220,10,40,.7),0 8px 0 rgba(60,0,6,.55)}
-#kOverlay.show .kc3-redout{animation:kc3RedStamp .5s cubic-bezier(.3,1.25,.4,1) 2.72s both,
-  kc3RedGlow 1.6s ease-in-out 3.3s infinite}
+  font-size:clamp(90px,18vw,270px);color:#c33127;opacity:0;transform:rotate(-8deg) scale(3);
+  text-shadow:0 0 2px rgba(150,32,24,.55),0 2px 3px rgba(30,0,0,.5)}
+#kOverlay.show .kc3-redout{animation:kc3RedStamp .5s cubic-bezier(.3,1.25,.4,1) 2.72s both}
 @keyframes kc3RedStamp{0%{opacity:0;transform:rotate(-8deg) scale(3)}
   22%{opacity:1}70%{transform:rotate(-8deg) scale(.9)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}
-@keyframes kc3RedGlow{0%,100%{text-shadow:0 0 26px rgba(255,40,60,.9),0 0 74px rgba(220,10,40,.7),0 8px 0 rgba(60,0,6,.55)}
-  50%{text-shadow:0 0 42px rgba(255,90,100,1),0 0 108px rgba(220,10,40,.95),0 8px 0 rgba(60,0,6,.55)}}
 /* the pitcher card resumes after the black lifts (~5.4s) */
 .k-sub{color:#7fe0ff;font-weight:900;letter-spacing:4px;font-size:clamp(14px,1.7vw,20px);opacity:0}
 #kOverlay.show .k-sub{animation:anFade .5s 5.4s both}
