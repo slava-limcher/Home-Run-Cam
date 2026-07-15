@@ -1262,9 +1262,9 @@ body.nfl .nfl-dd{display:block}
 /* ===== SHARED field-video scene (3rd down + red zone): dive video -> freeze -> lines -> zoom ===== */
 .fv-scene{position:absolute;inset:0;z-index:1;overflow:hidden}
 /* 16:9 cover box: the coordinate system IS the video frame, so line %s always sit on the
-   filmed field regardless of window shape — and scaling the box moves lines + film together */
+   filmed field regardless of window shape. Static 1.4× crop hides the bleachers — NO zoom motion. */
 .fv-zoom{position:absolute;left:50%;top:50%;width:max(100vw,177.78vh);height:max(100vh,56.25vw);
-  transform:translate(-50%,-50%);transform-origin:50% 50%}
+  transform:translate(-50%,-50%) scale(1.4);transform-origin:50% 50%}
 .fv-zoom>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a1a10}
 .fv-line{position:absolute;top:9%;bottom:9%;width:5px;margin-left:-2.5px;opacity:0;border-radius:3px;z-index:3}
 .fv-line.blue{background:#2d7dff;box-shadow:0 0 14px #2d7dff,0 0 5px #fff}
@@ -1274,17 +1274,15 @@ body.nfl .nfl-dd{display:block}
   border-left:5px solid rgba(255,70,100,.9);box-shadow:inset 0 0 40px rgba(120,0,20,.4)}
 #nmOverlay.frozen .fv-line,#rzOverlay.frozen .fv-line,#rzOverlay.frozen .fv-wash{animation:fvIn .4s ease-out both}
 @keyframes fvIn{from{opacity:0}to{opacity:1}}
-#nmOverlay.zoomed .fv-zoom,#rzOverlay.zoomed .fv-zoom{animation:fvZoom 1.2s cubic-bezier(.4,0,.2,1) both}
-@keyframes fvZoom{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(var(--fvS,1.4))}}
 
 /* ---- RED ZONE (video field + transparent red-zone wash + blue entry line) ---- */
 .rz2-inner{position:absolute;inset:0;z-index:4;pointer-events:none;display:flex;flex-direction:column;
   align-items:center;text-align:center;padding:6vh 4vw}
 .rz2-title{font-weight:900;letter-spacing:2px;color:#fff;font-size:clamp(48px,9vw,120px);line-height:.95;
   text-shadow:0 6px 26px rgba(0,0,0,.85);opacity:0;margin-top:2vh}
-#rzOverlay.show .rz2-title{animation:anFade .45s 7.1s both}
+#rzOverlay.show .rz2-title{animation:anFade .45s 6.1s both}
 .rz3-drive{display:flex;align-items:center;gap:8px;min-height:34px;opacity:0;flex-wrap:wrap;justify-content:center;margin-top:min(1.6vh,14px)}
-#rzOverlay.show .rz3-drive{animation:anFade .35s 7.3s both}
+#rzOverlay.show .rz3-drive{animation:anFade .35s 6.3s both}
 .rz3-chev{display:flex;align-items:center;background:rgba(13,17,24,.82);border:1px solid rgba(255,255,255,.16);
   padding:5px 16px 5px 12px;font-weight:900;font-size:clamp(13px,1.4vw,17px);color:#fff;
   opacity:0;transform:translateX(-14px);
@@ -1295,19 +1293,19 @@ body.nfl .nfl-dd{display:block}
 @keyframes rz3ChevIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 .rz2-sub{color:#fff;font-weight:800;letter-spacing:1px;font-size:clamp(16px,2vw,24px);opacity:0;margin-top:auto;
   text-shadow:0 3px 14px rgba(0,0,0,.85)}
-#rzOverlay.show .rz2-sub{animation:anFade .4s 7.8s both}
+#rzOverlay.show .rz2-sub{animation:anFade .4s 6.7s both}
 
 /* ---- 3RD DOWN (video field + blue line-of-scrimmage + yellow first-down line) ---- */
 .dm-inner{position:absolute;inset:0;z-index:4;pointer-events:none;display:flex;flex-direction:column;
   align-items:center;text-align:center;padding:7vh 4vw}
 .dm-kicker2{color:var(--gold);font-weight:900;letter-spacing:8px;font-size:clamp(18px,2.6vw,34px);opacity:0}
-#nmOverlay.show .dm-kicker2{animation:anFade .4s 7.0s both}
+#nmOverlay.show .dm-kicker2{animation:anFade .4s 6.0s both}
 .dm-money{font-weight:900;font-style:italic;line-height:.95;font-size:clamp(52px,9.5vw,150px);letter-spacing:-2px;
   color:#e7edf5;text-shadow:0 2px 0 #aeb9c6,0 4px 0 #8b97a6,0 6px 0 #6b7684,0 16px 34px rgba(0,0,0,.85);opacity:0;margin-top:1vh}
-#nmOverlay.show .dm-money{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) 7.1s both}
+#nmOverlay.show .dm-money{animation:nfpSlam .45s cubic-bezier(.2,1.1,.3,1) 6.1s both}
 .dm-sub{color:#fff;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,24px);opacity:0;margin-top:auto;
   text-shadow:0 3px 14px rgba(0,0,0,.85)}
-#nmOverlay.show .dm-sub{animation:anFade .4s 7.6s both}
+#nmOverlay.show .dm-sub{animation:anFade .4s 6.5s both}
 
 /* ---- TOUCHDOWN (through the uprights): ball SPIRALS up through the goal
    posts, they burst white with a shockwave ring, TOUCHDOWN erupts, +6 ---- */
@@ -3800,25 +3798,23 @@ function triggerRedZone(info){
   const wl=FV_ANCH[13], wr=FV_ANCH[16];
   const w=$("#rzWash"); w.style.left=wl+"%"; w.style.width=(wr-wl)+"%";
   $("#rzEntry").style.left=FV_ANCH[Math.max(13,Math.min(16,fvIdx(100-y)))]+"%";
-  $("#rzZoom").style.setProperty("--fvS","1.4");   // centered crop: hide the bleachers
   $("#rzSub").textContent=(((info.team&&info.team.name)||"OFFENSE")+` DRIVE • ${y} YARD${y>1?"S":""} TO THE END ZONE`).toUpperCase();
   const dr=$("#rzDrive"); dr.innerHTML="";
   const drv=(info.plays||[]).filter(g=>typeof g==="number").slice(-9);
   drv.forEach((g,i)=>{const c=document.createElement("div");
     c.className="rz3-chev "+(g<0?"loss":"gain");
     c.textContent=(g>0?"+":"")+g;
-    c.style.animationDelay=(7.3+i*.09)+"s";   // chevrons land after the zoom settles
+    c.style.animationDelay=(6.3+i*.09)+"s";   // chevrons land after the freeze
     dr.appendChild(c);});
   dr.style.display=drv.length?"":"none";
-  rzOv.classList.remove("show","frozen","zoomed"); void rzOv.offsetWidth; rzOv.classList.add("show");
+  rzOv.classList.remove("show","frozen"); void rzOv.offsetWidth; rzOv.classList.add("show");
   const v=$("#rzVid"); try{v.muted=true;v.currentTime=FV_START;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
   rzTimers.forEach(clearTimeout);
   rzTimers=[setTimeout(()=>rzOv.classList.add("frozen"),5300),
-            setTimeout(()=>rzOv.classList.add("zoomed"),5800),
-            setTimeout(endRedZone,11000)];
+            setTimeout(endRedZone,10000)];
 }
 function endRedZone(){rzTimers.forEach(clearTimeout);rzTimers=[];const v=$("#rzVid");if(v)v.pause();
-  rzOv.classList.remove("show","frozen","zoomed");rzPlaying=false;}
+  rzOv.classList.remove("show","frozen");rzPlaying=false;}
 function rzFakeDrive(){const n=4+Math.floor(Math.random()*4);
   return Array.from({length:n},()=>Math.floor(Math.random()*24)-4);}
 function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow first-down line
@@ -3835,16 +3831,14 @@ function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow firs
   const losIdx=Math.min(15,fvIdx(100-ytez));
   const fdIdx=Math.min(16,losIdx+Math.max(1,Math.round(dist/6.25)));
   $("#dmLos").style.left=FV_ANCH[losIdx]+"%"; $("#dmFd").style.left=FV_ANCH[fdIdx]+"%";
-  $("#dmZoom").style.setProperty("--fvS","1.4");   // centered crop: hide the bleachers
-  nmOv.classList.remove("show","frozen","zoomed"); void nmOv.offsetWidth; nmOv.classList.add("show");
+  nmOv.classList.remove("show","frozen"); void nmOv.offsetWidth; nmOv.classList.add("show");
   const v=$("#dmVid"); try{v.muted=true;v.currentTime=FV_START;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
   nmTimers.forEach(clearTimeout);
   nmTimers=[setTimeout(()=>nmOv.classList.add("frozen"),5300),
-            setTimeout(()=>nmOv.classList.add("zoomed"),5800),
-            setTimeout(endNoise,10000)];
+            setTimeout(endNoise,9000)];
 }
 function endNoise(){nmTimers.forEach(clearTimeout);nmTimers=[];const v=$("#dmVid");if(v)v.pause();
-  nmOv.classList.remove("show","frozen","zoomed");nmPlaying=false;}
+  nmOv.classList.remove("show","frozen");nmPlaying=false;}
 function triggerTouchdown(info){
   info=info||{};
   if(takeoverBusy())return; tdPlaying=true; hideWalkup();
@@ -4191,8 +4185,8 @@ async function startReel(){
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
     await reelStep(()=>triggerKickoff(), 11700);
-    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 11500);
-    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 10500);
+    await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 10500);
+    await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 9500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
     await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 6700);
     await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 5500);
