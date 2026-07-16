@@ -30,6 +30,14 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 /* =================== SETUP / GAME PICKER =================== */
 #setup{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;
   padding:min(5vh,48px) 20px;overflow-y:auto}
+/* full-bleed night-stadium video behind the opening/game-picker screen */
+.setup-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.setup-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.setup-bg::after{content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(4,10,24,.52),rgba(4,10,24,.70) 55%,rgba(3,8,20,.93)),
+    radial-gradient(135% 105% at 50% 8%, transparent 40%, rgba(3,8,20,.6));}
+#setup>:not(.setup-bg){position:relative;z-index:1}
 .brand{display:flex;align-items:center;gap:16px;margin-bottom:6px}
 .brandmark{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--red),var(--red2));
   display:grid;place-items:center;box-shadow:0 8px 30px rgba(191,13,62,.5);position:relative}
@@ -1717,6 +1725,7 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ SETUP ============ -->
 <div id="setup">
+  <div class="setup-bg"><video id="setupVid" autoplay muted loop playsinline preload="auto" poster="opening.jpg"><source src="opening.mp4" type="video/mp4"></video></div>
   <div class="brand">
     <div class="brandmark">
       <svg viewBox="0 0 24 24" fill="none"><path d="M6 4c3 2 5 6 5 8s-2 6-5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M18 4c-3 2-5 6-5 8s2 6 5 8" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.6"/></svg>
