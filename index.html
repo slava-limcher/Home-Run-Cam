@@ -900,6 +900,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
     linear-gradient(180deg,#0a1730 0%,#0b1a2c 46%,#0f2418 100%);
   background-size:auto,auto,auto,11px 11px,auto;
   background-repeat:no-repeat,no-repeat,no-repeat,repeat,no-repeat}
+/* MLB final: real night-ballpark video backdrop (dimmed so the champagne gold reads);
+   NFL keeps the stadium.jpg photo. Rides the .fg-bg fade + Ken-Burns push-in. */
+.fg-vid{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:brightness(.58) saturate(.9)}
+#finalOverlay.mlb .fg-vid{display:block}
 #finalOverlay.show .fg-bg{animation:anFade2 .6s both, fgKen 9s ease-out both}
 @keyframes fgKen{from{transform:scale(1)}to{transform:scale(1.08)}}
 /* dark vignette + warm center glow so the gold reads over the scene */
@@ -2046,7 +2051,7 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ FINAL / WALK-OFF — CHAMPAGNE GOLD ============ -->
 <div id="finalOverlay">
-  <div class="fg-bg"></div>
+  <div class="fg-bg"><video class="fg-vid" id="fVid" autoplay muted loop playsinline preload="auto" poster="lineup.jpg"><source src="lineup.mp4" type="video/mp4"></video></div>
   <div class="fg-rays"></div>
   <div class="fg-shock"></div>
   <div class="fg-flash"></div>
