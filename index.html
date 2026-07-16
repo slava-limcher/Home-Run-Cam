@@ -1014,6 +1014,11 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 /* MLB red ribbon along the top */
 #lineupOverlay::after{content:"";position:absolute;top:0;left:0;right:0;height:8px;
   background:linear-gradient(90deg,#bf0d3e,#e01843,#bf0d3e)}
+/* aerial night-ballpark video backdrop behind the lineup card (navy gradient is the fallback) */
+.lu-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.lu-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lu-bg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(4,14,32,.55),rgba(4,14,32,.72))}
 .lu-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(2vh,18px);padding:20px;text-align:center}
 .lu-kick{color:var(--gold);font-weight:900;letter-spacing:9px;font-size:clamp(12px,1.7vw,22px);opacity:0}
@@ -2022,6 +2027,7 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ LINEUP REVEAL — CHALKBOARD LINEUP CARD ============ -->
 <div id="lineupOverlay">
+  <div class="lu-bg"><video id="luVid" autoplay muted loop playsinline preload="auto" poster="lineup.jpg"><source src="lineup.mp4" type="video/mp4"></video></div>
   <div class="lu-inner">
     <div class="lu-kick">OFFICIAL LINEUP CARD</div>
     <div class="lu-title">STARTING LINEUPS</div>
