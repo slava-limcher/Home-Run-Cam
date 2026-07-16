@@ -2446,6 +2446,15 @@ async function fetchNumber(id){
   try{const r=await fetch(`${API}/v1/people/${id}`);const j=await r.json();
     return (j.people&&j.people[0]&&j.people[0].primaryNumber)||"";}catch(e){return "";}
 }
+// jersey number + position for a player (IP-safe identity: no names on the cards)
+async function fetchNumPos(id){
+  try{const r=await fetch(`${API}/v1/people/${id}`);const j=await r.json();
+    const p=(j.people&&j.people[0])||{};
+    return {number:p.primaryNumber||"",pos:(p.primaryPosition&&p.primaryPosition.abbreviation)||""};
+  }catch(e){return {number:"",pos:""};}
+}
+// "#17 • RF" / "RF" / "#17" — the on-screen player identity (number + position, never a name)
+function numPosStr(num,pos){return [num?("#"+num):"",pos||""].filter(Boolean).join(" • ")||"—";}
 const pad=n=>String(n).padStart(2,"0");
 const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
@@ -2614,10 +2623,11 @@ function ambientCards(){
   const c=[{lb:"MATCHUP",vl:`${G.away.name} @ ${G.home.name}${(MODE==="live"&&LIVE.venue)?" • "+LIVE.venue:""}`}];
   if(VENUE)c.push({lb:"TONIGHT AT",vl:VENUE.toUpperCase()});
   if(MODE==="demo"){
-    if(G.demoBatter)c.push({lb:"AT THE PLATE",vl:G.demoBatter.name});
+    if(G.demoBatter)c.push({lb:"AT THE PLATE",vl:numPosStr(G.demoBatter.number,G.demoBatter.pos)});
     return c;
   }
-  if(LIVE.batter)c.push({lb:"AT THE PLATE",vl:LIVE.batter.name+(LIVE.batter.pName?` vs ${LIVE.batter.pName}`:"")});
+  if(LIVE.batter&&(LIVE.batter.pos||LIVE.batter.num))
+    c.push({lb:"AT THE PLATE",vl:numPosStr(LIVE.batter.num,LIVE.batter.pos)+(LIVE.batter.pNum?` vs #${LIVE.batter.pNum}`:"")});
   if(LIVE.hits&&(LIVE.hits.a+LIVE.hits.h)>0)c.push({lb:"HIT COUNT",vl:`${G.away.abbr} ${LIVE.hits.a} • ${G.home.abbr} ${LIVE.hits.h}`});
   if(LIVE.k&&(LIVE.k.a+LIVE.k.h)>0)c.push({lb:"K COUNT",vl:`${G.away.abbr} ${LIVE.k.a} • ${G.home.abbr} ${LIVE.k.h}`});
   const diff=Math.abs(G.away.score-G.home.score);
@@ -2761,7 +2771,11 @@ async function tickLive(first){
       lastHRIndex=maxHR;
       triggerHR(hrInfoFromPlay(newestHR));
       const b=(newestHR.matchup&&newestHR.matchup.batter)||{};
-      if(b.id)fetchNumber(b.id).then(n=>{if(n)$("#hrNum").textContent="#"+n;});
+      if(b.id)fetchNumPos(b.id).then(d=>{
+        if(!hrPlaying)return;
+        if(d.number){$("#hrWho").textContent="#"+d.number;$("#hrNum").textContent=d.pos||"";}
+        else if(d.pos)$("#hrWho").textContent=d.pos;
+      });
     }
     // ---- strikeout-ends-the-inning detection (K play whose end count = 3 outs) ----
     let newestK=null, maxK=-1, kTop=0, kBot=0;
@@ -2856,10 +2870,10 @@ const DEMO_PITCHERS={
 };
 /* fill the demo lineups out to nine (no ids -> no headshots, names only) */
 const DEMO_EXTRA={
-  away:[{name:"Austin Wells",pos:"C"},{name:"Ben Rice",pos:"1B"},{name:"Trent Grisham",pos:"CF"},
-        {name:"Ryan McMahon",pos:"3B"},{name:"Jasson Domínguez",pos:"LF"}],
-  home:[{name:"Max Muncy",pos:"3B"},{name:"Tommy Edman",pos:"CF"},{name:"Andy Pages",pos:"LF"},
-        {name:"Miguel Rojas",pos:"2B"}]
+  away:[{name:"Austin Wells",pos:"C",number:"28"},{name:"Ben Rice",pos:"1B",number:"93"},{name:"Trent Grisham",pos:"CF",number:"12"},
+        {name:"Ryan McMahon",pos:"3B",number:"24"},{name:"Jasson Domínguez",pos:"LF",number:"89"}],
+  home:[{name:"Max Muncy",pos:"3B",number:"13"},{name:"Tommy Edman",pos:"CF",number:"25"},{name:"Andy Pages",pos:"LF",number:"44"},
+        {name:"Miguel Rojas",pos:"2B",number:"11"}]
 };
 function demoLineup(){
   const mk=(roster,extra)=>{
@@ -2867,7 +2881,7 @@ function demoLineup(){
     [...roster,...extra].slice(0,9).forEach((p,i)=>{
       const pid=p.id||-(i+1);
       order.push(pid);
-      players["ID"+pid]={person:{fullName:p.name},position:{abbreviation:p.pos||""}};
+      players["ID"+pid]={person:{fullName:p.name},position:{abbreviation:p.pos||""},jerseyNumber:p.number||""};
     });
     return {battingOrder:order,players};
   };
@@ -2983,8 +2997,9 @@ function buildHRCard(info){
     shot.src=siloURL(info.id);
   }else{ hero.style.display="none"; shot.removeAttribute("src"); }
   if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
-  $("#hrWho").textContent=info.name||"HOME RUN!";
-  $("#hrNum").textContent=info.number?("#"+info.number):"";
+  const hn=info.number?("#"+info.number):"";
+  $("#hrWho").textContent=hn||info.pos||"HOME RUN!";
+  $("#hrNum").textContent=hn?(info.pos||""):"";   // number is the hero → position rides in the chip
   $("#hrTeam").textContent=team.name||"";
   buildStats(info.stats||{});
 }
@@ -3084,14 +3099,10 @@ function triggerWalkup(info){
   const ghost=$("#wuGhost");
   if(team.id){ghost.src=logoURL(team.id);ghost.style.display="";}else{ghost.style.display="none";}
   $("#wuKick").textContent=info.kick||("NOW BATTING"+(info.order?" · "+ordinalOf(info.order):""));
-  // stacked broadcast name: small first name over a huge last name (suffixes stick to the surname)
-  const parts=(info.name||"—").trim().split(/\s+/);
-  let ln=parts.pop()||"—";
-  if(/^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(ln)&&parts.length)ln=parts.pop()+" "+ln;
-  const fn=parts.join(" ");
-  $("#wuName").innerHTML=(fn?`<span class="fn">${fn}</span>`:"")+`<span class="ln">${ln.toUpperCase()}</span>`;
+  // IP-safe identity: a big jersey number (position shown in the meta row) — no player name
+  const num=info.number?("#"+info.number):"";
+  $("#wuName").innerHTML=`<span class="ln">${(num||info.pos||"—").toUpperCase()}</span>`;
   const meta=[];
-  if(info.number)meta.push(`<span class="num">#${info.number}</span>`);
   if(info.pos)meta.push(`<span class="posw">${posSVG(info.pos)}<span>${info.pos}</span></span>`);
   if(info.bats)meta.push(`Bats ${info.bats}`);
   if(team.name)meta.push(team.name);
@@ -3171,7 +3182,7 @@ function triggerK(info){
     shot.onerror=()=>{ if(shot.src.indexOf('midfield')<0) shot.src=shotURL(info.id); else hero.style.display="none"; };
     shot.src=siloURL(info.id);
   }else{ hero.style.display="none"; shot.removeAttribute("src"); }
-  $("#kName").textContent=info.name||"—";
+  $("#kName").textContent="PITCHER";
   $("#kNum").textContent=info.number?("#"+info.number):"";
   $("#kTeam").textContent=team.name||"";
   $("#kSub").textContent=info.inningTxt?("SIDE RETIRED • "+info.inningTxt):"SIDE RETIRED";
@@ -3245,8 +3256,9 @@ function triggerHR2(info){
   }else{ hero.style.display="none"; shot.removeAttribute("src"); }
   const logo=$("#h2Logo");
   if(team.id){logo.src=logoURL(team.id);logo.style.display="";}else{logo.style.display="none";}
-  $("#h2Name").textContent=info.name||"—";
-  $("#h2Num").textContent=info.number?("#"+info.number):"";
+  const hn=info.number?("#"+info.number):"";
+  $("#h2Name").textContent=hn||info.pos||"—";
+  $("#h2Num").textContent=hn?(info.pos||""):"";
   $("#h2Team").textContent=team.name||"";
   const s=info.stats||{};
   // pick the style by how far it went: 440+ scorcher / 380–439 night lights / <380 broadcast
@@ -3345,11 +3357,14 @@ function fireLiveWalkup(b,guard){
   const orderNum=(bp&&bp.battingOrder)?Math.floor(parseInt(bp.battingOrder,10)/100):null;
   const bst=bp&&bp.stats&&bp.stats.batting;
   const firstAB=((bst&&bst.plateAppearances)||0)===0;
-  fetchBatter(b.id, firstAB?b.pId:null).then(d=>{
+  Promise.all([fetchBatter(b.id, firstAB?b.pId:null),
+               (firstAB&&b.pId)?fetchNumber(b.pId):Promise.resolve("")]).then(([d,pnum])=>{
     if(guard&&lastBatterId!==b.id)return;          // batter changed again while fetching
+    // stash the resolved identity so the ambient "AT THE PLATE" card shows #/pos too
+    if(LIVE.batter&&LIVE.batter.id===b.id){LIVE.batter.num=d.number;LIVE.batter.pos=d.pos;LIVE.batter.pNum=pnum;}
     let ctx=null;
     if(firstAB&&b.pId){
-      const vsWho="VS "+lastNameOf(b.pName).toUpperCase();
+      const vsWho=pnum?("VS #"+pnum):"VS THE PITCHER";
       ctx=(d.vs&&d.vs.ab>0)
         ? {label:vsWho, value:`${d.vs.h}-FOR-${d.vs.ab}${d.vs.hr?`, ${d.vs.hr} HR`:""}`}
         : {label:vsWho, value:"FIRST CAREER MATCHUP"};
@@ -3357,14 +3372,14 @@ function fireLiveWalkup(b,guard){
       const line=tonightLineOf(bst);
       if(line)ctx={label:"TONIGHT", value:line};
     }
-    triggerWalkup({id:b.id,name:d.name||b.name,number:d.number,pos:d.pos,bats:d.bats,
+    triggerWalkup({id:b.id,number:d.number,pos:d.pos,bats:d.bats,
       avg:d.avg,hr:d.hr,rbi:d.rbi,team:teamObj,order:orderNum,ctx,streak:d.streak});
   });
 }
 async function replayLastHR(fn){
   if(!LIVE.lastHR){ toast("No home run in this game yet"); return; }
   const info=hrInfoFromPlay(LIVE.lastHR);
-  if(info.id){ const n=await fetchNumber(info.id); if(n)info.number=n; }
+  if(info.id){ const d=await fetchNumPos(info.id); info.number=d.number; info.pos=d.pos; }
   fn(info);
 }
 
@@ -3465,14 +3480,14 @@ function triggerLineup(box){
     const el=$(sel); el.innerHTML="";
     ((tb&&tb.battingOrder)||[]).slice(0,9).forEach((pid,i)=>{
       const p=(tb.players&&tb.players["ID"+pid])||{};
-      const nm=(p.person&&p.person.fullName)||"—";
+      const num=(p.jerseyNumber?("#"+p.jerseyNumber):"");
       const pos=(p.position&&p.position.abbreviation)||"";
       const row=document.createElement("div"); row.className="lu-row";
       row.style.animationDelay=(base+i*0.12)+"s";
       row.innerHTML=`<span class="n">${i+1}</span>`
         +(pid>0?`<img class="mug" src="${shotURL(pid)}" onerror="this.style.display='none'" alt="">`
                :`<span class="mug"></span>`)
-        +`<span class="nm">${nm}</span><span class="pos">${pos}</span>`;
+        +`<span class="nm">${num||"—"}</span><span class="pos">${pos}</span>`;
       el.appendChild(row);
     });
   };
@@ -3491,6 +3506,52 @@ function endLineup(){ clearTimeout(triggerLineup._t); luOv.classList.remove("sho
    ============================================================ */
 let LEAGUE="mlb";
 const ESPN="https://site.api.espn.com/apis/site/v2/sports/football/nfl";
+// ---- live NFL: roster-backed jersey#/position so scorer & kicker cards show
+//      "#17 • WR" instead of a player name (matches the play-text name to the roster) ----
+let NFL_ROSTER={};   // { ABBR: [ {ini,last,jersey,pos} ] }
+async function loadNflRosters(){
+  NFL_ROSTER={};
+  await Promise.all([G.away,G.home].map(async t=>{
+    if(!t||!t.id)return;
+    try{
+      const r=await fetch(`${ESPN}/teams/${t.id}/roster`);
+      const j=await r.json();
+      const list=[];
+      (j.athletes||[]).forEach(g=>(g.items||[]).forEach(a=>{
+        list.push({ini:((a.firstName||"")[0]||"").toUpperCase(),
+                   last:(a.lastName||"").toUpperCase().replace(/[^A-Z]/g,""),
+                   jersey:a.jersey||"",
+                   pos:(a.position&&a.position.abbreviation)||""});
+      }));
+      NFL_ROSTER[t.abbr]=list;
+    }catch(e){ NFL_ROSTER[t.abbr]=[]; }
+  }));
+}
+// map an ESPN play-text name ("J.Allen" / "S. Diggs") -> {number,pos} from that team's roster
+function nflNumPos(abbr,name){
+  const list=NFL_ROSTER[abbr]; if(!list||!list.length||!name)return null;
+  const m=/([A-Za-z])[.\s]*([A-Za-z][A-Za-z'’-]+)\s*$/.exec(name.trim());   // last token = surname
+  if(!m)return null;
+  const ini=m[1].toUpperCase(), last=m[2].toUpperCase().replace(/[^A-Z]/g,"");
+  const hit=list.find(a=>a.last===last&&a.ini===ini)||list.find(a=>a.last===last);
+  return hit?{number:hit.jersey,pos:hit.pos}:null;
+}
+function nflTag(np){ return np?[np.number?("#"+np.number):"",np.pos||""].filter(Boolean).join(" • "):""; }
+// TD scorer: the receiver on a pass, else the ball-carrier (first name in the play text)
+function nflScorerTag(team,p){
+  const t=((p&&p.text)||"").replace(/^(?:\([^)]*\)\s*)+/,"").trim();
+  let name=null;
+  const pass=/\bpass\b[^,]*?\bto\s+([A-Z][.\w'’-]*(?:\s[A-Z][.\w'’-]+)?)/.exec(t);
+  if(pass)name=pass[1];
+  else{ const m=/^([A-Z][.\w'’-]*(?:\s[A-Z][.\w'’-]+)?)/.exec(t); name=m&&m[1]; }
+  return nflTag(nflNumPos(team&&team.abbr,name));
+}
+// kicker: the first name in the extra-point play text
+function nflKickerTag(team,p){
+  const t=((p&&p.text)||"").replace(/^(?:\([^)]*\)\s*)+/,"").trim();
+  const m=/^([A-Z][.\w'’-]*(?:\s[A-Z][.\w'’-]+)?)/.exec(t);
+  return nflTag(m?nflNumPos(team&&team.abbr,m[1]):null);
+}
 let nflPoll=null, nflDemoTimer=null, nflDemoPAT=null, nflPk=null;
 let NG={q:1,clock:"15:00",sec:900,down:1,dist:10,ytez:75,posHome:false,dd:""};
 let NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),pat:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:false};
@@ -3617,6 +3678,7 @@ function startLiveGameNFL(id,away,home){
   G.away=away; G.home=home;
   NG={q:1,clock:"",sec:0,down:1,dist:10,ytez:75,posHome:false,dd:""};
   NFLSEEN={kickoff:false,scores:new Set(),tos:new Set(),pat:new Set(),rzDrive:null,twoMin:{},noisePlay:null,final:false,seeded:false};
+  loadNflRosters();   // best-effort; scorer/kicker cards fall back to team name until ready
   document.documentElement.style.setProperty('--nflA',G.away.colorHex||"#e31837");
   document.documentElement.style.setProperty('--nflH',G.home.colorHex||"#00338d");
   LIVE={batter:null,lastHR:null,lastK:null,box:null};
@@ -3700,7 +3762,7 @@ async function tickNFL(first){
           triggerTurnover({kind:"INTERCEPTION",pickSix:true,team:rec});}
         else if(isTD&&/fumble/i.test(txt)){NFLSEEN.tos.add(p.id);   // scoop & score — the DEFENSE scored
           triggerTurnover({kind:"FUMBLE RETURN",six:true,team:rec});}
-        else if(isTD)triggerTouchdown({team:off,scorer:tdScorer(p),stat:tdStat(p)});
+        else if(isTD)triggerTouchdown({team:off,scorer:nflScorerTag(off,p),stat:tdStat(p)});
         else if(isXP){LIVE.lastXP={p,team:off};triggerXP(xpInfoFor(off,p,plays,true));}
         else if(isTP)triggerTwoPoint({team:off,good:true});
         // else: field goal / safety — marked seen, no takeover
@@ -3887,7 +3949,7 @@ function tdStat(p){
   return (yd+kind+(NG.q?" • Q"+NG.q:"")).trim();
 }
 function demoTDInfo(){
-  const r=[["RB #26","RUSHING TD"],["WR #17","RECEIVING TD"],["QB #12","RUSHING TD"],["TE #85","RECEIVING TD"]]
+  const r=[["#26 • RB","RUSHING TD"],["#17 • WR","RECEIVING TD"],["#12 • QB","RUSHING TD"],["#85 • TE","RECEIVING TD"]]
     [Math.floor(Math.random()*4)];
   return {scorer:r[0],stat:(5+Math.floor(Math.random()*70))+" YD "+r[1]+" • Q"+(NG.q||1)};
 }
@@ -3918,11 +3980,11 @@ function xpInfoFor(team,p,plays,good){
     if(((y.d.team&&y.d.team.abbreviation)||"")!==team.abbr)continue;
     t++; if(!/no good|missed|blocked|failed/i.test(yt))g++;
   }
-  return {team,good,kicker:tdScorer(p),stat:t?`${g}/${t} XP TONIGHT`:""};
+  return {team,good,kicker:nflKickerTag(team,p),stat:t?`${g}/${t} XP TONIGHT`:""};
 }
 function demoXPInfo(good){
   const made=2+Math.floor(Math.random()*3);
-  return {kicker:"K #"+(2+Math.floor(Math.random()*8)),
+  return {kicker:"#"+(2+Math.floor(Math.random()*8))+" • K",
     stat:`${good?made:made-1}/${made} XP TONIGHT`};
 }
 function endXP(){clearTimeout(triggerXP._t);xpOv.classList.remove("show");xpPlaying=false;}
@@ -4025,12 +4087,12 @@ $("#tdBtn").onclick=()=>{
   if(MODE==="demo"){const t=NG.posHome?G.home:G.away; t.score+=6; renderBoardNFL();
     triggerTouchdown(Object.assign({team:t},demoTDInfo()));}
   else if(LIVE.lastTD)   // replay the REAL last touchdown with its scorer + stat line
-    triggerTouchdown({team:LIVE.lastTD.team,scorer:tdScorer(LIVE.lastTD.p),stat:tdStat(LIVE.lastTD.p)});
+    triggerTouchdown({team:LIVE.lastTD.team,scorer:nflScorerTag(LIVE.lastTD.team,LIVE.lastTD.p),stat:tdStat(LIVE.lastTD.p)});
   else triggerTouchdown({team:NG.posHome?G.home:G.away});};
 $("#xpBtn").onclick=()=>{
   if(MODE!=="demo"&&LIVE.lastXP)   // replay the REAL last extra point
     triggerXP({team:LIVE.lastXP.team,good:!LIVE.lastXP.miss,
-      kicker:tdScorer(LIVE.lastXP.p),stat:LIVE.lastXP.miss?"EXTRA POINT NO GOOD":"EXTRA POINT GOOD"});
+      kicker:nflKickerTag(LIVE.lastXP.team,LIVE.lastXP.p),stat:LIVE.lastXP.miss?"EXTRA POINT NO GOOD":"EXTRA POINT GOOD"});
   else{const g=Math.random()<.9;
     triggerXP(Object.assign({team:NG.posHome?G.home:G.away,good:g},demoXPInfo(g)));}};
 $("#tpBtn").onclick=()=>triggerTwoPoint({team:NG.posHome?G.home:G.away,good:Math.random()<.6});
@@ -4072,7 +4134,7 @@ $("#kBtn").onclick=()=>{
 function hrPreviewInfo(){  // demo data for both HR buttons
   const roster=G.battingHome?DEMO_ROSTER.home:DEMO_ROSTER.away;
   const p=roster[Math.floor(Math.random()*roster.length)];
-  return {id:p.id,name:p.name,number:p.number,team:(G.battingHome?G.home:G.away),stats:demoStats()};
+  return {id:p.id,number:p.number,pos:p.pos,team:(G.battingHome?G.home:G.away),stats:demoStats()};
 }
 $("#hrBtn").onclick=()=>{ if(MODE==="demo")triggerHR(hrPreviewInfo()); else replayLastHR(triggerHR); };
 $("#hr2Btn").onclick=()=>{ if(MODE==="demo")triggerHR2(hrPreviewInfo()); else replayLastHR(triggerHR2); };
@@ -4183,9 +4245,9 @@ async function startReel(){
     await reelStep(()=>triggerLineup(demoLineup()), 13500);
     await reelStep(()=>triggerAnthem({sub}), 11000);
     await reelStep(()=>newDemoBatter(), 7500);
-    await reelStep(()=>triggerHR2({id:592450,name:"Aaron Judge",team:G.home,stats:{distance:462,exitVelo:114,seasonHR:41,rbi:2,sprayDeg:12}}), 9000);
-    await reelStep(()=>triggerHR2({id:660271,name:"Shohei Ohtani",team:G.home,stats:{distance:405,exitVelo:108,seasonHR:33,rbi:1,sprayDeg:-8}}), 9000);
-    await reelStep(()=>triggerHR2({id:605141,name:"Mookie Betts",team:G.home,stats:{distance:365,exitVelo:101,seasonHR:19,rbi:3,sprayDeg:28}}), 9000);
+    await reelStep(()=>triggerHR2({id:592450,number:"99",pos:"RF",team:G.home,stats:{distance:462,exitVelo:114,seasonHR:41,rbi:2,sprayDeg:12}}), 9000);
+    await reelStep(()=>triggerHR2({id:660271,number:"17",pos:"DH",team:G.home,stats:{distance:405,exitVelo:108,seasonHR:33,rbi:1,sprayDeg:-8}}), 9000);
+    await reelStep(()=>triggerHR2({id:605141,number:"50",pos:"SS",team:G.home,stats:{distance:365,exitVelo:101,seasonHR:19,rbi:3,sprayDeg:28}}), 9000);
     await reelStep(()=>triggerK({id:477132,name:"Clayton Kershaw",team:G.home,so:180,era:"2.85",mph:95,inningTxt:"END 7"}), 9000);
     await reelStep(()=>triggerStretch(), 7500);
     await reelStep(()=>triggerRally({team:G.away,deficit:1,bases:[true,false,true],inning:9,half:"Top"}), 8000);
