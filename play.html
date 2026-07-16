@@ -904,7 +904,8 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
    NFL keeps the stadium.jpg photo. Rides the .fg-bg fade + Ken-Burns push-in. */
 .fg-vid{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   filter:brightness(.58) saturate(.9)}
-#finalOverlay.mlb .fg-vid{display:block}
+#finalOverlay.mlb .fg-vid.mlb{display:block}
+#finalOverlay.nfl .fg-vid.nfl{display:block}
 #finalOverlay.show .fg-bg{animation:anFade2 .6s both, fgKen 9s ease-out both}
 @keyframes fgKen{from{transform:scale(1)}to{transform:scale(1.08)}}
 /* dark vignette + warm center glow so the gold reads over the scene */
@@ -1109,7 +1110,7 @@ body.nfl .nfl-dd{display:block}
   22%{transform:translate(-11px,8px) scale(1.06)}35%{transform:translate(10px,-7px) scale(1.06)}
   50%{transform:translate(-7px,5px) scale(1.035)}66%{transform:translate(4px,-3px) scale(1.02)}
   100%{transform:translate(0,0) scale(1)}}
-/* --- PHASE 0: the coin toss (a hand thumb-flicks the coin up, it spins, lands) --- */
+/* --- PHASE 0: the coin toss (team coin spins on its own, lands on the winner) --- */
 .ko3-toss{position:absolute;inset:0;z-index:3;pointer-events:none}
 /* p1's wipe (z-5) covers the toss, THEN it hides — no hard pop */
 #koOverlay.p2 .ko3-toss,#koOverlay.p3 .ko3-toss{display:none}
@@ -1122,15 +1123,8 @@ body.nfl .nfl-dd{display:block}
   width:min(44vh,420px);height:min(38vh,360px)}
 #koOverlay.show .ko3-tossaction{animation:ko3Action 2.9s ease both}
 @keyframes ko3Action{0%{opacity:0}5%{opacity:1}84%{opacity:1}100%{opacity:0}}
-.ko3-hand{position:absolute;inset:0;width:100%;height:100%}
-/* the hand retreats after the flick, leaving the coin airborne on its own */
-#koOverlay.show .ko3-hand{animation:ko3HandOut .55s ease-in 1.35s both}
-@keyframes ko3HandOut{to{opacity:0;transform:translate(-6%,14vh) rotate(-8deg)}}
-.ko3-thumb{transform-origin:300px 216px}
-#koOverlay.show .ko3-thumb{animation:ko3Thumb .5s cubic-bezier(.3,.85,.4,1) .35s both}
-@keyframes ko3Thumb{0%{transform:rotate(0)}30%{transform:rotate(-24deg)}58%{transform:rotate(12deg)}100%{transform:rotate(0)}}
-/* the 3D coin rests on the thumb, then flicks up and spins */
-.ko3-coinwrap{position:absolute;left:75%;top:34%;transform:translate(-50%,-50%);
+/* the 3D coin sits center-stage, then flicks up and spins on its own (no hand) */
+.ko3-coinwrap{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);
   width:min(16vh,150px);height:min(16vh,150px);perspective:900px}
 .ko3-spin{position:relative;width:100%;height:100%;transform-style:preserve-3d;--ko3end:1980deg}
 .ko3-spin.tails{--ko3end:2160deg}
@@ -1151,7 +1145,7 @@ body.nfl .nfl-dd{display:block}
   96%{transform:translateY(-1.8vh) rotateX(var(--ko3end)) scale(1)}
   100%{transform:translateY(0) rotateX(var(--ko3end)) scale(1)}}
 /* ground shadow tracking the coin's height */
-.ko3-coinshadow{position:absolute;left:75%;top:34%;width:min(15vh,140px);height:3vh;z-index:0;
+.ko3-coinshadow{position:absolute;left:50%;top:34%;width:min(15vh,140px);height:3vh;z-index:0;
   transform:translate(-50%,300%);border-radius:50%;opacity:.45;filter:blur(7px);background:#000}
 #koOverlay.show .ko3-coinshadow{animation:ko3Shadow 1.9s linear .4s both}
 @keyframes ko3Shadow{
@@ -1174,6 +1168,11 @@ body.nfl .nfl-dd{display:block}
   background:linear-gradient(122deg,transparent 40%,rgba(255,255,255,.28) 49%,transparent 58%)}
 .ko3-face .em{position:relative;z-index:2;font-size:min(8vh,74px);line-height:1;color:#a9800f;
   text-shadow:-1px -1px 0 #fff6d0,1px 1px 0 #6b4c0c}
+/* team identity struck onto each coin face — logo (primary), abbr fallback if the logo fails */
+.ko3-clogo{position:relative;z-index:3;width:64%;height:64%;object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+.ko3-cabbr{position:absolute;inset:0;z-index:2;display:grid;place-items:center;font-weight:900;
+  font-size:min(5vh,44px);letter-spacing:1px;color:#7a5a0c;text-shadow:-1px -1px 0 #fff6d0,1px 1px 0 #6b4c0c}
 /* thin dark rim disc between the two faces so a metal edge shows mid-spin */
 .ko3-edge{position:absolute;inset:0;border-radius:50%;transform:translateZ(0);
   background:radial-gradient(circle at 50% 50%,#9a761c,#6b4f12);box-shadow:inset 0 0 12px rgba(0,0,0,.5)}
@@ -2051,7 +2050,10 @@ body.tvmode .scorewrap{justify-content:center}
 
 <!-- ============ FINAL / WALK-OFF — CHAMPAGNE GOLD ============ -->
 <div id="finalOverlay">
-  <div class="fg-bg"><video class="fg-vid" id="fVid" autoplay muted loop playsinline preload="auto" poster="lineup.jpg"><source src="lineup.mp4" type="video/mp4"></video></div>
+  <div class="fg-bg">
+    <video class="fg-vid mlb" id="fVid" autoplay muted loop playsinline preload="auto" poster="lineup.jpg"><source src="lineup.mp4" type="video/mp4"></video>
+    <video class="fg-vid nfl" id="fVidN" autoplay muted loop playsinline preload="auto" poster="opening.jpg"><source src="opening.mp4" type="video/mp4"></video>
+  </div>
   <div class="fg-rays"></div>
   <div class="fg-shock"></div>
   <div class="fg-flash"></div>
@@ -2154,42 +2156,11 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="ko3-toss">
     <div class="nfp-kick ko3-tosskick">THE COIN TOSS</div>
     <div class="ko3-tossaction">
-      <svg class="ko3-hand" viewBox="0 0 460 380">
-        <defs>
-          <linearGradient id="ko3SkinG" x1="0" y1="0" x2="0.5" y2="1">
-            <stop offset="0" stop-color="#f4cfa8"/><stop offset="0.5" stop-color="#e2a97e"/><stop offset="1" stop-color="#bd7d50"/>
-          </linearGradient>
-          <radialGradient id="ko3FistG" cx="0.4" cy="0.26" r="0.85">
-            <stop offset="0" stop-color="#f4cda6"/><stop offset="0.55" stop-color="#dda276"/><stop offset="1" stop-color="#ac6d3b"/>
-          </radialGradient>
-          <filter id="ko3Soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
-        </defs>
-        <ellipse cx="272" cy="352" rx="128" ry="24" fill="#000" opacity=".35" filter="url(#ko3Soft)"/>
-        <path fill="url(#ko3SkinG)" d="M0 372 L0 252 Q0 218 54 212 L188 202 L196 372 Z"/>
-        <path fill="none" stroke="#8a5a34" stroke-width="3" opacity=".2" d="M66 240 q60 -12 118 -10"/>
-        <path fill="url(#ko3FistG)" d="M182 214 Q176 146 260 146 Q348 146 360 208 L364 292 Q364 348 286 346 Q198 344 190 280 Z"/>
-        <path fill="url(#ko3FistG)" d="M304 216 q52 -1 54 30 q1 20 -14 27 l-40 0 Z"/>
-        <path fill="url(#ko3FistG)" d="M304 250 q50 0 51 28 q0 18 -13 24 l-38 0 Z"/>
-        <path fill="url(#ko3FistG)" d="M303 282 q47 0 48 26 q0 17 -13 22 l-35 0 Z"/>
-        <path fill="url(#ko3FistG)" d="M300 312 q42 1 43 22 q0 14 -12 18 l-31 0 Z"/>
-        <g filter="url(#ko3Soft)" opacity=".55" stroke="#6b4022" stroke-width="4" stroke-linecap="round" fill="none">
-          <path d="M306 247 L354 246"/><path d="M305 279 L352 279"/><path d="M303 309 L348 309"/>
-        </g>
-        <path fill="#6b4022" opacity=".3" filter="url(#ko3Soft)" d="M300 340 q30 8 60 2 l0 8 q-32 6 -60 -2 Z"/>
-        <path fill="none" stroke="#fff" stroke-width="6" opacity=".17" stroke-linecap="round" d="M216 208 Q288 188 352 208"/>
-        <path fill="none" stroke="#fff" stroke-width="4" opacity=".13" stroke-linecap="round" d="M312 232 q26 -3 44 2"/>
-        <g class="ko3-thumb">
-          <path fill="url(#ko3SkinG)" d="M298 216 Q290 160 320 144 Q350 126 366 153 Q380 178 356 208 Q336 228 298 216 Z"/>
-          <ellipse cx="348" cy="156" rx="15" ry="10" fill="#f6dcc2" transform="rotate(30 348 156)"/>
-          <path fill="none" stroke="#8a5a34" stroke-width="3" opacity=".28" filter="url(#ko3Soft)" d="M300 214 Q314 199 326 200"/>
-        </g>
-        <path fill="none" stroke="#fff" stroke-width="3" opacity=".2" stroke-linecap="round" d="M198 166 Q222 146 262 145 Q322 144 354 176"/>
-      </svg>
       <div class="ko3-coinshadow"></div>
       <div class="ko3-coinwrap"><div class="ko3-spin" id="ko3Spin">
-        <div class="ko3-face f"><span class="em">★</span></div>
+        <div class="ko3-face f"><span class="ko3-cabbr" id="ko3CoinAAb"></span><img class="ko3-clogo" id="ko3CoinA" onerror="this.style.display='none'" alt=""></div>
         <div class="ko3-edge"></div>
-        <div class="ko3-face b"><span class="em">✦</span></div>
+        <div class="ko3-face b"><span class="ko3-cabbr" id="ko3CoinHAb"></span><img class="ko3-clogo" id="ko3CoinH" onerror="this.style.display='none'" alt=""></div>
       </div></div>
     </div>
     <div class="ko3-results">
@@ -3833,13 +3804,21 @@ function triggerKickoff(info){
   info=info||{};
   if(takeoverBusy())return; koPlaying=true; hideWalkup();
   const aw=G.away, hm=G.home, live=!!info.live;
-  const tails=info.call?(/tails/i.test(info.call)):(Math.random()<.5);
   const winner=info.recv||(Math.random()<.5?aw:hm);
+  const winnerIsAway=(winner===aw)||(!!winner.abbr&&winner.abbr===aw.abbr);
   const receives=info.choice?!/defer/i.test(info.choice):(Math.random()<.85);
-  $("#ko3Spin").classList.toggle("tails",tails);
-  $("#ko3Res").textContent=live?"TOSS DECIDED":(tails?"TAILS!":"HEADS!");
+  // put the two teams on the coin faces: front(.f)=away, back(.b)=home
+  const setCoinFace=(imgSel,abbrSel,t)=>{
+    const img=$(imgSel); if(t.logo){img.src=t.logo;img.style.display="";}else{img.style.display="none";}
+    $(abbrSel).textContent=(t.abbr||t.name||"").toUpperCase();
+  };
+  setCoinFace("#ko3CoinA","#ko3CoinAAb",aw);
+  setCoinFace("#ko3CoinH","#ko3CoinHAb",hm);
+  // land on the winner: tails => front(.f)=away up; default => back(.b)=home up
+  $("#ko3Spin").classList.toggle("tails",winnerIsAway);
+  $("#ko3Res").textContent=(winner.name||"").toUpperCase();
   $("#ko3WinLogo").src=winner.logo||""; $("#ko3WinLogo").style.display=winner.logo?"":"none";
-  $("#ko3WinName").textContent=((winner.name||"")+" WIN THE TOSS").toUpperCase();
+  $("#ko3WinName").textContent="WINS THE TOSS";
   $("#ko3Say").textContent=receives?"“WE’LL RECEIVE!”":"“WE DEFER.”";
   // panel + clash decals (logo = data layer; blank cleanly when missing)
   [["#ko3DecalPA",aw],["#ko3DecalCA",aw],["#ko3DecalPH",hm],["#ko3DecalCH",hm]].forEach(([id,t])=>{
