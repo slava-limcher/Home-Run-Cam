@@ -1241,12 +1241,17 @@ body.nfl .nfl-dd{display:block}
 .ko3-clash{position:absolute;inset:0;z-index:5;visibility:hidden}
 #koOverlay.p3 .ko3-clash{visibility:visible}
 .ko3-clash .ko3-helm{position:absolute;top:72%;left:50%;width:min(36vh,340px);height:min(36vh,340px)}
-#koOverlay.p3 .ko3-clash .ko3-helm.a{animation:ko3FlyA .7s cubic-bezier(.4,0,.7,1) .08s both}
-#koOverlay.p3 .ko3-clash .ko3-helm.h{animation:ko3FlyH .7s cubic-bezier(.4,0,.7,1) .08s both}
+/* fly in + clash, then EXIT: helmets pull back out of frame .5s after contact (contact ~.49s -> exit @.99s) */
+#koOverlay.p3 .ko3-clash .ko3-helm.a{animation:ko3FlyA .7s cubic-bezier(.4,0,.7,1) .08s both,
+  ko3ExitA .45s cubic-bezier(.55,0,.85,.45) .99s forwards}
+#koOverlay.p3 .ko3-clash .ko3-helm.h{animation:ko3FlyH .7s cubic-bezier(.4,0,.7,1) .08s both,
+  ko3ExitH .45s cubic-bezier(.55,0,.85,.45) .99s forwards}
 @keyframes ko3FlyA{0%{transform:translate(-150vw,-50%)}58%{transform:translate(-98%,-50%)}
   66%,72%{transform:translate(-96%,-50%)}100%{transform:translate(-162%,-50%)}}
 @keyframes ko3FlyH{0%{transform:translate(150vw,-50%)}58%{transform:translate(-2%,-50%)}
   66%,72%{transform:translate(-4%,-50%)}100%{transform:translate(62%,-50%)}}
+@keyframes ko3ExitA{from{transform:translate(-162%,-50%)}to{transform:translate(-150vw,-50%)}}
+@keyframes ko3ExitH{from{transform:translate(62%,-50%)}to{transform:translate(150vw,-50%)}}
 /* post-impact wobble rides the inner svg so it can't fight the fly transform */
 #koOverlay.p3 .ko3-clash .ko3-helm.a .ko3-hsvg{animation:ko3WobA .8s ease-out .78s both}
 #koOverlay.p3 .ko3-clash .ko3-helm.h .ko3-hsvg{animation:ko3WobH .8s ease-out .78s both}
