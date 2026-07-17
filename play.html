@@ -1097,6 +1097,15 @@ body.nfl .nfl-dd{display:block}
 .ko-bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ko-bg::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(4,10,24,.42),rgba(4,10,24,.6))}
+/* AFTER the coin flip: the kickoff film (boot -> ball flight -> gold KICKOFF! -> field) takes over
+   as the backdrop — the panels wipe over it and the helmet clash plays with IT as the "transparent"
+   background (the clash layer itself has no bg). JS starts playback at the p1 handoff. */
+.ko-clashbg{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;
+  opacity:0;transition:opacity .4s}
+#koOverlay.p1 .ko-clashbg,#koOverlay.p2 .ko-clashbg,#koOverlay.p3 .ko-clashbg{opacity:1}
+.ko-clashbg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ko-clashbg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(4,10,24,.22),rgba(4,10,24,.34))}
 /* ambient life: two soft stadium-light glows drifting slowly the whole takeover */
 #koOverlay::before{content:"";position:absolute;inset:-10%;z-index:0;pointer-events:none;opacity:.65;
   background:
@@ -2183,6 +2192,7 @@ body.tvmode .scorewrap{justify-content:center}
 </defs></svg>
 <div id="koOverlay">
   <div class="ko-bg"><video id="koVid" autoplay muted loop playsinline preload="auto" poster="opening.jpg"><source src="opening.mp4" type="video/mp4"></video></div>
+  <div class="ko-clashbg"><video id="koVid2" muted playsinline preload="auto"><source src="kickoff2.mp4" type="video/mp4"></video></div>
   <!-- phase 0: the coin toss -->
   <div class="ko3-toss">
     <div class="nfp-kick ko3-tosskick">THE COIN TOSS</div>
@@ -3842,13 +3852,17 @@ function triggerKickoff(info){
   koOv.classList.remove("show","p1","p2","p3"); void koOv.offsetWidth; koOv.classList.add("show");
   ko3Timers.forEach(clearTimeout);
   ko3Timers=[
-    setTimeout(()=>koOv.classList.add("p1"),3500),
+    setTimeout(()=>{koOv.classList.add("p1");
+      const v2=$("#koVid2");
+      if(v2){try{v2.muted=true;v2.currentTime=0;const p=v2.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+    },3500),
     setTimeout(()=>{koOv.classList.remove("p1");koOv.classList.add("p2");},5200),
     setTimeout(()=>{koOv.classList.remove("p2");koOv.classList.add("p3");},6900),
     setTimeout(endKickoff,11000)
   ];
 }
 function endKickoff(){ko3Timers.forEach(clearTimeout);ko3Timers=[];
+  const v2=$("#koVid2"); if(v2)v2.pause();
   koOv.classList.remove("show","p1","p2","p3");koPlaying=false;}
 /* ===== field-video calibration (field.mp4 final frame; goal-to-goal linear map) ===== */
 const FV_START=5;   // start playback mid-dive so the beat is ~5s
