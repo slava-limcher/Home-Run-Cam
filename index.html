@@ -1340,7 +1340,7 @@ body.nfl .nfl-dd{display:block}
    generated video), 3D silver letters that spin once, crowd cheer, scorer card ---- */
 #tdOverlay{position:fixed;inset:0;z-index:47;display:none;opacity:0;transition:opacity .3s;overflow:hidden;
   background:#04060a}
-#tdOverlay.show{display:block;opacity:1;animation:tdCam .45s ease-out 1.15s}  /* punch as the word lands */
+#tdOverlay.show{display:block;opacity:1;animation:tdCam .45s ease-out 4.7s}  /* punch as the film's gold TOUCHDOWN lands */
 @keyframes tdCam{0%{transform:scale(1)}35%{transform:scale(1.035)}100%{transform:scale(1)}}
 /* drawn fallback scene — only visible if stadium.jpg is missing (bowl, crowd band, turf) */
 .td4-fall{position:absolute;inset:0;z-index:0;
@@ -1352,47 +1352,16 @@ body.nfl .nfl-dd{display:block}
 .td4-fgoal{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:min(38vh,340px);height:auto}
 .td4-fgoal path{fill:none;stroke:#f4c518;stroke-width:12;stroke-linecap:round;
   filter:drop-shadow(0 0 10px rgba(244,197,24,.6))}
-/* the real stadium still — slow cinematic push-in the whole takeover */
-.td4-photo{position:absolute;inset:-4%;z-index:1;opacity:0;
-  background:url("stadium.jpg") center 38%/cover no-repeat}
-#tdOverlay.show .td4-photo{animation:anFade2 .45s both, td4Ken 8s ease-out both}
-@keyframes td4Ken{from{transform:scale(1)}to{transform:scale(1.075)}}
-/* vignette + grade so silver text reads at bar distance */
-.td4-vig{position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 45%, transparent 52%, rgba(2,4,8,.8) 100%),
-    linear-gradient(180deg, rgba(2,4,8,.5), transparent 28% 72%, rgba(2,4,8,.66))}
-/* stadium light-flare bands sweep the scene once */
-.td4-flare{position:absolute;top:-20%;bottom:-20%;width:34%;z-index:2;pointer-events:none;opacity:0;
-  transform:skewX(-14deg);
-  background:linear-gradient(100deg,transparent,rgba(190,215,255,.12) 45%,rgba(225,238,255,.22) 50%,rgba(190,215,255,.12) 55%,transparent)}
-#tdOverlay.show .td4-flare.l{animation:td4FlareL 1.5s ease-in-out .1s both}
-#tdOverlay.show .td4-flare.r{animation:td4FlareR 1.5s ease-in-out .3s both}
-@keyframes td4FlareL{0%{left:-40%;opacity:0}12%{opacity:1}100%{left:115%;opacity:0}}
-@keyframes td4FlareR{0%{left:115%;opacity:0}12%{opacity:1}100%{left:-40%;opacity:0}}
-/* white pop as the last letters land */
-.td4-flash{position:absolute;inset:0;z-index:3;background:#fff;opacity:0;pointer-events:none}
-#tdOverlay.show .td4-flash{animation:td4Flash .5s ease-out 1.05s both}
-@keyframes td4Flash{0%{opacity:0}18%{opacity:.5}100%{opacity:0}}
-/* TOUCHDOWN! — chromed-silver 3D letters, each spins exactly once (delays set inline by JS) */
-.td4-word{position:absolute;left:0;right:0;top:41%;z-index:4;display:flex;justify-content:center;
-  gap:.045em;perspective:1100px;pointer-events:none;font-weight:900;font-style:italic;
-  letter-spacing:1px;font-size:clamp(52px,10.5vw,168px);line-height:1}
-#tdOverlay.show .td4-word{animation:td4WordGlow 2.6s ease-in-out 2s infinite}
-@keyframes td4WordGlow{0%,100%{filter:drop-shadow(0 0 12px rgba(210,225,245,.25))}
-  50%{filter:drop-shadow(0 0 26px rgba(225,238,255,.5))}}
-.td4-word span{display:inline-block;opacity:0;transform-style:preserve-3d;
-  background:linear-gradient(180deg,#ffffff 0%,#e8edf2 30%,#b9c2cc 47%,#69737f 52%,#dfe5eb 68%,#939eaa 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(2px 3px 0 rgba(38,45,55,.95)) drop-shadow(4px 7px 0 rgba(19,24,31,.9))
-    drop-shadow(0 15px 28px rgba(0,0,0,.75))}
-#tdOverlay.show .td4-word span{animation:td4Spin .95s cubic-bezier(.25,.7,.3,1) both}
-@keyframes td4Spin{0%{opacity:0;transform:rotateY(-360deg) scale(.4) translateZ(-140px)}
-  22%{opacity:1}100%{opacity:1;transform:rotateY(0) scale(1) translateZ(0)}}
-/* sub line under the word */
+/* the TOUCHDOWN film (user's Veo "Eruption": fireworks build ~4.5s -> giant gold 3D
+   TOUCHDOWN whooshes in and holds w/ confetti) — the film IS the scene AND the title */
+.td4-film{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:0}
+#tdOverlay.show .td4-film{animation:anFade2 .4s both}
+.td4-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* sub line — lands with the film's title */
 .td4-sub{position:absolute;left:0;right:0;bottom:min(8vh,72px);z-index:4;text-align:center;color:#fff;
   font-weight:900;letter-spacing:3px;font-size:clamp(16px,2.1vw,26px);opacity:0;
   text-shadow:0 4px 18px rgba(0,0,0,.85)}
-#tdOverlay.show .td4-sub{animation:anFade .45s 1.6s both}
+#tdOverlay.show .td4-sub{animation:anFade .45s 5.4s both}
 /* scorer attribution card — top-left when the AWAY team scores, top-right for HOME */
 .td4-card{position:absolute;top:min(4vh,34px);z-index:5;display:flex;align-items:center;gap:14px;
   background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
@@ -1400,7 +1369,7 @@ body.nfl .nfl-dd{display:block}
   box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
 #tdOverlay.aw .td4-card{left:min(3vw,28px);border-left:5px solid var(--nflOff,#e31837)}
 #tdOverlay.hm .td4-card{right:min(3vw,28px);border-right:5px solid var(--nflOff,#e31837)}
-#tdOverlay.show .td4-card{animation:td4CardIn .55s cubic-bezier(.2,.9,.3,1) 1.75s both}
+#tdOverlay.show .td4-card{animation:td4CardIn .55s cubic-bezier(.2,.9,.3,1) 5.2s both}
 @keyframes td4CardIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
 .td4-card img{width:clamp(40px,4.6vw,62px);height:clamp(40px,4.6vw,62px);object-fit:contain}
 .td4-name{font-weight:900;font-style:italic;color:#fff;font-size:clamp(18px,2.3vw,30px);letter-spacing:.5px}
@@ -2266,12 +2235,7 @@ body.tvmode .scorewrap{justify-content:center}
       <path d="M55 210 L55 22 M245 210 L245 22"/>
     </svg>
   </div>
-  <div class="td4-photo"></div>
-  <div class="td4-vig"></div>
-  <div class="td4-flare l"></div>
-  <div class="td4-flare r"></div>
-  <div class="td4-flash"></div>
-  <div class="td4-word" id="td4Word"></div>
+  <div class="td4-film"><video id="tdVid" muted playsinline preload="auto"><source src="touchdown.mp4" type="video/mp4"></video></div>
   <div class="td4-sub" id="tdSub"></div>
   <div class="td4-card">
     <img id="td4Logo" alt="">
@@ -3903,9 +3867,9 @@ function triggerTouchdown(info){
   document.documentElement.style.setProperty('--nflOff',team.colorHex||"#e31837");
   const scoringAway=(team.abbr===G.away.abbr);
   tdOv.classList.toggle("aw",scoringAway); tdOv.classList.toggle("hm",!scoringAway);
-  // 3D silver letters — rebuilt each play so the staggered single spin restarts
-  $("#td4Word").innerHTML=[..."TOUCHDOWN!"]
-    .map((c,i)=>`<span style="animation-delay:${(.35+i*.05).toFixed(2)}s">${c}</span>`).join("");
+  // the film (fireworks build -> gold TOUCHDOWN @~4.7s) is the scene and the title
+  const tv=$("#tdVid");
+  if(tv){try{tv.muted=true;tv.currentTime=0;const p=tv.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
   $("#tdSub").textContent=((team.name||"")+" PUT SIX ON THE BOARD").toUpperCase();
   // scorer attribution card (top-left away / top-right home)
   $("#td4Logo").src=team.logo||"";
@@ -3917,10 +3881,11 @@ function triggerTouchdown(info){
   const ch=$("#tdCheer");
   if(ch){try{ch.currentTime=0;ch.volume=.95;const p=ch.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
   tdOv.classList.remove("show"); void tdOv.offsetWidth; tdOv.classList.add("show");
-  clearTimeout(triggerTouchdown._t); triggerTouchdown._t=setTimeout(endTouchdown,8000);
+  clearTimeout(triggerTouchdown._t); triggerTouchdown._t=setTimeout(endTouchdown,10600);
 }
 function endTouchdown(){clearTimeout(triggerTouchdown._t);
   const ch=$("#tdCheer"); if(ch)ch.pause();
+  const tv=$("#tdVid"); if(tv)tv.pause();
   tdOv.classList.remove("show");tdPlaying=false;}
 /* scorer + stat line from an ESPN play object, e.g. "(3:42) J.Allen up the middle for 5 yards, TOUCHDOWN." */
 function tdScorer(p){
@@ -4251,7 +4216,7 @@ async function startReel(){
     await reelStep(()=>triggerKickoff(), 16300);
     await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 10500);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 9500);
-    await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
+    await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 11400);
     await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 7800);
     await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 7800);
     await reelStep(()=>triggerTwoMin({q:4,toA:2,toH:1}), 6500);
