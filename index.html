@@ -1104,8 +1104,8 @@ body.nfl .nfl-dd{display:block}
     radial-gradient(30vw 24vh at 78% 84%, rgba(96,146,224,.10), transparent 70%);
   animation:ko3Amb 13s ease-in-out infinite alternate}
 @keyframes ko3Amb{from{transform:translate(0,0) scale(1)}to{transform:translate(2.5%,1.6%) scale(1.04)}}
-/* whole-scene camera shake on the helmet clash (scale bumps keep the fixed overlay's edges covered) */
-#koOverlay.p3{animation:ko3Shake .45s ease-out .5s both}
+/* whole-scene camera shake on the KICKOFF! slam (scale bumps keep the fixed overlay's edges covered) */
+#koOverlay.p3{animation:ko3Shake .45s ease-out 3s both}
 @keyframes ko3Shake{0%,10%{transform:translate(0,0) scale(1)}
   22%{transform:translate(-11px,8px) scale(1.06)}35%{transform:translate(10px,-7px) scale(1.06)}
   50%{transform:translate(-7px,5px) scale(1.035)}66%{transform:translate(4px,-3px) scale(1.02)}
@@ -1228,50 +1228,117 @@ body.nfl .nfl-dd{display:block}
 #koOverlay.p1 .ko3-panel.a .ko3-pname,#koOverlay.p2 .ko3-panel.h .ko3-pname{
   animation:ko3NameIn .85s ease-out .15s both}
 @keyframes ko3NameIn{from{letter-spacing:7px}to{letter-spacing:-1px}}
-/* --- PHASE 3: the helmet clash (accelerating fly-in, micro contact-hold, spark burst, recoil + wobble) --- */
-.ko3-clash{position:absolute;inset:0;z-index:5;visibility:hidden}
-#koOverlay.p3 .ko3-clash{visibility:visible}
-.ko3-clash .ko3-helm{position:absolute;top:50%;left:50%;width:min(36vh,340px);height:min(36vh,340px)}
-#koOverlay.p3 .ko3-clash .ko3-helm.a{animation:ko3FlyA .7s cubic-bezier(.4,0,.7,1) .08s both}
-#koOverlay.p3 .ko3-clash .ko3-helm.h{animation:ko3FlyH .7s cubic-bezier(.4,0,.7,1) .08s both}
-@keyframes ko3FlyA{0%{transform:translate(-150vw,-50%)}58%{transform:translate(-98%,-50%)}
-  66%,72%{transform:translate(-96%,-50%)}100%{transform:translate(-162%,-50%)}}
-@keyframes ko3FlyH{0%{transform:translate(150vw,-50%)}58%{transform:translate(-2%,-50%)}
-  66%,72%{transform:translate(-4%,-50%)}100%{transform:translate(62%,-50%)}}
-/* post-impact wobble rides the inner svg so it can't fight the fly transform */
-#koOverlay.p3 .ko3-clash .ko3-helm.a .ko3-hsvg{animation:ko3WobA .8s ease-out .78s both}
-#koOverlay.p3 .ko3-clash .ko3-helm.h .ko3-hsvg{animation:ko3WobH .8s ease-out .78s both}
-@keyframes ko3WobA{0%{transform:rotate(0)}28%{transform:rotate(-5deg)}58%{transform:rotate(2.4deg)}100%{transform:rotate(0)}}
-@keyframes ko3WobH{0%{transform:scaleX(-1) rotate(0)}28%{transform:scaleX(-1) rotate(5deg)}
-  58%{transform:scaleX(-1) rotate(-2.4deg)}100%{transform:scaleX(-1) rotate(0)}}
-/* white blink exactly at contact */
-.ko3-blink{position:absolute;inset:0;z-index:6;background:#fff;opacity:0;pointer-events:none}
-#koOverlay.p3 .ko3-blink{animation:ko3Blink .32s ease-out .5s both}
-@keyframes ko3Blink{0%{opacity:0}22%{opacity:.55}100%{opacity:0}}
-.ko3-impact{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;pointer-events:none;
-  width:min(40vh,380px);height:min(40vh,380px);border-radius:50%;opacity:0;
-  background:radial-gradient(closest-side,#fff,rgba(255,240,190,.6) 38%,transparent 70%)}
-#koOverlay.p3 .ko3-impact{animation:ko3Impact .5s ease-out .52s both}
-@keyframes ko3Impact{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}22%{opacity:.95}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
-.ko3-ring1,.ko3-ring2{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.25);z-index:6;
-  border-radius:50%;opacity:0;pointer-events:none;width:min(30vh,280px);height:min(30vh,280px)}
-.ko3-ring1{border:5px solid #fff} .ko3-ring2{border:4px solid var(--gold)}
-#koOverlay.p3 .ko3-ring1{animation:ko3Ring .7s ease-out .52s both}
-#koOverlay.p3 .ko3-ring2{animation:ko3Ring .8s ease-out .64s both}
-@keyframes ko3Ring{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.3)}}
-/* gold spark shards bursting from the contact point */
-.ko3-sparks{position:absolute;left:50%;top:50%;z-index:6;pointer-events:none}
-.ko3-sparks i{position:absolute;width:16px;height:4px;border-radius:2px;opacity:0;
-  background:linear-gradient(90deg,#fff,#f4c518);transform-origin:left center}
-#koOverlay.p3 .ko3-sparks i{animation:ko3Spark .55s cubic-bezier(.15,.6,.3,1) .55s both}
-@keyframes ko3Spark{0%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(1vh) scaleX(.4)}
-  14%{opacity:1}100%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(var(--sd,24vh)) scaleX(1)}}
-.ko3-title{position:absolute;left:0;right:0;top:16%;z-index:4;text-align:center;
-  font-size:clamp(56px,13vw,188px);line-height:.9;opacity:0}
-#koOverlay.p3 .ko3-title{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) .95s both, nfpShine 2.8s linear 1.7s infinite}
-.ko3-venue{position:absolute;left:0;right:0;bottom:14%;z-index:4;text-align:center;
+/* --- PHASE 3: "THE BOOT" — coded shot-for-shot from the user's Veo kickoff video:
+   tee-cam run-up -> boot -> ball flies AT the camera w/ speed lines -> 3D KICKOFF! slam
+   w/ shockwave + sparks -> ember float behind the end-zone goal frame --- */
+.ko4-scene{position:absolute;inset:0;z-index:5;visibility:hidden;overflow:hidden;
+  background:radial-gradient(140% 60% at 50% 26%,#1a2333 0%,#0b101a 55%,#04060a 100%)}
+#koOverlay.p3 .ko4-scene{visibility:visible}
+.ko4-photo{position:absolute;inset:-3%;opacity:0;background:url("stadium2.jpg") center 42%/cover no-repeat}
+#koOverlay.p3 .ko4-photo{animation:anFade2 .45s both, ko4Ken 6s ease-out both}
+@keyframes ko4Ken{from{transform:scale(1)}to{transform:scale(1.06)}}
+.ko4-vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 45%, transparent 50%, rgba(2,4,8,.82) 100%),
+    linear-gradient(180deg, rgba(2,4,8,.5), transparent 32% 66%, rgba(2,4,8,.72))}
+/* the tee (white, center-low) — the ball rests on it until the boot */
+.ko4-tee{position:absolute;left:52%;bottom:17.5%;width:min(3.2vh,30px);height:min(4.6vh,44px);
+  transform:translateX(-50%);background:linear-gradient(180deg,#fff,#c9d2da);opacity:0;
+  clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);filter:drop-shadow(0 3px 5px rgba(0,0,0,.7))}
+#koOverlay.p3 .ko4-tee{animation:anFade2 .45s .1s both}
+/* the kicker — dark side-view silhouette, runs in, plants, and swings through */
+.ko4-man{position:absolute;left:25%;bottom:12.5%;height:min(46vh,420px);width:auto;
+  transform:translateX(-50%);opacity:0;filter:drop-shadow(0 4px 10px rgba(0,0,0,.8))}
+#koOverlay.p3 .ko4-man{animation:ko4Approach 1.6s ease-out .1s both}
+@keyframes ko4Approach{0%{opacity:0;left:25%}10%{opacity:1}88%{left:45.5%}100%{left:46.5%}}
+/* run-cycle bob rides an inner group (own transform channel) */
+#koOverlay.p3 .ko4-bob{animation:ko4Bob .28s ease-in-out .1s 5}
+@keyframes ko4Bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+/* legs scissor for 5 strides, then the kick leg winds up and SWINGS through the ball */
+.ko4-legA,.ko4-legB{transform-box:view-box}
+.ko4-legA{transform-origin:90px 140px} .ko4-legB{transform-origin:94px 140px}
+#koOverlay.p3 .ko4-legA{animation:ko4RunA .28s linear .1s 5 both, ko4Plant .75s ease-out 1.55s forwards}
+#koOverlay.p3 .ko4-legB{animation:ko4RunB .28s linear .1s 5 both, ko4Swing .75s cubic-bezier(.55,0,.35,1) 1.55s forwards}
+@keyframes ko4RunA{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-20deg)}}
+@keyframes ko4RunB{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(22deg)}}
+@keyframes ko4Plant{0%{transform:rotate(22deg)}40%{transform:rotate(-6deg)}100%{transform:rotate(-9deg)}}
+@keyframes ko4Swing{0%{transform:rotate(-20deg)}38%{transform:rotate(52deg)}   /* wind-up back */
+  78%{transform:rotate(-78deg)}100%{transform:rotate(-68deg)}}                  /* rip through */
+/* boot pop + turf pellets at contact (~2.1s) */
+.ko4-boot{position:absolute;left:52%;bottom:20%;width:min(11vh,100px);height:min(11vh,100px);
+  transform:translate(-50%,50%);border-radius:50%;opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,#fff,rgba(255,240,190,.45) 45%,transparent 70%)}
+#koOverlay.p3 .ko4-boot{animation:ko4BootPop .4s ease-out 2.05s both}
+@keyframes ko4BootPop{0%{opacity:0;transform:translate(-50%,50%) scale(.3)}30%{opacity:.9}
+  100%{opacity:0;transform:translate(-50%,50%) scale(1.7)}}
+.ko4-turf{position:absolute;left:52%;bottom:20%;pointer-events:none}
+.ko4-turf i{position:absolute;width:9px;height:4px;border-radius:2px;opacity:0;
+  background:#17321f;transform-origin:left center}
+#koOverlay.p3 .ko4-turf i{animation:ko4Turf .5s cubic-bezier(.2,.6,.4,1) 2.05s both}
+@keyframes ko4Turf{0%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(.5vh) scaleX(.5)}
+  18%{opacity:1}100%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(var(--sd,9vh)) scaleX(1)}}
+/* the ball: upright on the tee, then boots UP AND AT THE CAMERA — grows huge, blurs, exits.
+   flight = wrapper keyframes; end-over-end spin = inner svg `rotate` (separate channels) */
+.ko4-ballwrap{position:absolute;left:52%;bottom:24%;width:min(9vh,84px);height:auto;z-index:6;
+  transform:translate(-50%,50%) scale(1);filter:drop-shadow(0 4px 9px rgba(0,0,0,.7))}
+.ko4-ballwrap svg{display:block;width:100%;height:auto;rotate:90deg}
+#koOverlay.p3 .ko4-ballwrap{animation:ko4Fly 1s cubic-bezier(.3,.4,.5,1) 2.1s both}
+#koOverlay.p3 .ko4-ballwrap svg{animation:ko4Spin 1s linear 2.1s both}
+@keyframes ko4Spin{from{rotate:90deg}to{rotate:1170deg}}
+@keyframes ko4Fly{
+  0%{opacity:1;left:52%;bottom:24%;transform:translate(-50%,50%) scale(1);filter:drop-shadow(0 4px 9px rgba(0,0,0,.7)) blur(0)}
+  30%{left:53.5%;bottom:38%;transform:translate(-50%,50%) scale(1.9);filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(1px)}
+  60%{left:55.5%;bottom:58%;transform:translate(-50%,50%) scale(3.6);filter:blur(2.5px)}
+  92%{opacity:1;filter:blur(4px)}
+  100%{opacity:0;left:58%;bottom:105%;transform:translate(-50%,50%) scale(8.5);filter:blur(5px)}}
+/* radial speed-lines while the ball rips past the lens */
+.ko4-rays{position:absolute;left:50%;top:50%;width:240vmax;height:240vmax;margin:-120vmax;opacity:0;
+  pointer-events:none;z-index:5;
+  background:repeating-conic-gradient(rgba(214,232,255,.14) 0 1.1deg,transparent 1.1deg 9deg);
+  -webkit-mask:radial-gradient(circle,transparent 12%,#000 46%);mask:radial-gradient(circle,transparent 12%,#000 46%)}
+#koOverlay.p3 .ko4-rays{animation:ko4Rays 1.7s ease-out 2.25s both}
+@keyframes ko4Rays{0%{opacity:0;transform:rotate(0)}25%{opacity:.85}
+  60%{opacity:.4}100%{opacity:0;transform:rotate(9deg)}}
+/* the end-zone goal frame arrives with the slam (camera has landed behind the posts) */
+.ko4-goal{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;z-index:6}
+#koOverlay.p3 .ko4-goal{animation:ko4GoalIn .5s ease-out 3.05s both}
+@keyframes ko4GoalIn{from{opacity:0;transform:scale(1.06)}to{opacity:.95;transform:scale(1)}}
+.ko4-goal .xgp{fill:none;stroke:#f4c518;stroke-width:22;stroke-linecap:round;
+  filter:drop-shadow(0 0 10px rgba(244,197,24,.5)) drop-shadow(0 3px 4px rgba(0,0,0,.8))}
+/* white flash + double shockwave ring + orange spark burst behind the word */
+.ko4-flash{position:absolute;inset:0;z-index:7;background:#fff;opacity:0;pointer-events:none}
+#koOverlay.p3 .ko4-flash{animation:ko4Flash .38s ease-out 3s both}
+@keyframes ko4Flash{0%{opacity:0}22%{opacity:.65}100%{opacity:0}}
+.ko4-ring1,.ko4-ring2{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.2);z-index:7;
+  border-radius:50%;opacity:0;pointer-events:none;width:min(46vh,430px);height:min(46vh,430px)}
+.ko4-ring1{border:6px solid #fff}.ko4-ring2{border:4px solid #ff9a2e}
+#koOverlay.p3 .ko4-ring1{animation:ko4Ring .75s ease-out 3.05s both}
+#koOverlay.p3 .ko4-ring2{animation:ko4Ring .9s ease-out 3.17s both}
+@keyframes ko4Ring{0%{opacity:.9;transform:translate(-50%,-50%) scale(.2)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
+.ko4-sparks{position:absolute;left:50%;top:44%;z-index:7;pointer-events:none}
+.ko4-sparks i{position:absolute;width:18px;height:4px;border-radius:2px;opacity:0;
+  background:linear-gradient(90deg,#fff,#ff9a2e);transform-origin:left center}
+#koOverlay.p3 .ko4-sparks i{animation:ko4Spark .6s cubic-bezier(.15,.6,.3,1) 3.05s both}
+@keyframes ko4Spark{0%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(2vh) scaleX(.4)}
+  14%{opacity:1}100%{opacity:0;transform:rotate(var(--sa,0deg)) translateX(var(--sd,30vh)) scaleX(1)}}
+/* the 3D stone KICKOFF! — slams in, then floats on embers behind the uprights */
+.ko4-wordwrap{position:absolute;left:0;right:0;top:31%;z-index:8;text-align:center;pointer-events:none}
+#koOverlay.p3 .ko4-wordwrap{animation:ko4Float 2.4s ease-in-out 3.55s infinite alternate}
+@keyframes ko4Float{from{transform:translateY(0) rotate(-.4deg)}to{transform:translateY(-10px) rotate(.4deg)}}
+.ko4-word{display:inline-block;font-weight:900;font-style:italic;letter-spacing:0;line-height:.9;
+  font-size:clamp(58px,13vw,190px);opacity:0;
+  background:linear-gradient(180deg,#f2f5f8 0%,#b9c2cc 36%,#7d8894 56%,#525c66 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 #2b323a) drop-shadow(0 7px 0 #1d232a) drop-shadow(0 14px 24px rgba(0,0,0,.75)) drop-shadow(0 0 22px rgba(255,140,30,.5))}
+#koOverlay.p3 .ko4-word{animation:ko4Slam .45s cubic-bezier(.2,1.1,.3,1) 3.05s both,
+  ko4Ember 1.6s ease-in-out 3.6s infinite alternate}
+@keyframes ko4Slam{from{opacity:0;transform:scale(2.8)}to{opacity:1;transform:scale(1)}}
+@keyframes ko4Ember{
+  from{filter:drop-shadow(0 4px 0 #2b323a) drop-shadow(0 7px 0 #1d232a) drop-shadow(0 14px 24px rgba(0,0,0,.75)) drop-shadow(0 0 18px rgba(255,140,30,.45))}
+  to{filter:drop-shadow(0 4px 0 #2b323a) drop-shadow(0 7px 0 #1d232a) drop-shadow(0 14px 24px rgba(0,0,0,.75)) drop-shadow(0 0 40px rgba(255,150,40,.95))}}
+.ko4-venue{position:absolute;left:0;right:0;bottom:9%;z-index:8;text-align:center;
   color:#c6d2e0;font-weight:800;letter-spacing:3px;font-size:clamp(16px,2vw,25px);opacity:0}
-#koOverlay.p3 .ko3-venue{animation:anFade .5s 1.45s both}
+#koOverlay.p3 .ko4-venue{animation:anFade .5s 3.9s both}
 
 /* ===== SHARED field-video scene (3rd down + red zone): dive video -> freeze -> lines -> zoom ===== */
 .fv-scene{position:absolute;inset:0;z-index:1;overflow:hidden}
@@ -2216,29 +2283,64 @@ body.tvmode .scorewrap{justify-content:center}
       <img class="ko3-decal" id="ko3DecalPH" alt="">
     </div>
   </div></div>
-  <!-- phase 3: the helmet clash -->
-  <div class="ko3-clash">
-    <div class="ko3-helm a">
-      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
-      <img class="ko3-decal" id="ko3DecalCA" alt="">
+  <!-- phase 3: THE BOOT (coded from the user's Veo kickoff video) -->
+  <div class="ko4-scene">
+    <div class="ko4-photo"></div>
+    <div class="ko4-vig"></div>
+    <div class="ko4-tee"></div>
+    <svg class="ko4-man" viewBox="0 0 200 300">
+      <g class="ko4-bob" fill="none" stroke="#0d1420" stroke-linecap="round">
+        <g class="ko4-legA">
+          <path d="M90 140 L68 202 L60 264" stroke-width="16"/>
+          <path d="M52 258 L66 258 L80 270 Q80 276 72 276 L54 274 Q48 268 52 258 Z" fill="#0d1420" stroke="none"/>
+        </g>
+        <circle cx="120" cy="46" r="16" fill="#0d1420" stroke="none"/>
+        <path d="M114 62 L92 142" stroke-width="26"/>
+        <path d="M106 78 L76 100 L86 128" stroke-width="11"/>
+        <path d="M108 80 L138 98 L132 126" stroke-width="11"/>
+        <g class="ko4-legB">
+          <path d="M94 140 L122 198 L128 262" stroke-width="16"/>
+          <path d="M122 256 L136 258 L152 268 Q154 274 146 276 L128 272 Q120 266 122 256 Z" fill="#0d1420" stroke="none"/>
+        </g>
+      </g>
+    </svg>
+    <div class="ko4-boot"></div>
+    <div class="ko4-turf">
+      <i style="--sa:200deg;--sd:8vh"></i><i style="--sa:227deg;--sd:11vh;animation-delay:2.08s"></i>
+      <i style="--sa:255deg;--sd:9vh"></i><i style="--sa:283deg;--sd:12vh;animation-delay:2.09s"></i>
+      <i style="--sa:311deg;--sd:8vh"></i><i style="--sa:338deg;--sd:10vh;animation-delay:2.07s"></i>
     </div>
-    <div class="ko3-helm h">
-      <svg class="ko3-hsvg" viewBox="0 0 300 260"><use href="#ko3HelmShape"/></svg>
-      <img class="ko3-decal" id="ko3DecalCH" alt="">
+    <div class="ko4-ballwrap"><svg viewBox="0 0 64 40">
+      <defs>
+        <radialGradient id="ko4BallG" cx="35%" cy="28%" r="85%">
+          <stop offset="0%" stop-color="#b57a3d"/><stop offset="55%" stop-color="#8a5426"/>
+          <stop offset="100%" stop-color="#552f10"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="32" cy="20" rx="30" ry="18.5" fill="url(#ko4BallG)" stroke="#38200a" stroke-width="1.6"/>
+      <path d="M6 15 Q32 3 58 15" fill="none" stroke="#4a2a10" stroke-width="1.4" opacity=".85"/>
+      <ellipse cx="23" cy="12" rx="12" ry="5" fill="#fff" opacity=".16"/>
+      <path d="M18 20 L46 20" stroke="#f4f6f8" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M23 16.5 L23 23.5 M29 16 L29 24 M35 16 L35 24 M41 16.5 L41 23.5"
+        stroke="#f4f6f8" stroke-width="2.2" stroke-linecap="round"/>
+    </svg></div>
+    <div class="ko4-rays"></div>
+    <svg class="ko4-goal" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <path class="xgp" d="M430 900 L430 -40 M1170 900 L1170 -40"/>
+    </svg>
+    <div class="ko4-flash"></div>
+    <div class="ko4-ring1"></div>
+    <div class="ko4-ring2"></div>
+    <div class="ko4-sparks">
+      <i style="--sa:5deg;--sd:30vh"></i><i style="--sa:36deg;--sd:24vh;animation-delay:3.08s"></i>
+      <i style="--sa:64deg;--sd:28vh"></i><i style="--sa:95deg;--sd:22vh;animation-delay:3.1s"></i>
+      <i style="--sa:124deg;--sd:31vh"></i><i style="--sa:152deg;--sd:25vh;animation-delay:3.07s"></i>
+      <i style="--sa:184deg;--sd:29vh"></i><i style="--sa:215deg;--sd:23vh;animation-delay:3.09s"></i>
+      <i style="--sa:244deg;--sd:32vh"></i><i style="--sa:275deg;--sd:24vh;animation-delay:3.11s"></i>
+      <i style="--sa:305deg;--sd:27vh"></i><i style="--sa:336deg;--sd:22vh;animation-delay:3.08s"></i>
     </div>
-    <div class="ko3-blink"></div>
-    <div class="ko3-impact"></div>
-    <div class="ko3-ring1"></div>
-    <div class="ko3-ring2"></div>
-    <div class="ko3-sparks">
-      <i style="--sa:8deg;--sd:26vh"></i><i style="--sa:42deg;--sd:20vh;animation-delay:.57s"></i>
-      <i style="--sa:98deg;--sd:18vh"></i><i style="--sa:146deg;--sd:24vh;animation-delay:.58s"></i>
-      <i style="--sa:176deg;--sd:28vh"></i><i style="--sa:208deg;--sd:21vh;animation-delay:.6s"></i>
-      <i style="--sa:252deg;--sd:17vh"></i><i style="--sa:290deg;--sd:23vh;animation-delay:.57s"></i>
-      <i style="--sa:322deg;--sd:26vh"></i><i style="--sa:352deg;--sd:19vh;animation-delay:.59s"></i>
-    </div>
-    <div class="ko3-title nfp-chrome">KICKOFF!</div>
-    <div class="ko3-venue" id="koVenue"></div>
+    <div class="ko4-wordwrap"><div class="ko4-word">KICKOFF!</div></div>
+    <div class="ko4-venue" id="koVenue"></div>
   </div>
 </div>
 <div id="rzOverlay">
@@ -3833,8 +3935,8 @@ function triggerKickoff(info){
   $("#ko3WinLogo").src=winner.logo||""; $("#ko3WinLogo").style.display=winner.logo?"":"none";
   $("#ko3WinName").textContent="WINS THE TOSS";
   $("#ko3Say").textContent=receives?"“WE’LL RECEIVE!”":"“WE DEFER.”";
-  // panel + clash decals (logo = data layer; blank cleanly when missing)
-  [["#ko3DecalPA",aw],["#ko3DecalCA",aw],["#ko3DecalPH",hm],["#ko3DecalCH",hm]].forEach(([id,t])=>{
+  // panel decals (logo = data layer; blank cleanly when missing)
+  [["#ko3DecalPA",aw],["#ko3DecalPH",hm]].forEach(([id,t])=>{
     $(id).src=t.logo||""; $(id).style.display=t.logo?"":"none";});
   $("#ko3PAName").textContent=(aw.name||"AWAY").toUpperCase();
   $("#ko3PHName").textContent=(hm.name||"HOME").toUpperCase();
@@ -3845,7 +3947,7 @@ function triggerKickoff(info){
     setTimeout(()=>koOv.classList.add("p1"),3500),
     setTimeout(()=>{koOv.classList.remove("p1");koOv.classList.add("p2");},5200),
     setTimeout(()=>{koOv.classList.remove("p2");koOv.classList.add("p3");},6900),
-    setTimeout(endKickoff,11000)
+    setTimeout(endKickoff,12900)
   ];
 }
 function endKickoff(){ko3Timers.forEach(clearTimeout);ko3Timers=[];
@@ -4255,7 +4357,7 @@ async function startReel(){
     if(!reelOn)break;
     // ---- NFL ----
     reelBoardNFL(); await reelSleep(2600);
-    await reelStep(()=>triggerKickoff(), 11700);
+    await reelStep(()=>triggerKickoff(), 13600);
     await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 10500);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 9500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
