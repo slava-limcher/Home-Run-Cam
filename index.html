@@ -1545,40 +1545,21 @@ body.nfl .nfl-dd{display:block}
 #tpOverlay.miss .tp-plus{display:none}
 .tp-score{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.8vw,22px);opacity:0}
 
-/* ---- TWO-POINT CONVERSION: a silhouette lunges across the goal line, "GOOD!" ---- */
-#tpOverlay.show{animation:tpCam .4s ease-out 1.05s}
+/* ---- TWO-POINT CONVERSION: the user's Veo film (dark bowl -> light banks slam on ->
+   twin gold fireworks columns) IS the scene; text lands center between the columns.
+   GOOD = full film, fireworks @~3.2s. MISS = film pauses @2.3s (lights on, the
+   celebration never arrives) + red NO GOOD. Shared dark bg is the no-play fallback. ---- */
+#tpOverlay.show{animation:tpCam .4s ease-out 3.3s}
 @keyframes tpCam{0%{transform:scale(1)}35%{transform:scale(1.03)}100%{transform:scale(1)}}
-.tp-turf{position:absolute;left:0;right:0;bottom:0;height:38%;z-index:0;pointer-events:none;opacity:0;
-  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--nflOff,#e31837) 30%,#0c2a17) 62%,#0a2414)}
-#tpOverlay.show .tp-turf{animation:anFade2 .5s .15s both}
-.tp-gline{position:absolute;left:6%;right:6%;top:66%;height:5px;z-index:1;background:#fff;opacity:0;
-  box-shadow:0 0 14px rgba(255,255,255,.7)}
-#tpOverlay.show .tp-gline{animation:anFade2 .4s .2s both}
-#tpOverlay.show:not(.miss) .tp-gline{animation:anFade2 .4s .2s both, tpGFlash .55s ease-out 1s}
-@keyframes tpGFlash{0%{opacity:1}25%{opacity:1;box-shadow:0 0 34px #fff,0 0 74px rgba(255,255,255,.85)}
-  100%{opacity:1;box-shadow:0 0 18px rgba(255,255,255,.7)}}
-.tp-diver{position:absolute;top:56%;left:-16%;width:min(30vh,280px);height:auto;z-index:2;opacity:0;
-  filter:drop-shadow(0 0 3px rgba(150,180,230,.5)) drop-shadow(0 8px 16px rgba(0,0,0,.6))}
-#tpOverlay.show .tp-diver{animation:tpDive .85s cubic-bezier(.3,.4,.5,1) .3s both}
-#tpOverlay.show.miss .tp-diver{animation:tpDiveShort .85s cubic-bezier(.3,.55,.6,1) .3s both}
-@keyframes tpDive{0%{opacity:0;left:-16%;transform:rotate(-4deg) translateY(0)}10%{opacity:1}
-  70%{transform:rotate(-11deg) translateY(1.5vh)}100%{opacity:1;left:56%;transform:rotate(-15deg) translateY(3.5vh)}}
-@keyframes tpDiveShort{0%{opacity:0;left:-16%;transform:rotate(-4deg)}10%{opacity:1}
-  100%{opacity:1;left:30%;transform:rotate(4deg) translateY(2vh)}}   /* stuffed short of the line */
-.tp-diver .tpv{fill:none;stroke:#0a0d13;stroke-width:20;stroke-linecap:round;stroke-linejoin:round}
-.tp-diver .tpvh{fill:#0a0d13}
-.tp-diver .tpvb{fill:#8a5a2b;stroke:#fff;stroke-width:2.5}
-.tp-streak{position:absolute;top:59%;left:-30%;width:26%;height:4px;z-index:1;opacity:0;border-radius:2px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.8))}
-#tpOverlay.show:not(.miss) .tp-streak{animation:tpStreak .85s cubic-bezier(.3,.4,.5,1) .35s both}
-@keyframes tpStreak{0%{opacity:0;left:-30%}15%{opacity:.8}100%{opacity:0;left:42%}}
-.tp-ring{position:absolute;left:52%;top:66%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;
-  width:min(18vh,170px);height:min(18vh,170px);border:5px solid #fff;border-radius:50%;opacity:0}
-#tpOverlay.show:not(.miss) .tp-ring{animation:xp2Ring .7s ease-out 1s both}
-#tpOverlay.show .tp-kick{animation:anFade .5s .45s both}
-#tpOverlay.show .tp-big{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 1.15s both, nfpShine 2.6s linear 1.9s infinite}
-#tpOverlay.show .tp-plus{animation:anFade .4s 1.5s both}
-#tpOverlay.show .tp-score{animation:anFade .4s 1.6s both}
+.tp-film{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:0}
+#tpOverlay.show .tp-film{animation:anFade2 .4s both}
+.tp-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#tpOverlay.show .tp-kick{animation:anFade .5s .5s both}
+#tpOverlay.show .tp-big{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3.3s both, nfpShine 2.6s linear 3.9s infinite}
+#tpOverlay.show.miss .tp-big{animation-delay:2.5s}
+#tpOverlay.show .tp-plus{animation:anFade .4s 3.75s both}
+#tpOverlay.show .tp-score{animation:anFade .4s 3.9s both}
+#tpOverlay.show.miss .tp-score{animation-delay:2.9s}
 
 /* ---- TWO-MINUTE WARNING (A · Clock Wipe): radial sweep reveal ---- */
 .tm2-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;
@@ -2361,19 +2342,7 @@ body.tvmode .scorewrap{justify-content:center}
   </div>
 </div>
 <div id="tpOverlay">
-  <div class="tp-turf"></div>
-  <div class="tp-gline"></div>
-  <div class="tp-streak"></div>
-  <svg class="tp-diver" viewBox="0 0 270 110">
-    <circle class="tpvh" cx="222" cy="40" r="14"/>
-    <path class="tpv" d="M118 54 L202 46" style="stroke-width:26"/>
-    <path class="tpv" d="M198 46 L246 32" style="stroke-width:12"/>
-    <path class="tpv" d="M196 54 L244 52" style="stroke-width:12"/>
-    <path class="tpv" d="M122 52 L58 28" style="stroke-width:13"/>
-    <path class="tpv" d="M124 60 L56 66" style="stroke-width:13"/>
-    <ellipse class="tpvb" cx="254" cy="42" rx="13" ry="8"/>
-  </svg>
-  <div class="tp-ring"></div>
+  <div class="tp-film"><video id="tpVid" muted playsinline preload="auto"><source src="twopoint.mp4" type="video/mp4"></video></div>
   <div class="tp-center">
     <div class="tp-kick">TWO-POINT CONVERSION</div>
     <div class="tp-big nfp-chrome" id="tpBig">GOOD!</div>
@@ -4012,10 +3981,17 @@ function triggerTwoPoint(info){
   tpOv.classList.toggle("miss",!good);
   $("#tpBig").textContent=good?"GOOD!":"NO GOOD";
   $("#tpScore").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`;
+  // the film: full run for GOOD; on a MISS pause just before the fireworks ever ignite
+  const v=$("#tpVid");
+  if(v){try{v.muted=true;v.currentTime=0;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+  clearTimeout(triggerTwoPoint._pz);
+  if(!good&&v)triggerTwoPoint._pz=setTimeout(()=>v.pause(),2300);
   tpOv.classList.remove("show"); void tpOv.offsetWidth; tpOv.classList.add("show");
-  clearTimeout(triggerTwoPoint._t); triggerTwoPoint._t=setTimeout(endTwoPoint,5000);
+  clearTimeout(triggerTwoPoint._t); triggerTwoPoint._t=setTimeout(endTwoPoint,good?7000:5200);
 }
-function endTwoPoint(){clearTimeout(triggerTwoPoint._t);tpOv.classList.remove("show");tpPlaying=false;}
+function endTwoPoint(){clearTimeout(triggerTwoPoint._t);clearTimeout(triggerTwoPoint._pz);
+  const v=$("#tpVid"); if(v)v.pause();
+  tpOv.classList.remove("show");tpPlaying=false;}
 function triggerTwoMin(info){
   if(takeoverBusy())return; tmPlaying=true; hideWalkup();
   $("#tmRecap").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr} • Q${(info&&info.q)||NG.q}`;
@@ -4277,7 +4253,7 @@ async function startReel(){
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 9500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 8500);
     await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 7800);
-    await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 5500);
+    await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 7800);
     await reelStep(()=>triggerTwoMin({q:4,toA:2,toH:1}), 6500);
     await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 8500);
     await reelStep(()=>triggerFinal({winner:G.home,aw:G.away,hm:G.home,walkoff:false}), 9500);
