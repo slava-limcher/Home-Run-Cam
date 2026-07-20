@@ -1392,7 +1392,7 @@ body.nfl .nfl-dd{display:block}
 /* ---- EXTRA POINT v4 "Down the Barrel": end-zone cam behind the uprights, the ball
    flies AT the camera and splits the posts (or DOINKS off the left upright on a miss).
    scene is IP-neutral (no numbers/logos/colors); real logos/kicker/stats ride the data card */
-#xpOverlay.show{animation:xpCam .4s ease-out 2.5s}   /* punch as the ball reaches the posts */
+#xpOverlay.show{animation:xpCam .4s ease-out 4.6s}   /* punch as the ball reaches the posts */
 @keyframes xpCam{0%{transform:scale(1)}35%{transform:scale(1.03)}100%{transform:scale(1)}}
 /* drawn fallback scene — only visible if stadium.jpg is missing */
 .xp2-fall{position:absolute;inset:0;z-index:0;
@@ -1403,88 +1403,79 @@ body.nfl .nfl-dd{display:block}
   background:linear-gradient(180deg,#10381f,#0a2817)}
 /* the stadium still (dedicated XP backdrop; the big drawn post supplies the goal) */
 .xp2-photo{position:absolute;inset:-3%;z-index:1;opacity:0;
-  background:url("stadium2.jpg") center 45%/cover no-repeat}
-#xpOverlay.show .xp2-photo{animation:anFade2 .4s both, xp2Ken 6.5s ease-out both}
-@keyframes xp2Ken{from{transform:scale(1)}to{transform:scale(1.05)}}
+  background:url("goalposts.jpg") center 50%/cover no-repeat}
+#xpOverlay.show .xp2-photo{animation:anFade2 .4s both, xp2Ken 8s ease-out both}
+@keyframes xp2Ken{from{transform:scale(1)}to{transform:scale(1.03)}}
 .xp2-vig{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:radial-gradient(120% 90% at 50% 45%, transparent 52%, rgba(2,4,8,.8) 100%),
     linear-gradient(180deg, rgba(2,4,8,.45), transparent 30% 68%, rgba(2,4,8,.7))}
-/* soft field glow where the distant kick happens, so the silhouettes sit ON the photo */
-.xp3-spot{position:absolute;left:50%;bottom:16%;width:min(34vw,420px);height:min(12vh,110px);z-index:2;
-  transform:translateX(-50%);opacity:0;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(120,190,140,.22),transparent 70%)}
-#xpOverlay.show .xp3-spot{animation:anFade2 .8s .2s both}
-/* distant kicker + holder — tiny IP-neutral silhouettes at the far kick spot ON the field */
-.xp3-crew{position:absolute;left:45.5%;bottom:20%;height:min(12vh,110px);width:auto;z-index:2;
-  transform:translateX(-50%);opacity:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
-#xpOverlay.show .xp3-crew{animation:anFade2 .5s .3s both}
-.xp3-kleg{transform-box:fill-box;transform-origin:14% 8%;transform:rotate(46deg)}
-#xpOverlay.show .xp3-kleg{animation:xp3Swing .28s cubic-bezier(.6,0,.3,1) .82s both}
-@keyframes xp3Swing{0%{transform:rotate(46deg)}70%{transform:rotate(-64deg)}100%{transform:rotate(-56deg)}}
-/* launch pop at the tee the instant the boot lands */
-.xp3-launch{position:absolute;left:48.5%;bottom:21%;width:min(9vh,84px);height:min(9vh,84px);z-index:2;
-  transform:translate(-50%,50%);border-radius:50%;opacity:0;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,240,190,.4) 45%,transparent 70%)}
-#xpOverlay.show .xp3-launch{animation:xp3Launch .4s ease-out .95s both}
-@keyframes xp3Launch{0%{opacity:0;transform:translate(-50%,50%) scale(.3)}
-  30%{opacity:.9}100%{opacity:0;transform:translate(-50%,50%) scale(1.6)}}
-/* the goal frame seen from BEHIND — full-screen SVG, uprights running off the top */
-.xp3-goal{position:absolute;inset:0;z-index:3;width:100%;height:100%;opacity:0;pointer-events:none}
-#xpOverlay.show .xp3-goal{animation:xp3GoalIn .55s cubic-bezier(.2,.9,.3,1) .05s both}
-@keyframes xp3GoalIn{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:scale(1)}}
-.xp3-goal .xgp{fill:none;stroke:#f4c518;stroke-width:26;stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 12px rgba(244,197,24,.55)) drop-shadow(0 3px 4px rgba(0,0,0,.85))}
-.xp3-goal .xgpad{fill:#e8622a;filter:drop-shadow(0 3px 6px rgba(0,0,0,.7))}
-/* both uprights flash white as the ball splits them (good only) */
-#xpOverlay.show:not(.miss) .xp3-up{animation:xp3PostFlash .6s ease-out 2.55s both}
-@keyframes xp3PostFlash{0%{stroke:#f4c518;filter:drop-shadow(0 0 12px rgba(244,197,24,.55))}
-  25%{stroke:#fff;filter:drop-shadow(0 0 34px #fff) drop-shadow(0 0 70px rgba(255,240,180,.95))}
-  100%{stroke:#f4c518;filter:drop-shadow(0 0 16px rgba(244,197,24,.85))}}
-/* the LEFT upright takes the DOINK and shudders (miss only) */
-.xp3-upL{transform-box:fill-box;transform-origin:50% 100%}
-#xpOverlay.show.miss .xp3-upL{animation:xp3Doink .8s ease-out 2.45s both}
-@keyframes xp3Doink{0%{transform:rotate(0)}18%{transform:rotate(1.7deg)}40%{transform:rotate(-1.2deg)}
-  62%{transform:rotate(.7deg)}82%{transform:rotate(-.3deg)}100%{transform:rotate(0)}}
-/* the ball — starts as a speck at the tee and flies AT the camera, tumbling end-over-end.
-   flight (left/bottom/scale) rides the wrapper; the tumble rides the inner svg (own channel) */
-.xp3-ballwrap{position:absolute;left:50%;bottom:23%;width:min(13vw,190px);height:auto;z-index:4;
-  opacity:0;transform:translate(-50%,50%) scale(.1);filter:drop-shadow(0 4px 10px rgba(0,0,0,.65))}
-#xpOverlay.show .xp3-ballwrap{animation:xp3FlyGood 1.75s linear 1s both}
-#xpOverlay.show.miss .xp3-ballwrap{animation:xp3FlyMiss 2s linear 1s both}
-.xp3-ballwrap svg{display:block;width:100%;height:auto}
-#xpOverlay.show .xp3-ballwrap svg{animation:xp3Tumble 1.75s linear 1s both}
-#xpOverlay.show.miss .xp3-ballwrap svg{animation:xp3TumbleM 2s linear 1s both}
-@keyframes xp3Tumble{to{rotate:-1240deg}}
-@keyframes xp3TumbleM{0%{rotate:0deg}74%{rotate:-880deg}100%{rotate:-680deg}} /* spin checks up off the clank */
-/* GOOD: rise, hang at the apex, then blow past the camera between the uprights */
-@keyframes xp3FlyGood{
-  0%{opacity:0;left:48.5%;bottom:23%;transform:translate(-50%,50%) scale(.1)}
-  7%{opacity:1}
-  30%{left:50.9%;bottom:52%;transform:translate(-50%,50%) scale(.24)}
-  55%{left:51.8%;bottom:68%;transform:translate(-50%,50%) scale(.4)}
-  78%{left:52.6%;bottom:82%;transform:translate(-50%,50%) scale(.66)}
-  100%{opacity:1;left:53.5%;bottom:118%;transform:translate(-50%,50%) scale(1.25)}}
-/* MISS: hooks left the whole way, CLANKS off the left upright, ricochets away dead */
-@keyframes xp3FlyMiss{
-  0%{opacity:0;left:48.5%;bottom:23%;transform:translate(-50%,50%) scale(.1)}
-  7%{opacity:1}
-  30%{left:46%;bottom:52%;transform:translate(-50%,50%) scale(.26)}
-  56%{left:38%;bottom:70%;transform:translate(-50%,50%) scale(.5)}
-  72%{left:28.2%;bottom:81%;transform:translate(-50%,50%) scale(.74)}     /* CLANK */
-  76%{left:26.2%;bottom:79.5%;transform:translate(-50%,50%) scale(.75)}   /* checks up dead */
-  100%{opacity:1;left:6%;bottom:30%;transform:translate(-50%,50%) scale(.6)}}
-/* white clank flash on the left upright + the DOINK! call-out (miss only) */
-.xp3-clank{position:absolute;left:27%;bottom:81%;width:min(15vh,140px);height:min(15vh,140px);z-index:5;
+/* drifting fog bands so the still photo breathes (the photo's own mist, kept moving) */
+.xp5-fog{position:absolute;inset:-12%;z-index:2;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(46vw 18vh at 30% 34%, rgba(210,225,240,.10), transparent 70%),
+    radial-gradient(52vw 20vh at 74% 26%, rgba(210,225,240,.08), transparent 70%)}
+#xpOverlay.show .xp5-fog{animation:xp5Fog 14s ease-in-out infinite alternate}
+@keyframes xp5Fog{from{transform:translate(0,0)}to{transform:translate(3.5%,-2%)}}
+/* the ball — a speck on the distant field that rises, hangs, and blows past the camera
+   BETWEEN the photo's uprights (near posts at ~11.5% / ~88.5%).
+   flight (left/bottom/scale/blur) rides the wrapper; the tumble rides the inner svg */
+.xp5-ballwrap{position:absolute;left:49.5%;bottom:30%;width:min(15vw,220px);height:auto;z-index:4;
+  opacity:0;transform:translate(-50%,50%) scale(.1)}
+#xpOverlay.show .xp5-ballwrap{animation:xp5FlyGood 4.6s linear .7s both}
+#xpOverlay.show.miss .xp5-ballwrap{animation:xp5FlyMiss 4.9s linear .7s both}
+.xp5-ballwrap svg{display:block;width:100%;height:auto}
+#xpOverlay.show .xp5-ballwrap svg{animation:xp5Spin 4.6s linear .7s both}
+#xpOverlay.show.miss .xp5-ballwrap svg{animation:xp5SpinM 4.9s linear .7s both}
+@keyframes xp5Spin{from{rotate:-15deg}to{rotate:705deg}}
+@keyframes xp5SpinM{0%{rotate:-15deg}74%{rotate:560deg}100%{rotate:660deg}} /* spin checks up off the clank */
+/* GOOD: slow rise off the distant turf, long apex hang, then it accelerates past the lens */
+@keyframes xp5FlyGood{
+  0%{opacity:0;left:49.5%;bottom:30%;transform:translate(-50%,50%) scale(.1);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  8%{opacity:1}
+  32%{left:50.3%;bottom:47%;transform:translate(-50%,50%) scale(.25);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  56%{left:51%;bottom:59%;transform:translate(-50%,50%) scale(.4);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  68%{left:51.5%;bottom:64%;transform:translate(-50%,50%) scale(.52);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  88%{opacity:1;filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(2px)}
+  100%{opacity:1;left:53%;bottom:128%;transform:translate(-50%,50%) scale(2.5);
+    filter:drop-shadow(0 0 0 rgba(0,0,0,0)) blur(4px)}}
+/* MISS: hooks left the whole way, CLANKS off the photo's left upright, ricochets away dead */
+@keyframes xp5FlyMiss{
+  0%{opacity:0;left:49.5%;bottom:30%;transform:translate(-50%,50%) scale(.1);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  8%{opacity:1}
+  32%{left:46.5%;bottom:47%;transform:translate(-50%,50%) scale(.27);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  56%{left:38%;bottom:60%;transform:translate(-50%,50%) scale(.46);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}
+  74%{left:13%;bottom:71%;transform:translate(-50%,50%) scale(1.05);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}                /* CLANK */
+  78%{left:11%;bottom:69%;transform:translate(-50%,50%) scale(1.05);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(0)}                /* checks up dead */
+  100%{opacity:1;left:-14%;bottom:24%;transform:translate(-50%,50%) scale(.85);
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.65)) blur(1.5px)}}
+/* white bloom at the top of the gap as the ball splits the uprights (good only) */
+.xp5-pass{position:absolute;left:52%;top:-4%;width:min(34vh,320px);height:min(34vh,320px);z-index:5;
+  transform:translate(-50%,-50%);border-radius:50%;opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(255,240,190,.45) 45%,transparent 70%)}
+#xpOverlay.show:not(.miss) .xp5-pass{animation:xp5Pass .55s ease-out 4.6s both}
+@keyframes xp5Pass{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  30%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}}
+/* clank flash on the photo's left upright + the DOINK! call-out (miss only) */
+.xp5-clank{position:absolute;left:12%;bottom:71%;width:min(16vh,150px);height:min(16vh,150px);z-index:5;
   transform:translate(-50%,50%);border-radius:50%;opacity:0;pointer-events:none;
   background:radial-gradient(closest-side,#fff,rgba(255,240,190,.5) 40%,transparent 70%)}
-#xpOverlay.show.miss .xp3-clank{animation:xp3Clank .45s ease-out 2.42s both}
-@keyframes xp3Clank{0%{opacity:0;transform:translate(-50%,50%) scale(.3)}
+#xpOverlay.show.miss .xp5-clank{animation:xp5Clank .45s ease-out 4.3s both}
+@keyframes xp5Clank{0%{opacity:0;transform:translate(-50%,50%) scale(.3)}
   25%{opacity:.95}100%{opacity:0;transform:translate(-50%,50%) scale(1.6)}}
-.xp3-doink{position:absolute;left:27%;bottom:84%;z-index:5;transform:translate(-50%,50%) rotate(-8deg);
+.xp5-doink{position:absolute;left:14%;bottom:78%;z-index:5;transform:translate(-50%,50%) rotate(-8deg);
   font-weight:900;font-style:italic;letter-spacing:1px;color:#fff;opacity:0;pointer-events:none;
   font-size:clamp(26px,4.2vw,60px);text-shadow:0 0 18px rgba(255,240,180,.9),0 4px 10px rgba(0,0,0,.8)}
-#xpOverlay.show.miss .xp3-doink{animation:xp3DoinkPop 1.1s cubic-bezier(.2,1.2,.3,1) 2.48s both}
-@keyframes xp3DoinkPop{0%{opacity:0;transform:translate(-50%,50%) rotate(-8deg) scale(.4)}
+#xpOverlay.show.miss .xp5-doink{animation:xp5DoinkPop 1.1s cubic-bezier(.2,1.2,.3,1) 4.36s both}
+@keyframes xp5DoinkPop{0%{opacity:0;transform:translate(-50%,50%) rotate(-8deg) scale(.4)}
   18%{opacity:1;transform:translate(-50%,50%) rotate(-8deg) scale(1.1)}
   30%{transform:translate(-50%,50%) rotate(-8deg) scale(1)}
   80%{opacity:1}100%{opacity:0;transform:translate(-50%,64%) rotate(-8deg) scale(1)}}
@@ -1494,8 +1485,8 @@ body.nfl .nfl-dd{display:block}
 .xp2-top .nfp-kick{letter-spacing:7px}
 #xpOverlay.show .xp2-top .nfp-kick{animation:anFade .5s .45s both}
 .xp2-word{font-size:clamp(48px,9.5vw,140px);line-height:.95;opacity:0}
-#xpOverlay.show .xp2-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3s both,
-  nfpShine 2.6s linear 3.6s infinite}
+#xpOverlay.show .xp2-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 4.9s both,
+  nfpShine 2.6s linear 5.5s infinite}
 #xpOverlay.miss .xp2-word{background:none;-webkit-text-fill-color:#ff6b6b;color:#ff6b6b;
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.75));animation-iteration-count:1!important}
 /* data card: away logo+score | kicker + stat line | home score+logo */
@@ -1504,7 +1495,7 @@ body.nfl .nfl-dd{display:block}
   background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
   border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 26px;
   box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
-#xpOverlay.show .xp2-card{animation:xp2CardIn .55s cubic-bezier(.2,.9,.3,1) 3.7s both}
+#xpOverlay.show .xp2-card{animation:xp2CardIn .55s cubic-bezier(.2,.9,.3,1) 5.7s both}
 @keyframes xp2CardIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}
   to{opacity:1;transform:translateX(-50%)}}
 .xp2-side{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;
@@ -2204,47 +2195,34 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="xp2-fall"></div>
   <div class="xp2-photo"></div>
   <div class="xp2-vig"></div>
-  <div class="xp3-spot"></div>
-  <svg class="xp3-crew" viewBox="0 0 120 100">
-    <!-- kicker mid-approach (leg swings) -->
-    <g fill="none" stroke="#10161f" stroke-linecap="round">
-      <circle cx="30" cy="20" r="9" fill="#10161f" stroke="none"/>
-      <path d="M30 28 L27 55" stroke-width="11"/>
-      <path d="M29 36 L16 46 M29 36 L42 30" stroke-width="7"/>
-      <path d="M27 55 L19 88" stroke-width="9"/>
-      <g class="xp3-kleg"><path d="M28 54 L41 73 L39 92" stroke-width="9"/></g>
-    </g>
-    <!-- holder crouched at the tee -->
-    <g fill="none" stroke="#10161f" stroke-linecap="round">
-      <circle cx="88" cy="40" r="8" fill="#10161f" stroke="none"/>
-      <path d="M88 47 L84 68" stroke-width="10"/>
-      <path d="M84 68 L71 84 M84 68 L95 85" stroke-width="8"/>
-      <path d="M86 53 L99 72" stroke-width="6"/>
-    </g>
-  </svg>
-  <div class="xp3-launch"></div>
-  <svg class="xp3-goal" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
-    <rect class="xgpad" x="770" y="806" width="60" height="54" rx="16"/>
-    <path class="xgp" d="M800 826 L800 560 M420 560 L1180 560"/>
-    <g class="xp3-upL"><path class="xgp xp3-up" d="M420 560 L420 -40"/></g>
-    <path class="xgp xp3-up" d="M1180 560 L1180 -40"/>
-  </svg>
-  <div class="xp3-ballwrap"><svg viewBox="0 0 64 40">
+  <div class="xp5-fog"></div>
+  <div class="xp5-ballwrap"><svg viewBox="0 0 120 78">
     <defs>
-      <radialGradient id="xp2BallG" cx="35%" cy="28%" r="85%">
-        <stop offset="0%" stop-color="#b57a3d"/><stop offset="55%" stop-color="#8a5426"/>
-        <stop offset="100%" stop-color="#552f10"/>
+      <radialGradient id="xp5L" cx="36%" cy="26%" r="92%">
+        <stop offset="0" stop-color="#d19a55"/><stop offset=".38" stop-color="#a96b2e"/>
+        <stop offset=".72" stop-color="#7c4a1c"/><stop offset="1" stop-color="#45260c"/>
       </radialGradient>
+      <radialGradient id="xp5Spec" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <pattern id="xp5Grain" width="4" height="4" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r=".55" fill="#3a1f0a" opacity=".3"/>
+        <circle cx="3" cy="3" r=".5" fill="#e8c290" opacity=".14"/>
+      </pattern>
     </defs>
-    <ellipse cx="32" cy="20" rx="30" ry="18.5" fill="url(#xp2BallG)" stroke="#38200a" stroke-width="1.6"/>
-    <path d="M6 15 Q32 3 58 15" fill="none" stroke="#4a2a10" stroke-width="1.4" opacity=".85"/>
-    <ellipse cx="23" cy="12" rx="12" ry="5" fill="#fff" opacity=".16"/>
-    <path d="M18 20 L46 20" stroke="#f4f6f8" stroke-width="2.6" stroke-linecap="round"/>
-    <path d="M23 16.5 L23 23.5 M29 16 L29 24 M35 16 L35 24 M41 16.5 L41 23.5"
-      stroke="#f4f6f8" stroke-width="2.2" stroke-linecap="round"/>
+    <ellipse cx="60" cy="39" rx="57" ry="36" fill="url(#xp5L)" stroke="#2e1806" stroke-width="2"/>
+    <ellipse cx="60" cy="39" rx="57" ry="36" fill="url(#xp5Grain)"/>
+    <path d="M10 29 Q60 6 110 29" fill="none" stroke="#4a2a10" stroke-width="2.2" opacity=".9"/>
+    <path d="M10 49 Q60 72 110 49" fill="none" stroke="#3c220c" stroke-width="2" opacity=".65"/>
+    <ellipse cx="42" cy="21" rx="25" ry="11" fill="url(#xp5Spec)"/>
+    <path d="M35 40.5 L87 40.5" stroke="#2e1806" stroke-width="5.4" stroke-linecap="round" opacity=".35"/>
+    <path d="M34 39 L86 39" stroke="#f6f7f5" stroke-width="4.6" stroke-linecap="round"/>
+    <path d="M42 32.5 L42 45.5 M49 32 L49 46 M56 31.8 L56 46.2 M63 31.8 L63 46.2 M70 32 L70 46 M77 32.5 L77 45.5"
+      stroke="#f6f7f5" stroke-width="3.4" stroke-linecap="round"/>
   </svg></div>
-  <div class="xp3-clank"></div>
-  <div class="xp3-doink">DOINK!</div>
+  <div class="xp5-pass"></div>
+  <div class="xp5-clank"></div>
+  <div class="xp5-doink">DOINK!</div>
   <div class="xp2-top">
     <div class="nfp-kick">EXTRA POINT</div>
     <div class="xp2-word nfp-chrome" id="xpBig">SCORED!</div>
@@ -3874,7 +3852,7 @@ function triggerXP(info){
   $("#xpKName").textContent=(info.kicker||((team.name||"")+" KICKER")).toUpperCase();
   $("#xpKStat").textContent=(info.stat||(good?"EXTRA POINT GOOD":"EXTRA POINT NO GOOD")).toUpperCase();
   xpOv.classList.remove("show"); void xpOv.offsetWidth; xpOv.classList.add("show");
-  clearTimeout(triggerXP._t); triggerXP._t=setTimeout(endXP,7300);
+  clearTimeout(triggerXP._t); triggerXP._t=setTimeout(endXP,8300);
 }
 /* kicker name + team's XP line tonight, from the live plays array */
 function xpInfoFor(team,p,plays,good){
@@ -4172,7 +4150,7 @@ async function startReel(){
     await reelStep(()=>triggerRedZone({team:G.home,yards:8,plays:rzFakeDrive()}), 10500);
     await reelStep(()=>triggerNoise({dd:"3RD & 7",defTeam:G.away,ytez:42,dist:7}), 9500);
     await reelStep(()=>triggerTouchdown(Object.assign({team:G.home},demoTDInfo())), 11400);
-    await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 7800);
+    await reelStep(()=>triggerXP({team:G.home,good:true,kicker:"K #3",stat:"3/3 XP TONIGHT"}), 9000);
     await reelStep(()=>triggerTwoPoint({team:G.away,good:true}), 7800);
     await reelStep(()=>triggerTwoMin({q:4,toA:2,toH:1}), 7500);
     await reelStep(()=>triggerTurnover({team:G.away,kind:"INTERCEPTION",pickSix:true}), 11100);
