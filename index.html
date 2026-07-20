@@ -1145,8 +1145,8 @@ body.nfl .nfl-dd{display:block}
 #koOverlay.show .ko3-tossaction{animation:ko3Action 2.9s ease both}
 @keyframes ko3Action{0%{opacity:0}5%{opacity:1}84%{opacity:1}100%{opacity:0}}
 /* the 3D coin sits center-stage, then flicks up and spins on its own (no hand) */
-.ko3-coinwrap{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);
-  width:min(24vh,225px);height:min(24vh,225px);perspective:1100px}
+.ko3-coinwrap{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
+  width:min(36vh,340px);height:min(36vh,340px);perspective:1500px}
 .ko3-spin{position:relative;width:100%;height:100%;transform-style:preserve-3d;--ko3end:1980deg}
 .ko3-spin.tails{--ko3end:2160deg}
 #koOverlay.show .ko3-spin{animation:ko3Flip 1.9s linear .4s both}
@@ -1166,22 +1166,22 @@ body.nfl .nfl-dd{display:block}
   96%{transform:translateY(-1.8vh) rotateX(var(--ko3end)) scale(1)}
   100%{transform:translateY(0) rotateX(var(--ko3end)) scale(1)}}
 /* ground shadow tracking the coin's height */
-.ko3-coinshadow{position:absolute;left:50%;top:34%;width:min(22vh,210px);height:3.5vh;z-index:0;
-  transform:translate(-50%,300%);border-radius:50%;opacity:.45;filter:blur(7px);background:#000}
+.ko3-coinshadow{position:absolute;left:50%;top:44%;width:min(32vh,300px);height:4.5vh;z-index:0;
+  transform:translate(-50%,400%);border-radius:50%;opacity:.45;filter:blur(8px);background:#000}
 #koOverlay.show .ko3-coinshadow{animation:ko3Shadow 1.9s linear .4s both}
 @keyframes ko3Shadow{
-  0%{transform:translate(-50%,300%) scale(1);opacity:.45}
-  48%{transform:translate(-50%,300%) scale(.4);opacity:.12}
-  80%{transform:translate(-50%,300%) scale(1.08);opacity:.5}
-  86%{transform:translate(-50%,300%) scale(.82);opacity:.3}
-  92%{transform:translate(-50%,300%) scale(1.04);opacity:.48}
-  100%{transform:translate(-50%,300%) scale(1);opacity:.45}}
+  0%{transform:translate(-50%,400%) scale(1);opacity:.45}
+  48%{transform:translate(-50%,400%) scale(.4);opacity:.12}
+  80%{transform:translate(-50%,400%) scale(1.08);opacity:.5}
+  86%{transform:translate(-50%,400%) scale(.82);opacity:.3}
+  92%{transform:translate(-50%,400%) scale(1.04);opacity:.48}
+  100%{transform:translate(-50%,400%) scale(1);opacity:.45}}
 /* struck-metal coin: radial SILVER + reeded rim + raised inner rim + embossed emblem + sheen */
 .ko3-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;display:grid;place-items:center;
   background:radial-gradient(circle at 32% 26%,#ffffff,#d3dbe3 42%,#98a4b0 74%,#68727d);
   box-shadow:inset 3px 3px 6px rgba(255,255,255,.8),inset -4px -4px 9px rgba(40,50,60,.85),0 10px 26px rgba(0,0,0,.55)}
-.ko3-face.f{transform:translateZ(9px)}
-.ko3-face.b{transform:rotateX(180deg) translateZ(9px)}
+.ko3-face.f{transform:translateZ(13px)}
+.ko3-face.b{transform:rotateX(180deg) translateZ(13px)}
 .ko3-face::before{content:"";position:absolute;inset:0;border-radius:50%;
   background:repeating-conic-gradient(#68727d 0 3deg,#eef2f6 3deg 6deg);
   -webkit-mask:radial-gradient(closest-side,transparent 87%,#000 88%);mask:radial-gradient(closest-side,transparent 87%,#000 88%)}
@@ -1193,12 +1193,12 @@ body.nfl .nfl-dd{display:block}
 .ko3-clogo{position:relative;z-index:3;width:64%;height:64%;object-fit:contain;
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .ko3-cabbr{position:absolute;inset:0;z-index:2;display:grid;place-items:center;font-weight:900;
-  font-size:min(7.5vh,66px);letter-spacing:1px;color:#55606b;text-shadow:-1px -1px 0 #fff,1px 1px 0 #39434d}
+  font-size:min(11vh,100px);letter-spacing:1px;color:#55606b;text-shadow:-1px -1px 0 #fff,1px 1px 0 #39434d}
 /* thin dark rim disc between the two faces so a metal edge shows mid-spin */
 .ko3-edge{position:absolute;inset:0;border-radius:50%;transform:translateZ(0);
   background:radial-gradient(circle at 50% 50%,#aeb8c2,#5a646e);box-shadow:inset 0 0 12px rgba(0,0,0,.5)}
 /* result / winner / pick — centered, revealed after the coin lands */
-.ko3-results{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+.ko3-results{position:absolute;left:0;right:0;top:37%;transform:translateY(-50%);
   display:flex;flex-direction:column;align-items:center;gap:min(2.2vh,18px);text-align:center;padding:0 6vw}
 .ko3-res{font-size:clamp(40px,7vw,96px);line-height:.9;opacity:0}
 #koOverlay.show .ko3-res{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.3s both, nfpShine 2.6s linear 2.9s infinite}
