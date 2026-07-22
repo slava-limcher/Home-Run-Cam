@@ -1140,6 +1140,40 @@ body.nfl .nfl-dd{display:block}
 #tpOverlay.show:not(.miss) .hleak{animation:hleakIn .9s ease-out 3.3s both}
 #toOverlay.show .hleak{animation:hleakIn .9s ease-out 5.5s both}
 
+/* ---- GENERIC MOMENT (NBA/NHL takeover stubs — house style; bespoke builds replace these) ---- */
+#nbaBtns,#nhlBtns{display:none}
+body.nba #nbaBtns{display:contents}
+body.nhl #nhlBtns{display:contents}
+#genOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#genOverlay.show{display:block;opacity:1}
+#genOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
+             radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
+#genOverlay.show::before{animation:hleakIn .8s ease-out .5s both}
+.gen-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:min(2vh,18px);text-align:center;padding:0 6vw}
+.gen-kick{color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
+#genOverlay.show .gen-kick{animation:anFade .5s .25s both}
+.gen-word{font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
+#genOverlay.show .gen-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) .55s both, nfpShine 2.6s linear 1.2s infinite}
+#genOverlay.alarm .gen-word{background:none;-webkit-text-fill-color:#ff5f52;color:#ff5f52;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,.75));animation-iteration-count:1!important}
+.gen-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(16px,2vw,25px);opacity:0}
+#genOverlay.show .gen-sub{animation:anFade .45s 1s both}
+#genOverlay .hcard{gap:14px}
+#genOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 1.5s both}
+#genOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
+/* per-league FINAL skins: hardwood amber (NBA) / ice sheet (NHL) */
+#finalOverlay.nba .fg-bg{background:
+  radial-gradient(120% 70% at 50% 110%, #5c3a14 0%, #3a2410 45%, transparent 75%),
+  repeating-linear-gradient(90deg, rgba(255,205,130,.05) 0 70px, rgba(0,0,0,.05) 70px 140px),
+  linear-gradient(180deg,#12100c 0%,#1c150c 55%,#241a0e 100%)}
+#finalOverlay.nhl .fg-bg{background:
+  radial-gradient(120% 70% at 50% 115%, #b8d8ec 0%, #5f89a8 30%, transparent 68%),
+  radial-gradient(60% 30% at 50% 108%, rgba(255,255,255,.5), transparent 70%),
+  linear-gradient(180deg,#060b14 0%,#0b1826 55%,#12283a 100%)}
+
 /* ---- KICKOFF v4.5 "The Toss & The Clash" (smooth pass): coin physics -> covered transitions -> real impact ---- */
 #koOverlay{background:radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
 /* aerial night-stadium video backdrop behind the whole scene (dark gradient is the fallback if it can't play) */
@@ -1633,6 +1667,8 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="lgtabs">
     <button id="lgMLB" class="on">⚾ MLB</button>
     <button id="lgNFL">🏈 NFL</button>
+    <button id="lgNBA">🏀 NBA</button>
+    <button id="lgNHL">🏒 NHL</button>
   </div>
 
   <div class="datebar">
@@ -1704,6 +1740,23 @@ body.tvmode .scorewrap{justify-content:center}
     <div class="linescore" id="lineTxt"></div>
     <div class="amb" id="ambient"><span class="amb-lb" id="ambLb"></span><span class="amb-vl" id="ambVl"></span></div>
     <div class="controls">
+      <span id="nbaBtns">
+        <button class="hrbtn" id="b3Btn">🏀 SPLASH (3)</button>
+        <button class="ghostbtn" id="bL3Btn">🚀 Long-Range 3</button>
+        <button class="ghostbtn" id="bSlamBtn">💥 Slam Dunk</button>
+        <button class="ghostbtn" id="bStealBtn">🧤 Steal</button>
+        <button class="ghostbtn" id="bWinBtn">🗡️ Game-Winner</button>
+        <button class="ghostbtn" id="bFoulBtn">📣 Foul</button>
+      </span>
+      <span id="nhlBtns">
+        <button class="hrbtn" id="hGoalBtn">🚨 GOAL</button>
+        <button class="ghostbtn" id="hGoldBtn">🥇 Golden Goal</button>
+        <button class="ghostbtn" id="hPenBtn">⛔ Penalty</button>
+        <button class="ghostbtn" id="hSoBtn">🥅 Shootout</button>
+        <button class="ghostbtn" id="hFoBtn">👀 Face-Off</button>
+        <button class="ghostbtn" id="hSirenBtn">📯 Period Siren</button>
+        <button class="ghostbtn" id="hMinBtn">⏱️ 1:00 Left</button>
+      </span>
       <span id="mlbBtns">
         <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
         <button class="hrbtn" id="hr2Btn">💥 HOME RUN V2</button>
@@ -2229,6 +2282,14 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
+<div id="genOverlay">
+  <div class="gen-inner">
+    <div class="gen-kick" id="genKick"></div>
+    <div class="gen-word nfp-chrome" id="genWord"></div>
+    <div class="gen-sub" id="genSub"></div>
+  </div>
+  <div class="hcard"><img id="genLogo" alt=""><div><div class="hname" id="genName"></div><div class="hstat" id="genStat"></div></div></div>
+</div>
 <div id="toast"></div>
 <div id="hwipe"></div>
 
@@ -2288,6 +2349,7 @@ function dateLabel(d){
 }
 async function loadSchedule(){
   if(LEAGUE==="nfl")return loadScheduleNFL();
+  if(LEAGUE==="nba"||LEAGUE==="nhl")return loadScheduleESPNX(LEAGUE);
   $("#dlabel").textContent=dateLabel(curDate);
   const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
   try{
@@ -2364,6 +2426,8 @@ function showSetup(){
 }
 function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clearInterval(demoTimer);demoTimer=null;}
   if(nflPoll){clearInterval(nflPoll);nflPoll=null;} if(nflDemoTimer){clearInterval(nflDemoTimer);nflDemoTimer=null;}
+  if(xPoll){clearInterval(xPoll);xPoll=null;} if(xDemoTimer){clearInterval(xDemoTimer);xDemoTimer=null;}
+  if(typeof endMoment==="function")endMoment();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -2379,7 +2443,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -3201,7 +3265,7 @@ function houseWipe(){
   w.classList.remove("go"); void w.offsetWidth; w.classList.add("go");
 }
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -3263,8 +3327,10 @@ function triggerFinal(info){
   $("#fCrest").src=teamLogo(winner);
   $("#fKick").textContent="FINAL";
   fOv.classList.toggle("walkoff",!!(info.walkoff&&!tie));   // red ribbon on the medallion
-  fOv.classList.toggle("nfl",LEAGUE==="nfl");               // per-league stadium background
-  fOv.classList.toggle("mlb",LEAGUE!=="nfl");
+  fOv.classList.toggle("nfl",LEAGUE==="nfl");               // per-league background
+  fOv.classList.toggle("mlb",LEAGUE==="mlb");
+  fOv.classList.toggle("nba",LEAGUE==="nba");
+  fOv.classList.toggle("nhl",LEAGUE==="nhl");
   $("#fTitle").textContent=tie?"FINAL":(winner.name||"").toUpperCase();
   $("#fScore").textContent=`${aw.abbr} ${aw.score} — ${hm.score} ${hm.abbr}`;
   $("#fSub").textContent=tie?"":(info.walkoff
@@ -3376,8 +3442,12 @@ function teamLogo(t){return (t&&t.logo)||((t&&t.id&&!t.colorHex)?logoURL(t.id):t
 function applyLeagueClass(l){   // league visuals only, no schedule fetch (used by TV/reel)
   LEAGUE=l;
   document.body.classList.toggle("nfl",l==="nfl");
+  document.body.classList.toggle("nba",l==="nba");
+  document.body.classList.toggle("nhl",l==="nhl");
   $("#lgMLB").classList.toggle("on",l==="mlb");
   $("#lgNFL").classList.toggle("on",l==="nfl");
+  $("#lgNBA").classList.toggle("on",l==="nba");
+  $("#lgNHL").classList.toggle("on",l==="nhl");
 }
 function setLeague(l){ applyLeagueClass(l); loadSchedule(); }
 async function loadScheduleNFL(){
@@ -3414,7 +3484,7 @@ function nflGameCard(ev){
     mid=`<div class="gmid"><div class="vs">@</div><div class="tm">${t}</div></div>`;}
   el.innerHTML=`<div class="gteam away"><img src="${away.logo}" alt=""><div><div class="nm">${away.name}</div><div class="rec"></div></div></div>${mid}
     <div class="gteam home"><div><div class="nm">${home.name}</div><div class="rec"></div></div><img src="${home.logo}" alt=""></div>`;
-  el.onclick=()=>startLiveGameNFL(ev.id,away,home);
+  el.onclick=()=>(LEAGUE==="nfl"?startLiveGameNFL:startLiveGameX)(ev.id,away,home);
   return el;
 }
 function renderBoardNFL(){
@@ -3931,10 +4001,235 @@ async function fetchBatter(id,oppId){
 /* ============================================================
    WIRE-UP
    ============================================================ */
-$("#demoBtn").onclick=()=>LEAGUE==="nfl"?startDemoNFL():startDemo();
+$("#demoBtn").onclick=()=>({nfl:startDemoNFL,nba:startDemoNBA,nhl:startDemoNHL}[LEAGUE]||startDemo)();
 $("#backBtn").onclick=showSetup;
 $("#lgMLB").onclick=()=>setLeague("mlb");
 $("#lgNFL").onclick=()=>setLeague("nfl");
+$("#lgNBA").onclick=()=>setLeague("nba");
+$("#lgNHL").onclick=()=>setLeague("nhl");
+
+/* ============================================================
+   NBA + NHL — ESPN hookup, boards, demos, and the 13 moments
+   (house-style takeover stubs today; each gets its bespoke
+   animation as we build them out together, like the NFL set)
+   ============================================================ */
+const ESPNX={nba:"https://site.api.espn.com/apis/site/v2/sports/basketball/nba",
+             nhl:"https://site.api.espn.com/apis/site/v2/sports/hockey/nhl"};
+let xPoll=null,xDemoTimer=null,xPk=null;
+let XG={p:1,clock:"12:00",sec:720,dd:""};
+let XSEEN={plays:new Set(),oneMin:{},pEnd:{},fo:{},final:false,seeded:false};
+function periodName(l,p){ if(l==="nhl")return p<=3?("P"+p):p===4?"OT":"SO"; return p<=4?("Q"+p):"OT"; }
+function renderBoardX(){
+  $("#awayCrest").src=G.away.logo||transparentPx(); $("#homeCrest").src=G.home.logo||transparentPx();
+  $("#awayAbbr").textContent=G.away.abbr; $("#homeAbbr").textContent=G.home.abbr;
+  $("#awayFull").textContent=G.away.name; $("#homeFull").textContent=G.home.name;
+  $("#awayScore").textContent=G.away.score; $("#homeScore").textContent=G.home.score;
+  $("#teamAway").classList.remove("batting"); $("#teamHome").classList.remove("batting");
+  $("#inHalf").textContent=XG.clock||"";
+  $("#inNum").textContent=periodName(LEAGUE,XG.p);
+  document.querySelector("#board .inning .lbl").textContent=LEAGUE==="nhl"?"PERIOD":"QUARTER";
+  $("#nflDD").textContent=XG.dd||"";
+}
+async function loadScheduleESPNX(l){
+  $("#dlabel").textContent=dateLabel(curDate);
+  const box=$("#games"); box.innerHTML='<div class="loading">Loading games…</div>';
+  try{
+    const ymdc=`${curDate.getFullYear()}${pad(curDate.getMonth()+1)}${pad(curDate.getDate())}`;
+    const r=await fetch(`${ESPNX[l]}/scoreboard?dates=${ymdc}`);
+    const j=await r.json(); const evs=j.events||[];
+    if(!evs.length){box.innerHTML=`<div class="empty">No ${l.toUpperCase()} games on this date.<br>Try another day, or run the Demo Game above.</div>`;return;}
+    box.innerHTML="";
+    evs.forEach(ev=>box.appendChild(nflGameCard(ev)));
+  }catch(e){box.innerHTML='<div class="empty">Couldn\'t reach the ESPN feed.<br>Check your connection, or run the Demo Game above.</div>';}
+}
+function startLiveGameX(id,away,home){
+  MODE="live"; stopAll();
+  livePk=null; nflPk=null; xPk=id;
+  G.away=away; G.home=home;
+  XG={p:1,clock:"",sec:0,dd:""};
+  XSEEN={plays:new Set(),oneMin:{},pEnd:{},fo:{},final:false,seeded:false};
+  document.documentElement.style.setProperty('--nflA',G.away.colorHex||"#e31837");
+  document.documentElement.style.setProperty('--nflH',G.home.colorHex||"#00338d");
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
+  $("#statusTxt").textContent="CONNECTING…";
+  $("#boardHint").textContent=LEAGUE==="nhl"
+    ?"Following the live ESPN feed — goals, penalties, the period siren, the golden goal and the final fire automatically."
+    :"Following the live ESPN feed — threes, slams, steals, the game-winner and the final fire automatically.";
+  showBoard(); renderBoardX();
+  startAmbient();
+  tickX(true);
+  xPoll=setInterval(()=>tickX(false),12000);
+}
+async function tickX(first){
+  if(MODE!=="live"||!xPk)return;
+  const l=LEAGUE; if(l!=="nba"&&l!=="nhl")return;
+  try{
+    const r=await fetch(`${ESPNX[l]}/summary?event=${xPk}`);
+    const j=await r.json();
+    const comp=(j.header&&j.header.competitions&&j.header.competitions[0])||{};
+    const cs=comp.competitors||[];
+    const ca=cs.find(c=>c.homeAway==="away"), ch=cs.find(c=>c.homeAway==="home");
+    if(ca)G.away.score=parseInt(ca.score||"0",10)||0;
+    if(ch)G.home.score=parseInt(ch.score||"0",10)||0;
+    const st=(comp.status&&comp.status.type)||{};
+    XG.p=(comp.status&&comp.status.period)||XG.p;
+    XG.clock=(comp.status&&comp.status.displayClock)||XG.clock;
+    XG.dd=st.state==="in"?"":(st.shortDetail||"");
+    if(st.state==="in"){$("#statusTxt").textContent="● LIVE";$("#liveDot").style.display="inline-block";}
+    else{$("#statusTxt").textContent=(st.shortDetail||st.description||"").toUpperCase();$("#liveDot").style.display="none";}
+    renderBoardX();
+    // NHL: one-minute warning, once per period
+    const secs=clockSecs(XG.clock);
+    if(l==="nhl"&&st.state==="in"&&secs!=null&&secs<=60&&secs>0&&!XSEEN.oneMin[XG.p]){
+      XSEEN.oneMin[XG.p]=true; if(!first&&!takeoverBusy())momentOneMinute();
+    }
+    const plays=j.plays||[];
+    if(first&&!XSEEN.seeded){XSEEN.seeded=true;plays.forEach(p=>p&&p.id&&XSEEN.plays.add(p.id));XSEEN.final=st.state==="post";return;}
+    for(const p of plays){
+      if(!p||!p.id||XSEEN.plays.has(p.id))continue;
+      if(takeoverBusy())break;                      // catch up on the next poll
+      XSEEN.plays.add(p.id);
+      const txt=((p.type&&p.type.text)||"")+" "+(p.text||"");
+      const isHome=!!(p.team&&ch&&ch.team&&String(p.team.id)===String(ch.team.id));
+      const team=isHome?G.home:G.away;
+      if(l==="nba"){
+        const pSecs=clockSecs((p.clock&&p.clock.displayValue)||"");
+        if(p.scoringPlay&&p.scoreValue===3){
+          const ft=(/\b(\d{2})[-\s]?(?:foot|ft)\b/i.exec(txt)||[])[1];
+          const late=(p.period&&p.period.number>=4)&&pSecs!=null&&pSecs<=24;
+          if(late)momentGameWinner(team);
+          else if(ft&&+ft>=28)momentLong3(team,+ft);
+          else momentThree(team);
+        }else if(p.scoringPlay&&/dunk/i.test(txt))momentSlam(team);
+        else if(/steal/i.test(txt))momentSteal(team);
+        else if(/flagrant|technical foul/i.test(txt))momentFoul(team,(p.text||"").slice(0,44));
+      }else{
+        if(p.scoringPlay){
+          if(XG.p>3&&XG.p<5)momentGoldenGoal(team); else momentGoal(team);
+        }
+        else if(/penalty/i.test((p.type&&p.type.text)||""))momentPenalty(team,(p.text||"").slice(0,44));
+        else if(XG.p>=5&&/shootout/i.test(txt))momentShootout(team,/scores|goal/i.test(txt));
+        else if(/faceoff|face-off/i.test(txt)&&!XSEEN.fo[XG.p]){XSEEN.fo[XG.p]=true;momentFaceoff();}
+        else if(/end of (the )?(1st|2nd|3rd|first|second|third|period)/i.test(txt)&&!XSEEN.pEnd[XG.p]){
+          XSEEN.pEnd[XG.p]=true;momentPeriodEnd(XG.p);}
+      }
+    }
+    if(st.state==="post"&&!XSEEN.final){XSEEN.final=true;
+      setTimeout(()=>{if(!takeoverBusy())triggerFinal({});},1200);}
+  }catch(e){}
+}
+/* ---- demo games ---- */
+function startDemoNBA(){
+  MODE="demo"; stopAll(); applyLeagueClass("nba");
+  G.away={abbr:"LAL",name:"Lakers",score:0,logo:"https://a.espncdn.com/i/teamlogos/nba/500/lal.png",colorHex:"#552583"};
+  G.home={abbr:"BOS",name:"Celtics",score:0,logo:"https://a.espncdn.com/i/teamlogos/nba/500/bos.png",colorHex:"#007a33"};
+  XG={p:1,clock:"12:00",sec:720,dd:""}; XSEEN={plays:new Set(),oneMin:{},pEnd:{},fo:{},final:false,seeded:true};
+  document.documentElement.style.setProperty('--nflA',G.away.colorHex);
+  document.documentElement.style.setProperty('--nflH',G.home.colorHex);
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
+  $("#statusTxt").textContent="DEMO"; $("#liveDot").style.display="none";
+  $("#boardHint").textContent="Simulated NBA game — threes, slams, steals and the game-winner fire on their own, or tap the buttons.";
+  showBoard(); renderBoardX(); startAmbient();
+  xDemoTimer=setInterval(nbaDemoTick,3200);
+}
+function nbaDemoTick(){
+  XG.sec-=20+Math.floor(Math.random()*30);
+  if(XG.sec<=0){XG.p=XG.p>=4?1:XG.p+1;XG.sec=720;}
+  XG.clock=fmtClock(Math.max(0,XG.sec));
+  const isHome=Math.random()<.5, team=isHome?G.home:G.away, r=Math.random();
+  if(r<.30){
+    if(Math.random()<.42){                              // a three
+      if(isHome)G.home.score+=3; else G.away.score+=3;
+      if(XG.p>=4&&XG.sec<=24)momentGameWinner(team);
+      else if(Math.random()<.25)momentLong3(team,28+Math.floor(Math.random()*10));
+      else momentThree(team);
+    }else{                                              // a deuce
+      if(isHome)G.home.score+=2; else G.away.score+=2;
+      if(Math.random()<.5)momentSlam(team);
+    }
+  }else if(r<.36)momentSteal(team);
+  else if(r<.40){momentFoul._last=0;momentFoul(team,"Flagrant foul, penalty 1");}
+  renderBoardX();
+}
+function startDemoNHL(){
+  MODE="demo"; stopAll(); applyLeagueClass("nhl");
+  G.away={abbr:"NYR",name:"Rangers",score:0,logo:"https://a.espncdn.com/i/teamlogos/nhl/500/nyr.png",colorHex:"#0038a8"};
+  G.home={abbr:"BOS",name:"Bruins",score:0,logo:"https://a.espncdn.com/i/teamlogos/nhl/500/bos.png",colorHex:"#ffb81c"};
+  XG={p:1,clock:"20:00",sec:1200,dd:""}; XSEEN={plays:new Set(),oneMin:{},pEnd:{},fo:{},final:false,seeded:true};
+  document.documentElement.style.setProperty('--nflA',G.away.colorHex);
+  document.documentElement.style.setProperty('--nflH',G.home.colorHex);
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
+  $("#statusTxt").textContent="DEMO"; $("#liveDot").style.display="none";
+  $("#boardHint").textContent="Simulated NHL game — goals, penalties, the siren and the golden goal fire on their own, or tap the buttons.";
+  showBoard(); renderBoardX(); startAmbient();
+  setTimeout(()=>{if(MODE==="demo"&&LEAGUE==="nhl")momentFaceoff();},900);
+  xDemoTimer=setInterval(nhlDemoTick,3200);
+}
+function nhlDemoTick(){
+  XG.sec-=18+Math.floor(Math.random()*26);
+  if(XG.sec<=60&&XG.sec>0&&!XSEEN.oneMin[XG.p]){XSEEN.oneMin[XG.p]=true;momentOneMinute();}
+  if(XG.sec<=0){
+    if(!XSEEN.pEnd[XG.p]){XSEEN.pEnd[XG.p]=true;momentPeriodEnd(XG.p);}
+    XG.p=XG.p>=3?1:XG.p+1; XG.sec=1200;
+    setTimeout(()=>{if(MODE==="demo"&&LEAGUE==="nhl")momentFaceoff();},7000);
+  }
+  XG.clock=fmtClock(Math.max(0,XG.sec));
+  const isHome=Math.random()<.5, team=isHome?G.home:G.away, r=Math.random();
+  if(r<.06){ if(isHome)G.home.score+=1; else G.away.score+=1;
+    if(XG.p>3)momentGoldenGoal(team); else momentGoal(team); }
+  else if(r<.12)momentPenalty(team,"Tripping — 2 min");
+  renderBoardX();
+}
+/* ---- the generic moment takeover (house grammar: wipe in/out, team wash, big word, hcard) ---- */
+let genPlaying=false;
+const genOvEl=$("#genOverlay");
+function triggerMoment(o){
+  o=o||{};
+  if(takeoverBusy())return; genPlaying=true; hideWalkup(); houseWipe();
+  const t=o.team||{};
+  genOvEl.style.setProperty('--hacc',o.accent||t.colorHex||"#e8c34a");
+  genOvEl.classList.toggle("alarm",!!o.alarm);
+  $("#genKick").textContent=o.kick||"";
+  $("#genWord").textContent=o.word||"";
+  $("#genSub").textContent=o.sub||"";
+  $("#genLogo").src=t.logo||""; $("#genLogo").style.display=t.logo?"":"none";
+  $("#genName").textContent=o.name||t.name||"";
+  $("#genStat").textContent=(o.stat||`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
+  genOvEl.classList.remove("show"); void genOvEl.offsetWidth; genOvEl.classList.add("show");
+  clearTimeout(triggerMoment._t); triggerMoment._t=setTimeout(endMoment,o.dur||5200);
+}
+function endMoment(){ if(genOvEl&&genOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerMoment._t); if(genOvEl)genOvEl.classList.remove("show"); genPlaying=false; }
+/* ---- the 13 moments (each becomes a bespoke build; these are the working stubs) ---- */
+const momentThree=t=>triggerMoment({team:t,kick:"FROM DOWNTOWN",word:"SPLASH!",sub:`${t.abbr} DRAINS THE THREE`,dur:5200});
+const momentLong3=(t,ft)=>triggerMoment({team:t,kick:"FROM ANOTHER ZIP CODE",word:"BANG!",sub:`${ft||30} FEET OUT`,dur:5600});
+const momentSlam=t=>triggerMoment({team:t,kick:"HAMMER TIME",word:"SLAM!",sub:`${t.abbr} THROWS IT DOWN`,dur:5200});
+const momentSteal=t=>triggerMoment({team:t,kick:"PICKED HIS POCKET",word:"STEAL!",sub:`${t.abbr} TAKES IT AWAY`,alarm:true,dur:4600});
+const momentGameWinner=t=>triggerMoment({team:t,kick:"FOR THE WIN…",word:"DAGGER!",sub:`${t.name} WITH THE GAME-WINNER`,dur:7000});
+const momentFoul=(t,txt)=>{const now=performance.now();
+  if(momentFoul._last&&now-momentFoul._last<180000)return; momentFoul._last=now;
+  triggerMoment({team:t,kick:"WHISTLE",word:"FOUL!",sub:(txt||"").toUpperCase(),alarm:true,dur:4200});};
+const momentGoal=t=>triggerMoment({team:t,kick:"LIGHT THE LAMP",word:"GOAL!",sub:`${t.name} SCORE`,dur:6000});
+const momentGoldenGoal=t=>triggerMoment({team:t,kick:"OVERTIME",word:"GOLDEN GOAL!",sub:`${t.name} WIN IT`,dur:7000});
+const momentPenalty=(t,txt)=>triggerMoment({team:t,kick:"TO THE BOX",word:"PENALTY!",sub:(txt||"").toUpperCase(),alarm:true,dur:5000});
+const momentShootout=(t,scored)=>triggerMoment({team:t,kick:"SHOOTOUT",word:scored?"HE SCORES!":"DENIED!",sub:scored?`${t.abbr} CONVERTS`:"WHAT A SAVE",alarm:!scored,dur:5200});
+const momentFaceoff=()=>triggerMoment({accent:"#7fd0ff",kick:"EYES UP",word:"FACE-OFF",sub:"PUCK DROPS NOW",dur:4200});
+const momentPeriodEnd=p=>triggerMoment({accent:"#ffb02e",kick:"SIREN",word:"END OF "+(p<=3?["1ST","2ND","3RD"][p-1]:"OT"),sub:"PERIOD COMPLETE",alarm:true,dur:5000});
+const momentOneMinute=()=>triggerMoment({accent:"#ff4b3e",kick:"CLOCK CHECK",word:"1:00",sub:"ONE MINUTE REMAINING",alarm:true,dur:5000});
+/* preview buttons */
+$("#b3Btn").onclick=()=>momentThree(G.home);
+$("#bL3Btn").onclick=()=>momentLong3(G.away,31);
+$("#bSlamBtn").onclick=()=>momentSlam(G.home);
+$("#bStealBtn").onclick=()=>momentSteal(G.away);
+$("#bWinBtn").onclick=()=>momentGameWinner(G.home);
+$("#bFoulBtn").onclick=()=>{momentFoul._last=0;momentFoul(G.away,"Flagrant foul, penalty 1");};
+$("#hGoalBtn").onclick=()=>momentGoal(G.home);
+$("#hGoldBtn").onclick=()=>momentGoldenGoal(G.home);
+$("#hPenBtn").onclick=()=>momentPenalty(G.away,"Slashing — 2 min");
+$("#hSoBtn").onclick=()=>momentShootout(G.home,Math.random()<.6);
+$("#hFoBtn").onclick=()=>momentFaceoff();
+$("#hSirenBtn").onclick=()=>momentPeriodEnd(XG.p||1);
+$("#hMinBtn").onclick=()=>momentOneMinute();
 /* NFL preview buttons */
 $("#koBtn").onclick=()=>triggerKickoff();
 $("#rzBtn").onclick=()=>triggerRedZone({team:NG.posHome?G.home:G.away,yards:12,plays:rzFakeDrive()});
