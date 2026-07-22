@@ -1108,12 +1108,6 @@ body.nfl .nfl-dd{display:block}
    - .hcard/.hside/.hmid/.hname/.hstat: one lower-third skin
    - .hleak: the scoring team's color washes the film hold
    Accent color rides --hacc (offense; thief on turnovers). */
-#hwipe{position:fixed;inset:0;z-index:58;pointer-events:none;visibility:hidden;
-  background:linear-gradient(105deg,transparent 40%,rgba(228,240,255,.30) 47%,
-    rgba(255,255,255,.85) 50%,rgba(228,240,255,.30) 53%,transparent 60%) no-repeat;
-  background-size:250% 100%;background-position:-150% 0}
-#hwipe.go{visibility:visible;animation:hwipeGo .42s cubic-bezier(.55,.1,.4,.9) both}
-@keyframes hwipeGo{from{background-position:-150% 0}to{background-position:250% 0}}
 #tdOverlay,#xpOverlay,#tpOverlay{--hacc:var(--nflOff,#e31837)}
 #toOverlay{--hacc:var(--nflDef,#e8eef4)}
 .hcard{position:absolute;left:50%;bottom:min(5vh,44px);transform:translateX(-50%);z-index:5;
@@ -2291,7 +2285,6 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="hcard"><img id="genLogo" alt=""><div><div class="hname" id="genName"></div><div class="hstat" id="genStat"></div></div></div>
 </div>
 <div id="toast"></div>
-<div id="hwipe"></div>
 
 <script>
 /* ============================================================
@@ -3255,15 +3248,9 @@ async function replayLastHR(fn){
    7TH-INNING STRETCH / LATE-GAME RALLY / FINAL & WALK-OFF
    ============================================================ */
 /* one central guard: no takeover ever stacks on another */
-/* the HOUSE WIPE: one signature light-sweep on every takeover enter/exit.
-   Debounced so back-to-back moments (TD -> XP) don't double-flash. */
-function houseWipe(){
-  const now=performance.now();
-  if(houseWipe._last&&now-houseWipe._last<500)return;
-  houseWipe._last=now;
-  const w=$("#hwipe"); if(!w)return;
-  w.classList.remove("go"); void w.offsetWidth; w.classList.add("go");
-}
+/* the HOUSE WIPE light-sweep was REMOVED at user request (2026-07-22).
+   Trigger/end call sites remain; restore the old body here to bring it back. */
+function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
   ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
