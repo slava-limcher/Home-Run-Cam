@@ -1241,6 +1241,75 @@ body.nhl #nhlBtns{display:contents}
 #dtOverlay .hcard{gap:14px}
 #dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.2s both}
 #dtOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
+/* ---- NET CAM: bespoke 3-pointer takeover — behind-the-cords swish (regular threes; 28+ ft go to the meter) ---- */
+#ncOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:
+    radial-gradient(90% 34% at 50% 30%, rgba(70,90,120,.16), transparent 70%),
+    radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#ncOverlay.show{display:block;opacity:1}
+#ncOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;z-index:1;
+  background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
+             radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
+#ncOverlay.show::before{animation:hleakIn .8s ease-out 1.95s both}
+.nc-bloom{position:absolute;width:26vw;height:16vw;border-radius:50%;filter:blur(60px);
+  background:rgba(226,238,255,.16);pointer-events:none;z-index:0}
+.nc-bloom.l{left:-8vw;top:-4vw}.nc-bloom.r{right:-8vw;top:-4vw}
+#ncOverlay.show .nc-bloom{animation:ncFlick 2.8s ease-in-out infinite alternate}
+@keyframes ncFlick{from{opacity:.75}to{opacity:1}}
+/* the ball rides between the arena and the net so we watch it THROUGH the cords */
+.nc-ballw{position:absolute;left:15%;top:36%;z-index:2;pointer-events:none}
+#ncOverlay.show .nc-ballw{animation:ncBX 1.6s linear .35s both}
+@keyframes ncBX{from{left:15%}to{left:50%}}
+.nc-ballm{transform:translateY(6vh)}
+#ncOverlay.show .nc-ballm{animation:ncBY 1.6s .35s both, ncThrough .6s cubic-bezier(.5,0,.9,.6) 1.95s forwards}
+@keyframes ncBY{0%{transform:translateY(6vh);animation-timing-function:cubic-bezier(.3,.7,.5,1)}
+  55%{transform:translateY(-32vh);animation-timing-function:cubic-bezier(.5,0,.8,.4)}
+  100%{transform:translateY(-1vh)}}
+@keyframes ncThrough{0%{transform:translateY(-1vh) scale(1);opacity:1;filter:blur(0)}
+  70%{opacity:1}100%{transform:translateY(46vh) scale(3.1);opacity:0;filter:blur(7px)}}
+.nc-ballm svg{display:block;width:clamp(64px,8.6vw,124px);height:auto;transform:scale(.055) rotate(-20deg)}
+#ncOverlay.show .nc-ballm svg{animation:ncBall 1.6s linear .35s both}
+@keyframes ncBall{from{transform:scale(.055) rotate(-20deg)}to{transform:scale(1) rotate(500deg)}}
+/* rim + backboard + cords */
+.nc-scene{position:absolute;inset:0;z-index:3;pointer-events:none}
+.nc-scene svg{position:absolute;inset:0;width:100%;height:100%}
+.nc-str{transform-box:view-box}
+#ncOverlay.show .nc-str{animation:ncWhip .85s cubic-bezier(.25,.9,.35,1) both;animation-delay:var(--d,1.93s)}
+@keyframes ncWhip{0%{transform:rotate(0) scaleY(1)}
+  30%{transform:rotate(var(--w,0deg)) scaleY(var(--s,1.08))}
+  62%{transform:rotate(calc(var(--w,0deg)*-.3)) scaleY(1.02)}
+  100%{transform:rotate(0) scaleY(1)}}
+.nc-ring{transform-box:view-box}
+#ncOverlay.show .nc-ring{animation:ncRingP .7s ease-out both;animation-delay:var(--d,1.95s)}
+@keyframes ncRingP{0%{transform:scaleY(1)}35%{transform:scaleY(1.22)}100%{transform:scaleY(1)}}
+.nc-rimg{transform-box:view-box;transform-origin:720px 310px}
+#ncOverlay.show .nc-rimg{animation:ncShud .5s ease-out 1.95s}
+@keyframes ncShud{0%,100%{transform:rotate(0) translateY(0)}30%{transform:rotate(.7deg) translateY(4px)}
+  60%{transform:rotate(-.5deg) translateY(1px)}}
+/* impact flash + splash droplets */
+.nc-flash{position:absolute;inset:0;z-index:4;background:radial-gradient(46vw 34vh at 50% 52%,rgba(255,255,255,.95),transparent 70%);
+  opacity:0;pointer-events:none}
+#ncOverlay.show .nc-flash{animation:ncFlash .4s ease-out 1.95s both}
+@keyframes ncFlash{0%{opacity:0}25%{opacity:.9}100%{opacity:0}}
+.nc-drops{position:absolute;left:50%;top:72%;z-index:4;pointer-events:none}
+.nc-drops i{position:absolute;width:9px;height:9px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,#fff 35%, color-mix(in srgb, var(--hacc,#e8c34a) 75%, #fff))}
+#ncOverlay.show .nc-drops i{animation:ncDrop .75s ease-out 2s both}
+@keyframes ncDrop{0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx,0),var(--dy,60px)) scale(.4);opacity:0}}
+/* text package */
+.nc-kick{position:absolute;left:0;right:0;top:9%;text-align:center;z-index:5;
+  color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
+#ncOverlay.show .nc-kick{animation:anFade .5s .25s both}
+.nc-word{position:absolute;left:0;right:0;top:44%;text-align:center;z-index:5;
+  font-size:clamp(58px,12vw,180px);line-height:.92;opacity:0}
+#ncOverlay.show .nc-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.5s both, nfpShine 2.6s linear 3.1s infinite}
+.nc-sub{position:absolute;left:0;right:0;top:66%;text-align:center;z-index:5;
+  color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#ncOverlay.show .nc-sub{animation:anFade .45s 2.85s both}
+#ncOverlay .hcard{gap:14px;z-index:6}
+#ncOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.1s both}
+#ncOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* per-league FINAL skins: hardwood amber (NBA) / ice sheet (NHL) */
 #finalOverlay.nba .fg-bg{background:
   radial-gradient(120% 70% at 50% 110%, #5c3a14 0%, #3a2410 45%, transparent 75%),
@@ -2359,6 +2428,56 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
+<!-- NET CAM: bespoke 3-pointer takeover — behind-the-cords swish (the ball rips the net past the lens) -->
+<div id="ncOverlay">
+  <div class="nc-bloom l"></div><div class="nc-bloom r"></div>
+  <div class="nc-ballw"><div class="nc-ballm"><svg viewBox="0 0 140 140">
+    <defs><radialGradient id="ncbg" cx="35%" cy="30%" r="85%">
+      <stop offset="0" stop-color="#f9974a"/><stop offset=".5" stop-color="#d96b28"/><stop offset="1" stop-color="#8a3d14"/>
+    </radialGradient></defs>
+    <circle cx="70" cy="70" r="62" fill="url(#ncbg)" stroke="#5e2c10" stroke-width="3"/>
+    <g fill="none" stroke="#5e2c10" stroke-width="3">
+      <path d="M8 70 Q70 44 132 70"/><path d="M70 8 Q98 70 70 132"/>
+      <path d="M24 26 Q70 70 24 114"/><path d="M116 26 Q70 70 116 114"/>
+    </g>
+  </svg></div></div>
+  <div class="nc-scene"><svg viewBox="0 0 1440 810" preserveAspectRatio="xMidYMid slice">
+    <g class="nc-rimg">
+      <rect x="540" y="60" width="360" height="210" rx="10" fill="rgba(200,225,255,.06)" stroke="rgba(255,255,255,.28)" stroke-width="3"/>
+      <rect x="650" y="160" width="140" height="80" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="3"/>
+      <path d="M700 270 L740 270 L732 302 L708 302 Z" fill="#8c93a0"/>
+      <ellipse cx="720" cy="310" rx="300" ry="80" fill="none" stroke="#ff8a3d" stroke-width="10"/>
+      <ellipse cx="720" cy="310" rx="300" ry="80" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+    </g>
+    <g fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3" stroke-linecap="round"
+       style="filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))">
+      <path class="nc-str" style="transform-origin:1010px 331px;--w:-10deg;--d:2.13s" d="M1010 331 Q975 461 1155 511"/>
+      <path class="nc-str" style="transform-origin:980px 350px;--w:-13deg;--d:2.09s" d="M980 350 Q949 480 1110 534"/>
+      <path class="nc-str" style="transform-origin:932px 367px;--w:-16deg;--d:2.05s" d="M932 367 Q907 497 1038 557"/>
+      <path class="nc-str" style="transform-origin:870px 379px;--w:-19deg;--d:2.01s" d="M870 379 Q852 509 945 576"/>
+      <path class="nc-str" style="transform-origin:798px 387px;--w:-22deg;--d:1.97s" d="M798 387 Q789 517 837 593"/>
+      <path class="nc-str" style="transform-origin:720px 390px;--w:0deg;--s:1.22;--d:1.93s" d="M720 390 Q720 520 720 605"/>
+      <path class="nc-str" style="transform-origin:642px 387px;--w:22deg;--d:1.97s" d="M642 387 Q651 517 603 593"/>
+      <path class="nc-str" style="transform-origin:570px 379px;--w:19deg;--d:2.01s" d="M570 379 Q588 509 495 576"/>
+      <path class="nc-str" style="transform-origin:508px 367px;--w:16deg;--d:2.05s" d="M508 367 Q533 497 402 557"/>
+      <path class="nc-str" style="transform-origin:460px 350px;--w:13deg;--d:2.09s" d="M460 350 Q491 480 330 534"/>
+      <path class="nc-str" style="transform-origin:430px 331px;--w:10deg;--d:2.13s" d="M430 331 Q465 461 285 511"/>
+      <ellipse class="nc-ring" style="transform-origin:720px 468px;--d:1.95s" cx="720" cy="468" rx="222" ry="48" opacity=".5"/>
+      <ellipse class="nc-ring" style="transform-origin:720px 548px;--d:2.03s" cx="720" cy="548" rx="258" ry="54" opacity=".4"/>
+    </g>
+  </svg></div>
+  <div class="nc-flash"></div>
+  <div class="nc-drops">
+    <i style="--dx:-120px;--dy:70px"></i><i style="--dx:-80px;--dy:110px"></i><i style="--dx:-40px;--dy:130px"></i>
+    <i style="--dx:-10px;--dy:150px"></i><i style="--dx:30px;--dy:140px"></i><i style="--dx:70px;--dy:120px"></i>
+    <i style="--dx:110px;--dy:80px"></i><i style="--dx:-150px;--dy:40px"></i><i style="--dx:150px;--dy:45px"></i>
+    <i style="--dx:0px;--dy:170px"></i>
+  </div>
+  <div class="nc-kick" id="ncKick">NOTHING BUT NET</div>
+  <div class="nc-word nfp-chrome" id="ncWord">SPLASH!</div>
+  <div class="nc-sub" id="ncSub"></div>
+  <div class="hcard"><img id="ncLogo" alt=""><div><div class="hname" id="ncName"></div><div class="hstat" id="ncStat"></div></div></div>
+</div>
 <!-- FROM DOWNTOWN: bespoke 3-pointer takeover — the range ruler slams to the real shot distance -->
 <div id="dtOverlay">
   <div class="dt-inner">
@@ -2532,6 +2651,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(xPoll){clearInterval(xPoll);xPoll=null;} if(xDemoTimer){clearInterval(xDemoTimer);xDemoTimer=null;}
   if(typeof endMoment==="function")endMoment();
   if(typeof endDowntown==="function")endDowntown();
+  if(typeof endNetCam==="function")endNetCam();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -2547,7 +2667,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -3363,7 +3483,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -4298,6 +4418,25 @@ function triggerMoment(o){
 }
 function endMoment(){ if(genOvEl&&genOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerMoment._t); if(genOvEl)genOvEl.classList.remove("show"); genPlaying=false; }
+/* ---- NET CAM (bespoke 3-pointer, regular range): behind-the-cords swish — the ball arcs in
+        from a distant speck, rips through the net toward the lens (staggered cord whip), white
+        flash + splash droplets, SPLASH! punches through the settling net. 28+ footers go to the
+        FROM DOWNTOWN meter below, where the distance is the story. ---- */
+let ncPlaying=false;
+const ncOvEl=$("#ncOverlay");
+function triggerNetCam(t,ft){
+  if(takeoverBusy())return; ncPlaying=true; hideWalkup(); houseWipe();
+  t=t||{}; ft=ft?Math.round(ft):null;
+  ncOvEl.style.setProperty('--hacc',t.colorHex||"#e8c34a");
+  $("#ncSub").textContent=(ft?`${t.abbr||""} FROM ${ft} FEET`:`${t.abbr||""} DRAINS THE THREE`).trim();
+  $("#ncLogo").src=t.logo||""; $("#ncLogo").style.display=t.logo?"":"none";
+  $("#ncName").textContent=t.name||"";
+  $("#ncStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  ncOvEl.classList.remove("show"); void ncOvEl.offsetWidth; ncOvEl.classList.add("show");
+  clearTimeout(triggerNetCam._t); triggerNetCam._t=setTimeout(endNetCam,6800);
+}
+function endNetCam(){ if(ncOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerNetCam._t); ncOvEl.classList.remove("show"); ncPlaying=false; }
 /* ---- FROM DOWNTOWN (bespoke 3-pointer): the range ruler slams to the real shot distance.
         Tiers by feet: <28 = THE ARC "SPLASH!" / 28-32 = DEEP "BANG!" / 33+ = LOGO "FROM THE LOGO!".
         Ruler scale is 0-40 ft; a made three never lands short of the arc. ---- */
@@ -4333,7 +4472,7 @@ function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._z);
   dtOvEl.classList.remove("show"); dtPlaying=false; }
 /* ---- the 13 moments (each becomes a bespoke build; the rest are working stubs) ---- */
-const momentThree=(t,ft)=>triggerDowntown(t,ft);
+const momentThree=(t,ft)=>((ft||0)>=28?triggerDowntown(t,ft):triggerNetCam(t,ft));
 const momentLong3=(t,ft)=>triggerDowntown(t,ft||30);
 const momentSlam=t=>triggerMoment({team:t,kick:"HAMMER TIME",word:"SLAM!",sub:`${t.abbr} THROWS IT DOWN`,dur:5200});
 const momentSteal=t=>triggerMoment({team:t,kick:"PICKED HIS POCKET",word:"STEAL!",sub:`${t.abbr} TAKES IT AWAY`,alarm:true,dur:4600});
