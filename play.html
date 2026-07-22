@@ -1102,6 +1102,44 @@ body.nfl .nfl-dd{display:block}
 @keyframes nfpSlam{from{opacity:0;transform:scale(1.9)}to{opacity:1;transform:scale(1)}}
 @keyframes nfpShine{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
 
+/* ===================== HOUSE PACKAGE =====================
+   One broadcast grammar across every takeover:
+   - #hwipe: the signature light-sweep on every enter/exit
+   - .hcard/.hside/.hmid/.hname/.hstat: one lower-third skin
+   - .hleak: the scoring team's color washes the film hold
+   Accent color rides --hacc (offense; thief on turnovers). */
+#hwipe{position:fixed;inset:0;z-index:58;pointer-events:none;visibility:hidden;
+  background:linear-gradient(105deg,transparent 40%,rgba(228,240,255,.30) 47%,
+    rgba(255,255,255,.85) 50%,rgba(228,240,255,.30) 53%,transparent 60%) no-repeat;
+  background-size:250% 100%;background-position:-150% 0}
+#hwipe.go{visibility:visible;animation:hwipeGo .42s cubic-bezier(.55,.1,.4,.9) both}
+@keyframes hwipeGo{from{background-position:-150% 0}to{background-position:250% 0}}
+#tdOverlay,#xpOverlay,#tpOverlay{--hacc:var(--nflOff,#e31837)}
+#toOverlay{--hacc:var(--nflDef,#e8eef4)}
+.hcard{position:absolute;left:50%;bottom:min(5vh,44px);transform:translateX(-50%);z-index:5;
+  display:flex;align-items:center;gap:min(2.4vw,26px);
+  background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
+  border:1px solid rgba(255,255,255,.18);border-left:5px solid var(--hacc,#e31837);
+  border-radius:14px;padding:12px 26px;box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
+@keyframes hcardIn{from{opacity:0;transform:translateX(-50%) translateY(22px)}
+  to{opacity:1;transform:translateX(-50%)}}
+.hside{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;
+  font-size:clamp(16px,2vw,26px)}
+.hside img{width:clamp(34px,3.8vw,52px);height:clamp(34px,3.8vw,52px);object-fit:contain}
+.hmid{text-align:center;padding:0 min(1.2vw,14px);
+  border-left:1px solid rgba(255,255,255,.14);border-right:1px solid rgba(255,255,255,.14)}
+.hname{font-weight:900;font-style:italic;color:#fff;font-size:clamp(17px,2.1vw,28px)}
+.hstat{color:#c6d2e0;font-weight:800;letter-spacing:1.5px;font-size:clamp(11px,1.3vw,16px);margin-top:3px}
+.hleak{position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:
+    radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e31837) 50%, transparent), transparent 62%),
+    radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e31837) 42%, transparent), transparent 62%)}
+@keyframes hleakIn{from{opacity:0}to{opacity:.55}}
+#tdOverlay.show .hleak{animation:hleakIn .9s ease-out 4.7s both}
+#xpOverlay.show:not(.miss) .hleak{animation:hleakIn .9s ease-out 4.7s both}
+#tpOverlay.show:not(.miss) .hleak{animation:hleakIn .9s ease-out 3.3s both}
+#toOverlay.show .hleak{animation:hleakIn .9s ease-out 5.5s both}
+
 /* ---- KICKOFF v4.5 "The Toss & The Clash" (smooth pass): coin physics -> covered transitions -> real impact ---- */
 #koOverlay{background:radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
 /* aerial night-stadium video backdrop behind the whole scene (dark gradient is the fallback if it can't play) */
@@ -1370,22 +1408,13 @@ body.nfl .nfl-dd{display:block}
 #tdOverlay.show .td4-film{animation:anFade2 .4s both}
 .td4-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 /* sub line — lands with the film's title */
-.td4-sub{position:absolute;left:0;right:0;bottom:min(8vh,72px);z-index:4;text-align:center;color:#fff;
+.td4-sub{position:absolute;left:0;right:0;bottom:min(17vh,160px);z-index:4;text-align:center;color:#fff;
   font-weight:900;letter-spacing:3px;font-size:clamp(16px,2.1vw,26px);opacity:0;
   text-shadow:0 4px 18px rgba(0,0,0,.85)}
 #tdOverlay.show .td4-sub{animation:anFade .45s 5.4s both}
-/* scorer attribution card — top-left when the AWAY team scores, top-right for HOME */
-.td4-card{position:absolute;top:min(4vh,34px);z-index:5;display:flex;align-items:center;gap:14px;
-  background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
-  border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 20px;
-  box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
-#tdOverlay.aw .td4-card{left:min(3vw,28px);border-left:5px solid var(--nflOff,#e31837)}
-#tdOverlay.hm .td4-card{right:min(3vw,28px);border-right:5px solid var(--nflOff,#e31837)}
-#tdOverlay.show .td4-card{animation:td4CardIn .55s cubic-bezier(.2,.9,.3,1) 5.2s both}
-@keyframes td4CardIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+/* scorer attribution — the HOUSE lower-third (bottom center, team-accent left edge) */
+#tdOverlay.show .td4-card{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 5.2s both}
 .td4-card img{width:clamp(40px,4.6vw,62px);height:clamp(40px,4.6vw,62px);object-fit:contain}
-.td4-name{font-weight:900;font-style:italic;color:#fff;font-size:clamp(18px,2.3vw,30px);letter-spacing:.5px}
-.td4-stat{color:#c6d2e0;font-weight:800;letter-spacing:1.5px;font-size:clamp(12px,1.4vw,17px);margin-top:3px}
 .td4-plus{background:var(--gold);color:#08243f;font-weight:900;border-radius:10px;padding:8px 14px;
   font-size:clamp(18px,2vw,26px)}
 
@@ -1427,34 +1456,17 @@ body.nfl .nfl-dd{display:block}
 #xpOverlay.show.miss .xp2-word{animation-delay:2.5s}
 #xpOverlay.miss .xp2-word{background:none;-webkit-text-fill-color:#ff6b6b;color:#ff6b6b;
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.75));animation-iteration-count:1!important}
-/* data card: away logo+score | kicker + stat line | home score+logo */
-.xp2-card{position:absolute;left:50%;bottom:min(5vh,44px);transform:translateX(-50%);z-index:5;
-  display:flex;align-items:center;gap:min(2.4vw,26px);
-  background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
-  border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 26px;
-  box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
-#xpOverlay.show .xp2-card{animation:xp2CardIn .55s cubic-bezier(.2,.9,.3,1) 5.5s both}
+/* data card = the HOUSE lower-third: away logo+score | kicker + stat line | home score+logo */
+#xpOverlay.show .xp2-card{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 5.5s both}
 #xpOverlay.show.miss .xp2-card{animation-delay:3.3s}
-@keyframes xp2CardIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}
-  to{opacity:1;transform:translateX(-50%)}}
-.xp2-side{display:flex;align-items:center;gap:10px;font-weight:900;color:#fff;
-  font-size:clamp(16px,2vw,26px)}
-.xp2-side img{width:clamp(34px,3.8vw,52px);height:clamp(34px,3.8vw,52px);object-fit:contain}
-.xp2-mid{text-align:center;padding:0 min(1.2vw,14px);
-  border-left:1px solid rgba(255,255,255,.14);border-right:1px solid rgba(255,255,255,.14)}
-.xp2-kname{font-weight:900;font-style:italic;color:#fff;font-size:clamp(17px,2.1vw,28px)}
-.xp2-kstat{color:#c6d2e0;font-weight:800;letter-spacing:1.5px;font-size:clamp(11px,1.3vw,16px);margin-top:3px}
 /* two-point overlay text stack (previously shared with the old XP) */
-.tp-center{position:absolute;left:0;right:0;bottom:min(9vh,80px);z-index:3;text-align:center;pointer-events:none;
+.tp-center{position:absolute;left:0;right:0;bottom:min(18vh,170px);z-index:3;text-align:center;pointer-events:none;
   display:flex;flex-direction:column;align-items:center;gap:min(1.3vh,11px)}
 .tp-kick{color:#93a3b8;font-weight:900;letter-spacing:7px;font-size:clamp(13px,1.7vw,21px);opacity:0}
 .tp-big{font-size:clamp(50px,11vw,150px);line-height:.9;opacity:0}
 #tpOverlay.miss .tp-big{background:none;-webkit-text-fill-color:#ff6b6b;color:#ff6b6b;
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.7));animation-iteration-count:1!important}
-.tp-plus{background:var(--gold);color:#08243f;font-weight:900;border-radius:10px;padding:6px 18px;
-  font-size:clamp(18px,2.2vw,30px);opacity:0}
-#tpOverlay.miss .tp-plus{display:none}
-.tp-score{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.8vw,22px);opacity:0}
+/* score/verdict data lives in the house lower-third (.tp-card.hcard) */
 
 /* ---- TWO-POINT CONVERSION: the user's Veo film (dark bowl -> light banks slam on ->
    twin gold fireworks columns) IS the scene; text lands center between the columns.
@@ -1468,9 +1480,8 @@ body.nfl .nfl-dd{display:block}
 #tpOverlay.show .tp-kick{animation:anFade .5s .5s both}
 #tpOverlay.show .tp-big{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3.3s both, nfpShine 2.6s linear 3.9s infinite}
 #tpOverlay.show.miss .tp-big{animation-delay:2.5s}
-#tpOverlay.show .tp-plus{animation:anFade .4s 3.75s both}
-#tpOverlay.show .tp-score{animation:anFade .4s 3.9s both}
-#tpOverlay.show.miss .tp-score{animation-delay:2.9s}
+#tpOverlay.show .tp-card{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.75s both}
+#tpOverlay.show.miss .tp-card{animation-delay:2.9s}
 
 /* ---- TWO-MINUTE WARNING (A · Clock Wipe): radial sweep reveal ---- */
 .tm2-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;
@@ -1528,12 +1539,12 @@ body.nfl .nfl-dd{display:block}
 #toOverlay.show .po-film{animation:anFade2 .4s both}
 .po-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .po-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:flex-end;gap:min(2.2vh,20px);text-align:center;padding-bottom:min(6vh,52px)}
+  justify-content:flex-end;gap:min(2.2vh,20px);text-align:center;padding-bottom:min(5vh,44px)}
 #toOverlay.show .nfp-kick{animation:anFade .4s .5s both}
 .po-bar{position:relative;display:flex;align-items:center;justify-content:space-between;
-  width:min(64vw,760px);background:linear-gradient(180deg,#161c26,#0b0f16);
-  border:1px solid rgba(255,255,255,.16);border-radius:18px;
-  padding:16px 46px;box-shadow:0 18px 50px rgba(0,0,0,.6);opacity:0}
+  width:min(64vw,760px);background:linear-gradient(180deg,rgba(13,17,24,.94),rgba(8,11,16,.94));
+  border:1px solid rgba(255,255,255,.18);border-left:5px solid var(--hacc,#e8eef4);border-radius:14px;
+  padding:16px 46px;box-shadow:0 16px 44px rgba(0,0,0,.65);opacity:0}
 /* B: momentum seesaw — one choreographed keyframe per direction (slide-in, hold, springy tip)
    because two animations can't share the transform channel (the last one listed would own it).
    Lands AFTER the film's TURNOVER! slam (~5.2s). */
@@ -2118,13 +2129,13 @@ body.tvmode .scorewrap{justify-content:center}
       <path d="M55 210 L55 22 M245 210 L245 22"/>
     </svg>
   </div>
-  <div class="td4-film"><video id="tdVid" muted playsinline preload="auto"><source src="touchdown.mp4" type="video/mp4"></video></div>
+  <div class="td4-film"><video id="tdVid" muted playsinline preload="auto"><source src="touchdown.mp4" type="video/mp4"></video><div class="hleak"></div></div>
   <div class="td4-sub" id="tdSub"></div>
-  <div class="td4-card">
+  <div class="td4-card hcard">
     <img id="td4Logo" alt="">
     <div>
-      <div class="td4-name" id="td4Name"></div>
-      <div class="td4-stat" id="td4Stat"></div>
+      <div class="hname" id="td4Name"></div>
+      <div class="hstat" id="td4Stat"></div>
     </div>
     <div class="td4-plus">+6</div>
   </div>
@@ -2134,27 +2145,33 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="xp2-fall"></div>
   <div class="xp2-photo"></div>
   <div class="xp2-vig"></div>
-  <div class="xpf-film"><video id="xpVid" muted playsinline preload="auto" poster="extrapoint.jpg"><source src="extrapoint.mp4" type="video/mp4"></video></div>
+  <div class="xpf-film"><video id="xpVid" muted playsinline preload="auto" poster="extrapoint.jpg"><source src="extrapoint.mp4" type="video/mp4"></video><div class="hleak"></div></div>
   <div class="xp2-top">
     <div class="nfp-kick">EXTRA POINT</div>
     <div class="xp2-word nfp-chrome" id="xpBig">SCORED!</div>
   </div>
-  <div class="xp2-card">
-    <div class="xp2-side"><img id="xpALogo" alt=""><span id="xpASc"></span></div>
-    <div class="xp2-mid">
-      <div class="xp2-kname" id="xpKName"></div>
-      <div class="xp2-kstat" id="xpKStat"></div>
+  <div class="xp2-card hcard">
+    <div class="hside"><img id="xpALogo" alt=""><span id="xpASc"></span></div>
+    <div class="hmid">
+      <div class="hname" id="xpKName"></div>
+      <div class="hstat" id="xpKStat"></div>
     </div>
-    <div class="xp2-side"><span id="xpHSc"></span><img id="xpHLogo" alt=""></div>
+    <div class="hside"><span id="xpHSc"></span><img id="xpHLogo" alt=""></div>
   </div>
 </div>
 <div id="tpOverlay">
-  <div class="tp-film"><video id="tpVid" muted playsinline preload="auto"><source src="twopoint.mp4" type="video/mp4"></video></div>
+  <div class="tp-film"><video id="tpVid" muted playsinline preload="auto"><source src="twopoint.mp4" type="video/mp4"></video><div class="hleak"></div></div>
   <div class="tp-center">
     <div class="tp-kick">TWO-POINT CONVERSION</div>
     <div class="tp-big nfp-chrome" id="tpBig">GOOD!</div>
-    <div class="tp-plus">+2</div>
-    <div class="tp-score" id="tpScore"></div>
+  </div>
+  <div class="tp-card hcard">
+    <div class="hside"><img id="tpALogo" alt=""><span id="tpASc"></span></div>
+    <div class="hmid">
+      <div class="hname">TWO-POINT CONVERSION</div>
+      <div class="hstat" id="tpStat"></div>
+    </div>
+    <div class="hside"><span id="tpHSc"></span><img id="tpHLogo" alt=""></div>
   </div>
 </div>
 <div id="tmOverlay">
@@ -2181,7 +2198,7 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="tm2-sweep"></div>
 </div>
 <div id="toOverlay">
-  <div class="po-film"><video id="toVid" muted playsinline preload="auto"><source src="turnover.mp4" type="video/mp4"></video></div>
+  <div class="po-film"><video id="toVid" muted playsinline preload="auto"><source src="turnover.mp4" type="video/mp4"></video><div class="hleak"></div></div>
   <div class="po-inner">
   <div class="nfp-kick" id="poKick">TURNOVER</div>
   <div class="po-bar">
@@ -2213,6 +2230,7 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <div id="toast"></div>
+<div id="hwipe"></div>
 
 <script>
 /* ============================================================
@@ -2745,7 +2763,7 @@ const ov=$("#hrOverlay"), vid=$("#hrVideo");
 let hrPlaying=false;
 /* info = {id, name, number, team:{id,name,abbr}, desc} — any field optional */
 function triggerHR(info){
-  if(takeoverBusy())return; hrPlaying=true;
+  if(takeoverBusy())return; hrPlaying=true; houseWipe();
   info=info||{};
   // in demo, actually score the HR on the board
   if(MODE==="demo"){
@@ -2814,6 +2832,7 @@ function sprayDegOf(hd){
 /* "Aaron Judge homers (37) on a fly ball..." -> 37 (season HR total) */
 function seasonHRof(desc){const m=(desc||"").match(/homers?\s*\((\d+)\)/i);return m?+m[1]:null;}
 function endHomeRun(){
+  if(ov.classList.contains("show"))houseWipe();
   vid.pause();
   ov.classList.remove("show");
   $("#hrName").classList.remove("show");
@@ -2834,7 +2853,7 @@ let anthemPlaying=false, anTimers=[];
 function triggerAnthem(opts){
   opts=opts||{};
   if(takeoverBusy())return;
-  anthemPlaying=true;
+  anthemPlaying=true; houseWipe();
   document.documentElement.style.setProperty('--anAwayc',teamColor(G.away.id));
   document.documentElement.style.setProperty('--anHomec',teamColor(G.home.id));
   const aLogo=G.away.id?logoURL(G.away.id):transparentPx();
@@ -2854,6 +2873,7 @@ function triggerAnthem(opts){
   ];
 }
 function endAnthem(){
+  if(anthemOv.classList.contains("show"))houseWipe();
   anTimers.forEach(clearTimeout); anTimers=[];
   anthemOv.classList.remove("show","p1","p2","p3");
   anthemPlaying=false;
@@ -2955,7 +2975,7 @@ let kPlaying=false;
 function triggerK(info){
   info=info||{};
   if(takeoverBusy())return;
-  kPlaying=true;
+  kPlaying=true; houseWipe();
   wuCard.classList.remove("show"); clearTimeout(wuHideT);   // clear the walk-up if it's up
   const team=info.team||{};
   const shot=$("#kShot"), hero=shot.parentElement;
@@ -2978,7 +2998,8 @@ function triggerK(info){
   clearTimeout(triggerK._t);
   triggerK._t=setTimeout(endK, info.dur||9100);
 }
-function endK(){ clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
+function endK(){ if(kOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerK._t); kOv.classList.remove("show"); kPlaying=false; }
 
 /* ============================================================
    HOME RUN V2 — fully animated takeover (alternative to the video;
@@ -3019,7 +3040,7 @@ function h2AimDiagram(s){
 function triggerHR2(info){
   info=info||{};
   if(takeoverBusy())return;
-  hr2Playing=true;
+  hr2Playing=true; houseWipe();
   wuCard.classList.remove("show"); clearTimeout(wuHideT);
   // in demo, score it on the board just like the video version does
   if(MODE==="demo"){
@@ -3076,7 +3097,8 @@ function triggerHR2(info){
   clearTimeout(triggerHR2._t);
   triggerHR2._t=setTimeout(endHR2, info.dur||8500);
 }
-function endHR2(){ clearTimeout(triggerHR2._t); hr2Ov.classList.remove("show"); hr2Playing=false; }
+function endHR2(){ if(hr2Ov.classList.contains("show"))houseWipe();
+  clearTimeout(triggerHR2._t); hr2Ov.classList.remove("show"); hr2Playing=false; }
 /* season pitching line for the K card */
 async function fetchPitcher(id){
   try{
@@ -3169,6 +3191,15 @@ async function replayLastHR(fn){
    7TH-INNING STRETCH / LATE-GAME RALLY / FINAL & WALK-OFF
    ============================================================ */
 /* one central guard: no takeover ever stacks on another */
+/* the HOUSE WIPE: one signature light-sweep on every takeover enter/exit.
+   Debounced so back-to-back moments (TD -> XP) don't double-flash. */
+function houseWipe(){
+  const now=performance.now();
+  if(houseWipe._last&&now-houseWipe._last<500)return;
+  houseWipe._last=now;
+  const w=$("#hwipe"); if(!w)return;
+  w.classList.remove("go"); void w.offsetWidth; w.classList.add("go");
+}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
   ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
@@ -3177,18 +3208,19 @@ let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
 
 function triggerStretch(opts){
   if(takeoverBusy())return;
-  stretchPlaying=true; hideWalkup();
+  stretchPlaying=true; hideWalkup(); houseWipe();
   stOv.classList.remove("show"); void stOv.offsetWidth; stOv.classList.add("show");
   clearTimeout(triggerStretch._t);
   triggerStretch._t=setTimeout(endStretch,(opts&&opts.dur)||7000);
 }
-function endStretch(){ clearTimeout(triggerStretch._t); stOv.classList.remove("show"); stretchPlaying=false; }
+function endStretch(){ if(stOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerStretch._t); stOv.classList.remove("show"); stretchPlaying=false; }
 
 /* info = {team:{id,name}, deficit, bases:[1st,2nd,3rd], inning, half} */
 function triggerRally(info){
   info=info||{};
   if(takeoverBusy())return;
-  rallyPlaying=true; hideWalkup();
+  rallyPlaying=true; hideWalkup(); houseWipe();
   const team=info.team||{};
   document.documentElement.style.setProperty('--rc',teamColor(team.id||0));
   const b=info.bases||[false,false,false];
@@ -3204,7 +3236,8 @@ function triggerRally(info){
   clearTimeout(triggerRally._t);
   triggerRally._t=setTimeout(endRally, info.dur||7500);
 }
-function endRally(){ clearTimeout(triggerRally._t); rOv.classList.remove("show"); rallyPlaying=false; }
+function endRally(){ if(rOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerRally._t); rOv.classList.remove("show"); rallyPlaying=false; }
 
 /* info = {winner, walkoff, aw, hm, inning} */
 function fgConfetti(accent){   // gold/white rain + a touch of the winner's color
@@ -3222,7 +3255,7 @@ function fgConfetti(accent){   // gold/white rain + a touch of the winner's colo
 function triggerFinal(info){
   info=info||{};
   if(takeoverBusy())return;
-  finalPlaying=true; hideWalkup();
+  finalPlaying=true; hideWalkup(); houseWipe();
   const aw=info.aw||G.away, hm=info.hm||G.home;
   const tie=aw.score===hm.score;
   const winner=info.winner||(hm.score>aw.score?hm:aw);
@@ -3242,7 +3275,8 @@ function triggerFinal(info){
   clearTimeout(triggerFinal._t);
   triggerFinal._t=setTimeout(endFinal, info.dur||9000);
 }
-function endFinal(){ clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false;
+function endFinal(){ if(fOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerFinal._t); fOv.classList.remove("show"); finalPlaying=false;
   const c=$("#fConfetti"); if(c)c.innerHTML=""; }
 
 /* ============================================================
@@ -3253,7 +3287,7 @@ const luOv=$("#lineupOverlay");
 let lineupPlaying=false;
 function triggerLineup(box){
   if(takeoverBusy()||!box)return;
-  lineupPlaying=true; hideWalkup();
+  lineupPlaying=true; hideWalkup(); houseWipe();
   $("#luACrest").src=G.away.id?logoURL(G.away.id):transparentPx();
   $("#luHCrest").src=G.home.id?logoURL(G.home.id):transparentPx();
   $("#luAName").textContent=(G.away.name||"AWAY").toUpperCase();
@@ -3279,7 +3313,8 @@ function triggerLineup(box){
   clearTimeout(triggerLineup._t);
   triggerLineup._t=setTimeout(endLineup, 13000);
 }
-function endLineup(){ clearTimeout(triggerLineup._t); luOv.classList.remove("show"); lineupPlaying=false; }
+function endLineup(){ if(luOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerLineup._t); luOv.classList.remove("show"); lineupPlaying=false; }
 
 /* ============================================================
    NFL MODE — ESPN key-less feed + 7 jumbotron moments
@@ -3605,7 +3640,7 @@ let ko3Timers=[];
 /* coin toss -> team panels -> helmet clash -> KICKOFF!   info={recv,call,choice,live} all optional */
 function triggerKickoff(info){
   info=info||{};
-  if(takeoverBusy())return; koPlaying=true; hideWalkup();
+  if(takeoverBusy())return; koPlaying=true; hideWalkup(); houseWipe();
   const aw=G.away, hm=G.home, live=!!info.live;
   const winner=info.recv||(Math.random()<.5?aw:hm);
   const winnerIsAway=(winner===aw)||(!!winner.abbr&&winner.abbr===aw.abbr);
@@ -3641,7 +3676,8 @@ function triggerKickoff(info){
     setTimeout(endKickoff,15600)   // film runs 8.8s from the p3 handoff; end as it settles
   ];
 }
-function endKickoff(){ko3Timers.forEach(clearTimeout);ko3Timers=[];
+function endKickoff(){if(koOv.classList.contains("show"))houseWipe();
+  ko3Timers.forEach(clearTimeout);ko3Timers=[];
   const v2=$("#koVid2"); if(v2)v2.pause();
   koOv.classList.remove("show","p1","p2","p3");koPlaying=false;}
 /* ===== field-video calibration (field.mp4 final frame; goal-to-goal linear map) ===== */
@@ -3655,7 +3691,7 @@ function fvX(d){return FV_ANCH[fvIdx(d)];}   // d = yards from LEFT goal -> % on
 let nmTimers=[], rzTimers=[];
 function triggerRedZone(info){
   info=info||{};
-  if(takeoverBusy())return; rzPlaying=true; hideWalkup();
+  if(takeoverBusy())return; rzPlaying=true; hideWalkup(); houseWipe();
   document.documentElement.style.setProperty('--nflOff',(info.team&&info.team.colorHex)||"#e31837");
   const y=Math.max(1,Math.min(20,Math.round(info.yards||18)));   // yards-to-endzone at entry
   // red-zone wash = last 20 yds (d 80→100); blue entry line where they crossed in (d=100−y)
@@ -3678,13 +3714,14 @@ function triggerRedZone(info){
   rzTimers=[setTimeout(()=>rzOv.classList.add("frozen"),5300),
             setTimeout(endRedZone,10000)];
 }
-function endRedZone(){rzTimers.forEach(clearTimeout);rzTimers=[];const v=$("#rzVid");if(v)v.pause();
+function endRedZone(){if($("#rzOverlay").classList.contains("show"))houseWipe();
+  rzTimers.forEach(clearTimeout);rzTimers=[];const v=$("#rzVid");if(v)v.pause();
   rzOv.classList.remove("show","frozen");rzPlaying=false;}
 function rzFakeDrive(){const n=4+Math.floor(Math.random()*4);
   return Array.from({length:n},()=>Math.floor(Math.random()*24)-4);}
 function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow first-down line
   info=info||{};
-  if(takeoverBusy())return; nmPlaying=true; hideWalkup();
+  if(takeoverBusy())return; nmPlaying=true; hideWalkup(); houseWipe();
   const def=info.defTeam||{};
   document.documentElement.style.setProperty('--nflDef',def.colorHex||"#00338d");
   $("#dmTxt").textContent=(info.dd||"3RD & LONG").toUpperCase();
@@ -3702,11 +3739,12 @@ function triggerNoise(info){   // 3rd down: video field + blue LOS + yellow firs
   nmTimers=[setTimeout(()=>nmOv.classList.add("frozen"),5300),
             setTimeout(endNoise,9000)];
 }
-function endNoise(){nmTimers.forEach(clearTimeout);nmTimers=[];const v=$("#dmVid");if(v)v.pause();
+function endNoise(){if($("#nmOverlay").classList.contains("show"))houseWipe();
+  nmTimers.forEach(clearTimeout);nmTimers=[];const v=$("#dmVid");if(v)v.pause();
   nmOv.classList.remove("show","frozen");nmPlaying=false;}
 function triggerTouchdown(info){
   info=info||{};
-  if(takeoverBusy())return; tdPlaying=true; hideWalkup();
+  if(takeoverBusy())return; tdPlaying=true; hideWalkup(); houseWipe();
   const team=info.team||{};
   document.documentElement.style.setProperty('--nflOff',team.colorHex||"#e31837");
   const scoringAway=(team.abbr===G.away.abbr);
@@ -3727,7 +3765,8 @@ function triggerTouchdown(info){
   tdOv.classList.remove("show"); void tdOv.offsetWidth; tdOv.classList.add("show");
   clearTimeout(triggerTouchdown._t); triggerTouchdown._t=setTimeout(endTouchdown,10600);
 }
-function endTouchdown(){clearTimeout(triggerTouchdown._t);
+function endTouchdown(){if(tdOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerTouchdown._t);
   const ch=$("#tdCheer"); if(ch)ch.pause();
   const tv=$("#tdVid"); if(tv)tv.pause();
   tdOv.classList.remove("show");tdPlaying=false;}
@@ -3750,7 +3789,7 @@ function demoTDInfo(){
 }
 /* point-after moments: extra point (kick splits uprights) + two-point conversion (lunge) */
 function triggerXP(info){
-  info=info||{}; if(takeoverBusy())return; xpPlaying=true; hideWalkup();
+  info=info||{}; if(takeoverBusy())return; xpPlaying=true; hideWalkup(); houseWipe();
   const team=info.team||{}, good=info.good!==false;
   document.documentElement.style.setProperty('--nflOff',team.colorHex||"#e31837");
   xpOv.classList.toggle("miss",!good);
@@ -3787,16 +3826,21 @@ function demoXPInfo(good){
   return {kicker:"#"+(2+Math.floor(Math.random()*8))+" • K",
     stat:`${good?made:made-1}/${made} XP TONIGHT`};
 }
-function endXP(){clearTimeout(triggerXP._t);clearTimeout(triggerXP._pz);
+function endXP(){if(xpOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerXP._t);clearTimeout(triggerXP._pz);
   const v=$("#xpVid"); if(v)v.pause();
   xpOv.classList.remove("show");xpPlaying=false;}
 function triggerTwoPoint(info){
-  info=info||{}; if(takeoverBusy())return; tpPlaying=true; hideWalkup();
+  info=info||{}; if(takeoverBusy())return; tpPlaying=true; hideWalkup(); houseWipe();
   const team=info.team||{}, good=info.good!==false;
   document.documentElement.style.setProperty('--nflOff',team.colorHex||"#e31837");
   tpOv.classList.toggle("miss",!good);
   $("#tpBig").textContent=good?"GOOD!":"NO GOOD";
-  $("#tpScore").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`;
+  $("#tpALogo").src=G.away.logo||""; $("#tpHLogo").src=G.home.logo||"";
+  $("#tpALogo").style.display=G.away.logo?"":"none"; $("#tpHLogo").style.display=G.home.logo?"":"none";
+  $("#tpASc").textContent=`${G.away.abbr} ${G.away.score}`;
+  $("#tpHSc").textContent=`${G.home.score} ${G.home.abbr}`;
+  $("#tpStat").textContent=good?"CONVERSION GOOD • +2":"NO GOOD";
   // the film: full run for GOOD; on a MISS pause just before the fireworks ever ignite
   const v=$("#tpVid");
   if(v){try{v.muted=true;v.currentTime=0;const p=v.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
@@ -3805,11 +3849,12 @@ function triggerTwoPoint(info){
   tpOv.classList.remove("show"); void tpOv.offsetWidth; tpOv.classList.add("show");
   clearTimeout(triggerTwoPoint._t); triggerTwoPoint._t=setTimeout(endTwoPoint,good?7000:5200);
 }
-function endTwoPoint(){clearTimeout(triggerTwoPoint._t);clearTimeout(triggerTwoPoint._pz);
+function endTwoPoint(){if(tpOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerTwoPoint._t);clearTimeout(triggerTwoPoint._pz);
   const v=$("#tpVid"); if(v)v.pause();
   tpOv.classList.remove("show");tpPlaying=false;}
 function triggerTwoMin(info){
-  if(takeoverBusy())return; tmPlaying=true; hideWalkup();
+  if(takeoverBusy())return; tmPlaying=true; hideWalkup(); houseWipe();
   $("#tmRecap").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr} • Q${(info&&info.q)||NG.q}`;
   // timeout pips (only when we actually know the counts)
   const tA=(info&&info.toA!=null)?info.toA:LIVE.toA;
@@ -3824,10 +3869,11 @@ function triggerTwoMin(info){
   tmOv.classList.remove("show"); void tmOv.offsetWidth; tmOv.classList.add("show");
   clearTimeout(triggerTwoMin._t); triggerTwoMin._t=setTimeout(endTwoMin,7000);
 }
-function endTwoMin(){clearTimeout(triggerTwoMin._t);tmOv.classList.remove("show");tmPlaying=false;}
+function endTwoMin(){if(tmOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerTwoMin._t);tmOv.classList.remove("show");tmPlaying=false;}
 function triggerTurnover(info){
   info=info||{};
-  if(takeoverBusy())return; toPlaying=true; hideWalkup();
+  if(takeoverBusy())return; toPlaying=true; hideWalkup(); houseWipe();
   const rec=info.team||(NG.posHome?G.away:G.home);   // recovering team = new possession
   const toHome=rec.abbr===G.home.abbr;
   document.documentElement.style.setProperty('--nflDef',rec.colorHex||"#e8eef4");
@@ -3846,7 +3892,8 @@ function triggerTurnover(info){
   clearTimeout(triggerTurnover._t);
   triggerTurnover._t=setTimeout(endTurnover,10300);              // film 10s + settle
 }
-function endTurnover(){clearTimeout(triggerTurnover._t);
+function endTurnover(){if(toOv.classList.contains("show"))houseWipe();
+  clearTimeout(triggerTurnover._t);
   const v=$("#toVid"); if(v)v.pause();
   toOv.classList.remove("show");toPlaying=false;}
 
