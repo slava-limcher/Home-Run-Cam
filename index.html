@@ -4472,7 +4472,7 @@ function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._z);
   dtOvEl.classList.remove("show"); dtPlaying=false; }
 /* ---- the 13 moments (each becomes a bespoke build; the rest are working stubs) ---- */
-const momentThree=(t,ft)=>((ft||0)>=28?triggerDowntown(t,ft):triggerNetCam(t,ft));
+const momentThree=(t,ft)=>triggerDowntown(t,ft);   // user picked the meter for ALL threes; triggerNetCam(t,ft) kept dormant — swap back here
 const momentLong3=(t,ft)=>triggerDowntown(t,ft||30);
 const momentSlam=t=>triggerMoment({team:t,kick:"HAMMER TIME",word:"SLAM!",sub:`${t.abbr} THROWS IT DOWN`,dur:5200});
 const momentSteal=t=>triggerMoment({team:t,kick:"PICKED HIS POCKET",word:"STEAL!",sub:`${t.abbr} TAKES IT AWAY`,alarm:true,dur:4600});
