@@ -1236,100 +1236,70 @@ body.nhl #nhlBtns{display:contents}
 #dtOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;
   background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
              radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
-#dtOverlay.show::before{animation:hleakIn .8s ease-out 1s both}
+#dtOverlay.show::before{animation:hleakIn .8s ease-out 2.2s both}
 .dt-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:min(1.6vh,14px);text-align:center;padding:0 6vw 9vh}
-#dtOverlay.show .dt-inner{animation:dtShake .5s linear 1.02s}
+#dtOverlay.show .dt-inner{animation:dtShake .5s linear 3.2s}
 .dt-kick{color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
 #dtOverlay.show .dt-kick{animation:anFade .5s .2s both}
 .dt-word{font-size:clamp(52px,10.5vw,158px);line-height:.92;opacity:0}
-#dtOverlay.show .dt-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.35s both, nfpShine 2.6s linear 3s infinite}
-.dt-distwrap{display:flex;align-items:baseline;gap:10px;opacity:0}
-#dtOverlay.show .dt-distwrap{animation:anFade .35s 1.02s both}
-.dt-distnum{font-weight:900;font-style:italic;font-size:clamp(32px,4.6vw,66px);color:#fff;
-  text-shadow:0 0 26px color-mix(in srgb, var(--hacc,#e8c34a) 70%, transparent)}
-.dt-distft{font-weight:900;letter-spacing:4px;color:#93a3b8;font-size:clamp(14px,1.6vw,22px)}
+#dtOverlay.show .dt-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3.45s both, nfpShine 2.6s linear 4.1s infinite}
 .dt-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
-#dtOverlay.show .dt-sub{animation:anFade .45s 2.7s both}
-/* the range ruler */
-.dt-meterwrap{position:relative;width:min(80vw,1500px);margin-top:min(2.6vh,24px);opacity:0}
-#dtOverlay.show .dt-meterwrap{animation:dtRise .55s cubic-bezier(.2,.9,.3,1) .15s both}
-.dt-meter{position:relative;display:flex;height:clamp(56px,10vh,92px);border-radius:14px;
-  background:linear-gradient(180deg,rgba(15,20,30,.92),rgba(8,11,17,.92));
-  border:1px solid rgba(255,255,255,.16);box-shadow:0 18px 50px rgba(0,0,0,.6)}
-.dt-zone{position:relative;display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,.12)}
-.dt-zone:last-child{border-right:0}
-.dt-zone span{color:#7d8ca0;font-weight:800;letter-spacing:2.5px;font-size:clamp(10px,1.15vw,15px);white-space:nowrap}
-.dt-zone.paint,.dt-zone.mid{background:rgba(255,255,255,.025)}
-.dt-zone.paint span,.dt-zone.mid span{opacity:.55}
-.dt-zone.paint{width:37.5%;border-radius:14px 0 0 14px}
-.dt-zone.mid{width:17.5%}
-.dt-zone.arc{width:15%}
-.dt-zone.deep{width:12.5%}
-.dt-zone.logo{width:17.5%;border-radius:0 14px 14px 0}
-.dt-zone.lit{animation:dtIgnite .45s ease-out both}
-.dt-zone.lit span{color:#fff;opacity:1;text-shadow:0 0 14px color-mix(in srgb, var(--hacc,#e8c34a) 80%, transparent)}
-@keyframes dtIgnite{
-  0%{background:rgba(255,255,255,.9);box-shadow:0 0 60px rgba(255,255,255,.9)}
-  100%{background:color-mix(in srgb, var(--hacc,#e8c34a) 38%, rgba(10,14,22,.2));
-       box-shadow:0 0 38px color-mix(in srgb, var(--hacc,#e8c34a) 60%, transparent),
-                  inset 0 0 24px color-mix(in srgb, var(--hacc,#e8c34a) 45%, transparent)}}
-/* the 3-point line marker at 22 ft */
-.dt-3ptline{position:absolute;left:55%;top:-6px;bottom:-6px;width:0;
-  border-left:2px dashed rgba(232,195,74,.75);pointer-events:none}
-.dt-3pt{position:absolute;left:55%;bottom:108%;transform:translateX(-50%);color:#e8c34a;font-weight:900;
-  letter-spacing:2px;font-size:clamp(9px,1vw,13px);white-space:nowrap;padding-bottom:4px}
-/* the needle */
-.dt-needle{position:absolute;left:2%;top:-26%;height:152%;width:5px;transform:translateX(-50%);z-index:3;
-  background:linear-gradient(180deg,#fff, color-mix(in srgb, var(--hacc,#e8c34a) 80%, #fff) 60%, var(--hacc,#e8c34a));
-  border-radius:3px;
-  box-shadow:0 0 20px color-mix(in srgb, var(--hacc,#e8c34a) 85%, transparent), 0 0 6px rgba(255,255,255,.9)}
-.dt-needle::before{content:"";position:absolute;left:50%;top:-13px;transform:translateX(-50%);
-  border:9px solid transparent;border-top:14px solid #fff;
-  filter:drop-shadow(0 0 8px color-mix(in srgb, var(--hacc,#e8c34a) 85%, transparent))}
-#dtOverlay.show .dt-needle{animation:dtSlamX .95s cubic-bezier(.65,0,.25,1) .35s both}
-@keyframes dtSlamX{0%{left:2%}62%{left:calc(var(--dtx,60%) + 2.2%)}80%{left:calc(var(--dtx,60%) - .9%)}100%{left:var(--dtx,60%)}}
-/* impact flash where it lands */
-.dt-burst{position:absolute;left:50%;top:24%;width:14px;height:14px;border-radius:50%;opacity:0;
-  transform:translate(-50%,-50%) scale(0);
-  background:radial-gradient(circle, rgba(255,255,255,.95), color-mix(in srgb, var(--hacc,#e8c34a) 70%, transparent) 55%, transparent 72%)}
-#dtOverlay.show .dt-burst{animation:dtBurst .6s ease-out 1.02s both}
-@keyframes dtBurst{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(12)}}
-/* speed streaks while the needle travels */
-.dt-streaks{position:absolute;inset:-40% 0;pointer-events:none;opacity:0;
-  background:repeating-linear-gradient(90deg, transparent 0 34px, rgba(255,255,255,.10) 34px 36px, transparent 36px 90px)}
-#dtOverlay.show .dt-streaks{animation:dtStreak .95s linear .35s both}
-@keyframes dtStreak{0%{opacity:0;transform:translateX(-6%)}25%{opacity:.7}85%{opacity:.5}100%{opacity:0;transform:translateX(5%)}}
-/* feet ticks under the track */
-.dt-ticks{position:relative;height:22px;margin-top:8px}
-.dt-ticks span{position:absolute;transform:translateX(-50%);color:#6f7f92;font-weight:800;letter-spacing:1px;
-  font-size:clamp(10px,1vw,14px)}
-/* ---- the scorched shot arc: air space above the ruler where the ball flies into the hoop ---- */
-.dt-air{position:absolute;left:0;right:0;bottom:100%;height:clamp(190px,28vh,300px);pointer-events:none}
+#dtOverlay.show .dt-sub{animation:anFade .45s 3.8s both}
+/* ===== two-act stage: ACT 1 top-down half court (where they shot) -> ACT 2 the side-view arc ===== */
+.dt-stage{position:relative;width:min(82vw,880px);height:clamp(210px,31vh,320px);margin-top:min(2.2vh,18px)}
+/* ACT 1 — top-down half-court diagram box (MLB-HR-diagram style), no hoop, marks the shot spot */
+.dt-court{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;opacity:0;
+  background:linear-gradient(180deg,rgba(15,20,30,.94),rgba(8,11,17,.94));
+  border:1px solid rgba(255,255,255,.16);border-top:4px solid var(--hacc,#e8c34a);border-radius:14px;
+  padding:9px 14px 8px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#dtOverlay.show .dt-court{animation:dtCourtIn .5s cubic-bezier(.2,.9,.3,1) .3s both, dtCourtOut .45s ease-in 2.05s both}
+@keyframes dtCourtIn{from{opacity:0;transform:scale(.92) translateY(14px)}to{opacity:1;transform:none}}
+@keyframes dtCourtOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(1.05)}}
+.dt-courtlbl{color:#93a3b8;font-weight:900;letter-spacing:5px;font-size:clamp(10px,1.15vw,14px);margin-bottom:5px}
+.dt-courtsvg{flex:1;min-height:0;width:auto;height:100%}
+.dt-cl{fill:none;stroke:rgba(184,200,218,.5);stroke-width:3;stroke-linejoin:round}
+.dt-cl.key{fill:rgba(255,255,255,.035)}
+.dt-arc3{fill:none;stroke:color-mix(in srgb,var(--hacc,#e8c34a) 78%,#fff);stroke-width:4}
+.dt-shotline{fill:none;stroke:color-mix(in srgb,var(--hacc,#e8c34a) 80%,#fff);stroke-width:2.5;
+  stroke-dasharray:6 7;opacity:0}
+#dtOverlay.show .dt-shotline{animation:anFade2 .4s .8s both}
+.dt-spot{opacity:0;transform-box:view-box;transform-origin:center}
+#dtOverlay.show .dt-spot{animation:dtSpotIn .42s cubic-bezier(.2,1.5,.4,1) 1.05s both}
+@keyframes dtSpotIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.dt-spotrim{fill:none;stroke:color-mix(in srgb,var(--hacc,#e8c34a) 60%,transparent);stroke-width:3}
+.dt-spotdot{stroke:#fff;stroke-width:3;fill:color-mix(in srgb,var(--hacc,#e8c34a) 88%,#fff)}
+.dt-spotring{fill:none;stroke:color-mix(in srgb,var(--hacc,#e8c34a) 85%,#fff);stroke-width:3;
+  transform-box:view-box;transform-origin:center}
+#dtOverlay.show .dt-spotring{animation:dtSpotPulse 1.2s ease-out 1.3s infinite}
+@keyframes dtSpotPulse{0%{opacity:.85;transform:scale(.5)}100%{opacity:0;transform:scale(2.6)}}
+/* ACT 2 — the scorched side-view arc into the coded hoop (fills the stage, fades in as act 1 leaves) */
+.dt-air{position:absolute;inset:0;pointer-events:none;opacity:0}
+#dtOverlay.show .dt-air{animation:anFade2 .5s 2.15s both}
 .dt-air svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .dt-arcglow{stroke:#ff6a26;stroke-width:10;opacity:.32;fill:none;stroke-linecap:round;filter:blur(5px);
   stroke-dasharray:1;stroke-dashoffset:1}
 .dt-arcpath{stroke:url(#dtFireG);stroke-width:4.5;fill:none;stroke-linecap:round;
   filter:drop-shadow(0 0 8px rgba(255,122,46,.8));stroke-dasharray:1;stroke-dashoffset:1}
-#dtOverlay.show .dt-arcpath,#dtOverlay.show .dt-arcglow{animation:dtArcDraw .8s cubic-bezier(.35,.4,.6,1) 1.4s both}
+#dtOverlay.show .dt-arcpath,#dtOverlay.show .dt-arcglow{animation:dtArcDraw .8s cubic-bezier(.35,.4,.6,1) 2.4s both}
 @keyframes dtArcDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 .dt-arcball{position:absolute;left:0;top:0;width:17px;height:17px;border-radius:50%;opacity:0;offset-rotate:0deg;
   background:radial-gradient(circle at 35% 30%, #ffe9a8, #ff8a2e 55%, #b3441a);
   box-shadow:0 0 16px rgba(255,122,46,.9), 0 0 34px rgba(255,80,20,.5)}
-#dtOverlay.show .dt-arcball{animation:dtBallFly .8s cubic-bezier(.35,.4,.6,1) 1.4s both}
+#dtOverlay.show .dt-arcball{animation:dtBallFly .8s cubic-bezier(.35,.4,.6,1) 2.4s both}
 @keyframes dtBallFly{0%{offset-distance:0%;opacity:0}6%{opacity:1}88%{opacity:1}100%{offset-distance:100%;opacity:0}}
 .dt-launch{position:absolute;bottom:-6px;width:68px;height:46px;border-radius:50%;opacity:0;filter:blur(2px);
   background:radial-gradient(circle at 50% 80%, rgba(255,214,106,.95), rgba(255,106,38,.55) 55%, transparent 75%)}
-#dtOverlay.show .dt-launch{animation:dtLaunchF .5s ease-out 1.42s both}
+#dtOverlay.show .dt-launch{animation:dtLaunchF .5s ease-out 2.42s both}
 @keyframes dtLaunchF{0%{opacity:0;transform:scale(.4)}30%{opacity:.95}100%{opacity:0;transform:scale(1.5) translateY(-16px)}}
 .dt-rimfx{position:absolute;width:70px;height:70px;pointer-events:none}
 .dt-rimfx b{position:absolute;inset:0;border-radius:50%;opacity:0;
   background:radial-gradient(circle, rgba(255,244,214,.95), rgba(255,122,46,.6) 55%, transparent 75%)}
-#dtOverlay.show .dt-rimfx b{animation:dtRimB .5s ease-out 2.18s both}
+#dtOverlay.show .dt-rimfx b{animation:dtRimB .5s ease-out 3.18s both}
 @keyframes dtRimB{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(2.4)}}
 .dt-rimfx i{position:absolute;left:50%;top:60%;width:7px;height:7px;border-radius:50%;opacity:0;
   background:radial-gradient(circle,#ffd76a,#ff6a26)}
-#dtOverlay.show .dt-rimfx i{animation:dtRimE .7s ease-out 2.2s both}
+#dtOverlay.show .dt-rimfx i{animation:dtRimE .7s ease-out 3.2s both}
 @keyframes dtRimE{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx,0),var(--dy,50px));opacity:0}}
 /* scorched setting: heat wash low + embers drifting up while the takeover holds */
 .dt-heat{position:absolute;left:0;right:0;bottom:0;height:46vh;pointer-events:none;z-index:1;
@@ -1350,7 +1320,7 @@ body.nhl #nhlBtns{display:contents}
 @keyframes dtShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,5px)}40%{transform:translate(8px,-5px)}
   60%{transform:translate(-6px,3px)}80%{transform:translate(4px,-2px)}}
 #dtOverlay .hcard{gap:14px}
-#dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.95s both}
+#dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 4.05s both}
 #dtOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- GLASS CAM: bespoke slam-dunk takeover — the ball hammers through, the backboard shatters ---- */
 #gcOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2952,9 +2922,14 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="dt-inner">
     <div class="dt-kick" id="dtKick">FROM DOWNTOWN</div>
     <div class="dt-word nfp-chrome" id="dtWord"></div>
-    <div class="dt-distwrap" id="dtDistWrap"><span class="dt-distnum" id="dtDist">0</span><span class="dt-distft">FEET</span></div>
     <div class="dt-sub" id="dtSub"></div>
-    <div class="dt-meterwrap">
+    <div class="dt-stage">
+      <!-- ACT 1: top-down half court, marks where they were standing when they shot -->
+      <div class="dt-court">
+        <div class="dt-courtlbl">SHOT LOCATION</div>
+        <svg class="dt-courtsvg" id="dtCourtSvg" viewBox="0 0 520 368"></svg>
+      </div>
+      <!-- ACT 2: side view of the arc they shot, into the coded hoop -->
       <div class="dt-air" id="dtAir">
         <svg id="dtArcSvg" viewBox="0 0 1200 260"></svg>
         <div class="dt-arcball" id="dtBall"></div>
@@ -2963,21 +2938,6 @@ body.tvmode .scorewrap{justify-content:center}
           <i style="--dx:-26px;--dy:44px"></i><i style="--dx:2px;--dy:56px"></i><i style="--dx:26px;--dy:46px"></i>
           <i style="--dx:-40px;--dy:20px"></i><i style="--dx:42px;--dy:24px"></i><i style="--dx:12px;--dy:64px"></i>
         </div>
-      </div>
-      <div class="dt-streaks"></div>
-      <div class="dt-meter">
-        <div class="dt-zone paint"><span>PAINT</span></div>
-        <div class="dt-zone mid"><span>MID-RANGE</span></div>
-        <div class="dt-zone arc"><span>THE ARC</span></div>
-        <div class="dt-zone deep"><span>DEEP</span></div>
-        <div class="dt-zone logo"><span>LOGO</span></div>
-        <div class="dt-3ptline"></div>
-        <div class="dt-3pt">3PT LINE</div>
-        <div class="dt-needle"><div class="dt-burst"></div></div>
-      </div>
-      <div class="dt-ticks">
-        <span style="left:0">0</span><span style="left:37.5%">15</span><span style="left:55%">22</span>
-        <span style="left:70%">28</span><span style="left:82.5%">33</span><span style="left:100%">40 FT</span>
       </div>
     </div>
   </div>
@@ -5008,8 +4968,6 @@ function triggerDowntown(t,ft,info){
                            deep:`${tag} FROM WAY OUTSIDE`,
                            logo:`${tag} FROM WAY, WAY DOWNTOWN`}[tier].trim();
   dtOvEl.style.setProperty('--hacc',t.colorHex||"#e8c34a");
-  dtOvEl.style.setProperty('--dtx',(shown/40*100).toFixed(2)+"%");
-  $("#dtDistWrap").style.display=ft?"":"none"; $("#dtDist").textContent="0";
   $("#dtLogo").src=t.logo||""; $("#dtLogo").style.display=t.logo?"":"none";
   // shooter identity = jersey + position ONLY (house rule: no player names on screen)
   const hasP=!!(info&&(info.num||info.pos));
@@ -5018,9 +4976,25 @@ function triggerDowntown(t,ft,info){
     +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
   $("#dtTileP").style.display=(info&&info.pts!=null)?"":"none"; $("#dtTPv").textContent="0";
   $("#dtTile3").style.display=(info&&info.tpm!=null)?"":"none"; $("#dtT3v").textContent="0";
-  document.querySelectorAll("#dtOverlay .dt-zone").forEach(z=>z.classList.remove("lit"));
   dtOvEl.classList.remove("show"); void dtOvEl.offsetWidth; dtOvEl.classList.add("show");
-  // scorched shot arc: hoop at the 0-ft end + fiery trajectory from THIS shot's spot on the ruler
+  // ACT 1 — top-down half court (no hoop): mark where they stood. Radius = the real distance,
+  // angle randomized (feed doesn't give the floor spot); a made 3 always sits on/beyond the arc.
+  const bx=260, by=320, Rpx=Math.min((ft||24),33)*9.3;
+  const deg=(Math.random()*2-1)*(Rpx>250?26:48), rad=deg*Math.PI/180;
+  let mx=Math.round(bx+Rpx*Math.sin(rad)), my=Math.round(by-Rpx*Math.cos(rad));
+  my=Math.max(26,my); mx=Math.max(30,Math.min(490,mx));
+  $("#dtCourtSvg").innerHTML=
+     `<path class="dt-cl" d="M12 12 L12 356 L508 356 L508 12"/>`
+    +`<path class="dt-cl" d="M12 12 L508 12"/>`
+    +`<rect class="dt-cl key" x="180" y="170" width="160" height="186"/>`
+    +`<circle class="dt-cl" cx="260" cy="170" r="58"/>`
+    +`<path class="dt-cl" d="M40 356 L40 228"/><path class="dt-cl" d="M480 356 L480 228"/>`
+    +`<path class="dt-arc3" d="M40 228 A238 238 0 0 1 480 228"/>`
+    +`<path class="dt-shotline" d="M260 320 L${mx} ${my}"/>`
+    +`<g class="dt-spot"><circle class="dt-spotring" cx="${mx}" cy="${my}" r="12"/>`
+    +`<circle class="dt-spotrim" cx="${mx}" cy="${my}" r="13"/>`
+    +`<circle class="dt-spotdot" cx="${mx}" cy="${my}" r="8"/></g>`;
+  // ACT 2 — side-view scorched arc from THIS distance into the coded hoop at the 0-ft end
   const air=$("#dtAir"), aw=air.clientWidth||1200, ah=air.clientHeight||260;
   const sx=Math.max(120,Math.round(shown/40*aw)), sy=ah-2;
   const rimX=50, rimY=Math.round(ah*0.38);
@@ -5044,21 +5018,16 @@ function triggerDowntown(t,ft,info){
   $("#dtBall").style.offsetPath=`path("${d}")`;
   $("#dtLaunch").style.left=(sx-34)+"px";
   $("#dtRimFx").style.left="16px"; $("#dtRimFx").style.top=(rimY-26)+"px";
-  clearTimeout(triggerDowntown._z);
-  triggerDowntown._z=setTimeout(()=>{            // impact: ignite the landed zone + count the feet
-    const z=document.querySelector("#dtOverlay .dt-zone."+tier); if(z)z.classList.add("lit");
-    if(ft)countUp($("#dtDist"),String(ft));
-  },1020);
   clearTimeout(triggerDowntown._s);
   triggerDowntown._s=setTimeout(()=>{            // card lands: count the shooter's line
     if(info&&info.pts!=null)countUp($("#dtTPv"),String(info.pts));
     if(info&&info.tpm!=null)setTimeout(()=>countUp($("#dtT3v"),String(info.tpm)),160);
-  },3050);
+  },4150);
   clearTimeout(triggerDowntown._t);
-  triggerDowntown._t=setTimeout(endDowntown,{arc:7400,deep:7800,logo:8400}[tier]);
+  triggerDowntown._t=setTimeout(endDowntown,{arc:8000,deep:8400,logo:9000}[tier]);
 }
 function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._z); clearTimeout(triggerDowntown._s);
+  clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._s);
   dtOvEl.classList.remove("show"); dtPlaying=false; }
 /* shooter lookup: play participants[0] = the shooter; boxscore carries jersey/position + tonight's line */
 function nbaShooterInfo(j,p){
