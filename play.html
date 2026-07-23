@@ -1020,6 +1020,75 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
 #finalOverlay.walkoff.show .fg-ribbon{animation:fgRibbon .5s cubic-bezier(.2,1.2,.4,1) 1.35s both}
 @keyframes fgRibbon{from{opacity:0;transform:translateX(-50%) rotate(-4deg) scale(1.7)}
   to{opacity:1;transform:translateX(-50%) rotate(-4deg) scale(1)}}
+/* ---- bespoke FINAL layers: NBA "the buzzer" / NHL "the horn & the ice" (no people, ride the gold ceremony) ---- */
+.fgx-nba,.fgx-nhl{display:none;position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+#finalOverlay.nba .fgx-nba{display:block}
+#finalOverlay.nhl .fgx-nhl{display:block}
+/* NBA: the backboard LED strip = a red frame around the whole screen, hard buzzer blinks then a slow simmer */
+.fgx-led{position:absolute;inset:0;opacity:0;
+  box-shadow:inset 0 0 0 6px rgba(255,36,28,.95), inset 0 0 64px 16px rgba(255,36,28,.4)}
+#finalOverlay.nba.show .fgx-led{animation:fgxBuzz .38s steps(2,jump-none) 3, fgxLedGlow 2.8s ease-in-out 1.14s infinite}
+@keyframes fgxBuzz{from{opacity:1}to{opacity:0}}
+@keyframes fgxLedGlow{0%,100%{opacity:.5}50%{opacity:.95}}
+.fgx-clock{position:absolute;top:4.5%;left:50%;transform:translateX(-50%);opacity:0;
+  background:linear-gradient(180deg,#100a08,#050302);border:1px solid rgba(255,80,60,.5);border-radius:10px;
+  padding:6px 22px;color:#ff3b2e;font-weight:900;font-size:clamp(22px,3vw,42px);letter-spacing:3px;
+  text-shadow:0 0 14px rgba(255,59,46,.9);box-shadow:0 10px 26px rgba(0,0,0,.6)}
+#finalOverlay.nba.show .fgx-clock{animation:fgxBuzz .38s steps(2,jump-none) 3, anFade2 .3s 1.14s both}
+/* the game ball bounces across the hardwood and rolls to rest */
+.fgx-ball{position:absolute;left:0;bottom:3.5%;width:min(9vh,84px)}
+#finalOverlay.nba.show .fgx-ball{animation:fgxBallX 3.4s cubic-bezier(.25,.6,.5,1) .5s both}
+@keyframes fgxBallX{from{transform:translateX(-12vw)}to{transform:translateX(24vw)}}
+.fgx-bally{transform:translateY(0)}
+#finalOverlay.nba.show .fgx-bally{animation:fgxBallY 3.4s linear .5s both}
+@keyframes fgxBallY{0%{transform:translateY(-52vh);animation-timing-function:cubic-bezier(.5,0,.85,.4)}
+  26%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.7,.45,1)}
+  48%{transform:translateY(-17vh);animation-timing-function:cubic-bezier(.5,0,.85,.4)}
+  66%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.7,.45,1)}
+  79%{transform:translateY(-6.5vh);animation-timing-function:cubic-bezier(.5,0,.85,.4)}
+  89%{transform:translateY(0);animation-timing-function:cubic-bezier(.2,.7,.45,1)}
+  95%{transform:translateY(-1.6vh);animation-timing-function:cubic-bezier(.5,0,.85,.4)}
+  100%{transform:translateY(0)}}
+.fgx-ball svg{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}
+#finalOverlay.nba.show .fgx-ball svg{animation:fgxBallSpin 3.4s cubic-bezier(.25,.6,.5,1) .5s both}
+@keyframes fgxBallSpin{from{transform:rotate(0)}to{transform:rotate(880deg)}}
+/* NHL: frost corners + falling snow + sweeping spotlights + the puck gliding to a stop */
+.fgx-frost{position:absolute;inset:0;opacity:.85;
+  background:
+    radial-gradient(46% 42% at 0% 0%, rgba(222,240,255,.26), transparent 68%),
+    radial-gradient(46% 42% at 100% 0%, rgba(222,240,255,.26), transparent 68%),
+    radial-gradient(52% 46% at 0% 100%, rgba(222,240,255,.32), transparent 70%),
+    radial-gradient(52% 46% at 100% 100%, rgba(222,240,255,.32), transparent 70%)}
+#finalOverlay.nhl.show .fgx-frost{animation:fgxFrostP 4s ease-in-out infinite alternate}
+@keyframes fgxFrostP{from{opacity:.65}to{opacity:1}}
+.fgx-beam{position:absolute;left:50%;bottom:-12%;width:16vw;height:70vh;opacity:.16;mix-blend-mode:screen;
+  transform-origin:50% 100%;
+  background:linear-gradient(180deg, transparent, rgba(214,236,255,.9) 55%, rgba(214,236,255,.4))}
+#finalOverlay.nhl.show .fgx-beam.b1{animation:fgxBeam1 5.6s ease-in-out infinite alternate}
+#finalOverlay.nhl.show .fgx-beam.b2{animation:fgxBeam2 6.4s ease-in-out infinite alternate}
+@keyframes fgxBeam1{from{transform:translateX(-50%) rotate(-26deg)}to{transform:translateX(-50%) rotate(18deg)}}
+@keyframes fgxBeam2{from{transform:translateX(-50%) rotate(24deg)}to{transform:translateX(-50%) rotate(-16deg)}}
+.fgx-snow i{position:absolute;top:-3vh;left:var(--x,50%);width:var(--sz,5px);height:var(--sz,5px);
+  border-radius:50%;opacity:0;background:radial-gradient(circle,#fff,rgba(214,236,255,.4))}
+#finalOverlay.nhl.show .fgx-snow i{animation:fgxSnow var(--dur,7s) linear var(--del,0s) infinite}
+@keyframes fgxSnow{0%{transform:translate(0,0);opacity:0}10%{opacity:.9}85%{opacity:.7}
+  100%{transform:translate(-4vw,108vh);opacity:0}}
+.fgx-puck{position:absolute;right:0;bottom:5%;width:min(7vh,64px);height:min(2.6vh,24px)}
+#finalOverlay.nhl.show .fgx-puck{animation:fgxPuck 2.3s cubic-bezier(.12,.75,.25,1) .5s both}
+@keyframes fgxPuck{from{transform:translateX(14vw) rotate(0)}to{transform:translateX(-74vw) rotate(-190deg)}}
+.fgx-puck::before{content:"";position:absolute;inset:0;border-radius:50%/44%;
+  background:linear-gradient(180deg,#20242b,#05070a 68%);
+  box-shadow:0 6px 14px rgba(0,0,0,.65), inset 0 2px 3px rgba(255,255,255,.25)}
+.fgx-puck::after{content:"";position:absolute;top:20%;right:96%;width:26vw;height:60%;opacity:0;filter:blur(6px);
+  background:linear-gradient(90deg, transparent, rgba(224,242,255,.75));border-radius:50%}
+#finalOverlay.nhl.show .fgx-puck::after{animation:fgxTrail 2.3s ease-out .5s both}
+@keyframes fgxTrail{0%{opacity:0}12%{opacity:.9}80%{opacity:.5}100%{opacity:0}}
+.fgx-chips{position:absolute;left:19%;bottom:6.5%;width:0;height:0}
+.fgx-chips i{position:absolute;width:7px;height:7px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,#fff,rgba(214,236,255,.5))}
+#finalOverlay.nhl.show .fgx-chips i{animation:fgxChip .65s ease-out 2.62s both}
+@keyframes fgxChip{0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx,0),var(--dy,-40px)) scale(.4);opacity:0}}
 
 /* =================== LINEUP REVEAL — MLB LINEUP CARD ===================
    pre-game: both starting nines cascade in on an MLB navy pinstripe board  */
@@ -1935,6 +2004,7 @@ body.tvmode .scorewrap{justify-content:center}
         <button class="ghostbtn" id="bStealBtn">🧤 Steal</button>
         <button class="ghostbtn" id="bWinBtn">🗡️ Game-Winner</button>
         <button class="ghostbtn" id="bFoulBtn">📣 Foul</button>
+        <button class="ghostbtn" id="bFinBtn">🏆 Final</button>
       </span>
       <span id="nhlBtns">
         <button class="hrbtn" id="hGoalBtn">🚨 GOAL</button>
@@ -1944,6 +2014,7 @@ body.tvmode .scorewrap{justify-content:center}
         <button class="ghostbtn" id="hFoBtn">👀 Face-Off</button>
         <button class="ghostbtn" id="hSirenBtn">📯 Period Siren</button>
         <button class="ghostbtn" id="hMinBtn">⏱️ 1:00 Left</button>
+        <button class="ghostbtn" id="hFinBtn">🏆 Final</button>
       </span>
       <span id="mlbBtns">
         <button class="hrbtn" id="hrBtn">💥 HIT A HOME RUN</button>
@@ -2185,6 +2256,38 @@ body.tvmode .scorewrap{justify-content:center}
   </div>
   <div class="fg-rays"></div>
   <div class="fg-shock"></div>
+  <!-- NBA final: buzzer LED frame + expired clock + the game ball bouncing to rest -->
+  <div class="fgx-nba">
+    <div class="fgx-led"></div>
+    <div class="fgx-clock">0.0</div>
+    <div class="fgx-ball"><div class="fgx-bally"><svg viewBox="0 0 140 140">
+      <defs><radialGradient id="fgxbg" cx="35%" cy="30%" r="85%">
+        <stop offset="0" stop-color="#f9974a"/><stop offset=".5" stop-color="#d96b28"/><stop offset="1" stop-color="#8a3d14"/>
+      </radialGradient></defs>
+      <circle cx="70" cy="70" r="62" fill="url(#fgxbg)" stroke="#5e2c10" stroke-width="3"/>
+      <g fill="none" stroke="#5e2c10" stroke-width="3">
+        <path d="M8 70 Q70 44 132 70"/><path d="M70 8 Q98 70 70 132"/>
+        <path d="M24 26 Q70 70 24 114"/><path d="M116 26 Q70 70 116 114"/>
+      </g>
+    </svg></div></div>
+  </div>
+  <!-- NHL final: frost + snow + spotlight sweeps + the puck gliding in with ice spray -->
+  <div class="fgx-nhl">
+    <div class="fgx-frost"></div>
+    <div class="fgx-beam b1"></div><div class="fgx-beam b2"></div>
+    <div class="fgx-snow">
+      <i style="--x:5%;--del:.3s;--dur:7.5s;--sz:5px"></i><i style="--x:16%;--del:2.1s;--dur:6.4s;--sz:4px"></i>
+      <i style="--x:27%;--del:1.2s;--dur:8.2s;--sz:6px"></i><i style="--x:38%;--del:3.4s;--dur:7s;--sz:4px"></i>
+      <i style="--x:49%;--del:.7s;--dur:6.8s;--sz:5px"></i><i style="--x:60%;--del:2.8s;--dur:7.8s;--sz:4px"></i>
+      <i style="--x:71%;--del:1.7s;--dur:6.2s;--sz:6px"></i><i style="--x:82%;--del:3.9s;--dur:7.3s;--sz:5px"></i>
+      <i style="--x:91%;--del:.9s;--dur:8s;--sz:4px"></i><i style="--x:97%;--del:2.4s;--dur:6.6s;--sz:5px"></i>
+    </div>
+    <div class="fgx-puck"></div>
+    <div class="fgx-chips">
+      <i style="--dx:-30px;--dy:-46px"></i><i style="--dx:-6px;--dy:-60px"></i><i style="--dx:20px;--dy:-50px"></i>
+      <i style="--dx:-44px;--dy:-22px"></i><i style="--dx:38px;--dy:-26px"></i>
+    </div>
+  </div>
   <div class="fg-flash"></div>
   <div class="fg-confetti" id="fConfetti"></div>
   <div class="fg-inner">
@@ -4627,6 +4730,8 @@ $("#hSoBtn").onclick=()=>momentShootout(G.home,Math.random()<.6);
 $("#hFoBtn").onclick=()=>momentFaceoff();
 $("#hSirenBtn").onclick=()=>momentPeriodEnd(XG.p||1);
 $("#hMinBtn").onclick=()=>momentOneMinute();
+$("#bFinBtn").onclick=()=>triggerFinal({});
+$("#hFinBtn").onclick=()=>triggerFinal({});
 /* NFL preview buttons */
 $("#koBtn").onclick=()=>triggerKickoff();
 $("#rzBtn").onclick=()=>triggerRedZone({team:NG.posHome?G.home:G.away,yards:12,plays:rzFakeDrive()});
