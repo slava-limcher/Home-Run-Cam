@@ -1174,14 +1174,14 @@ body.nhl #nhlBtns{display:contents}
 .dt-kick{color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
 #dtOverlay.show .dt-kick{animation:anFade .5s .2s both}
 .dt-word{font-size:clamp(52px,10.5vw,158px);line-height:.92;opacity:0}
-#dtOverlay.show .dt-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 1.35s both, nfpShine 2.6s linear 2s infinite}
+#dtOverlay.show .dt-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.35s both, nfpShine 2.6s linear 3s infinite}
 .dt-distwrap{display:flex;align-items:baseline;gap:10px;opacity:0}
 #dtOverlay.show .dt-distwrap{animation:anFade .35s 1.02s both}
 .dt-distnum{font-weight:900;font-style:italic;font-size:clamp(32px,4.6vw,66px);color:#fff;
   text-shadow:0 0 26px color-mix(in srgb, var(--hacc,#e8c34a) 70%, transparent)}
 .dt-distft{font-weight:900;letter-spacing:4px;color:#93a3b8;font-size:clamp(14px,1.6vw,22px)}
 .dt-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
-#dtOverlay.show .dt-sub{animation:anFade .45s 1.9s both}
+#dtOverlay.show .dt-sub{animation:anFade .45s 2.7s both}
 /* the range ruler */
 .dt-meterwrap{position:relative;width:min(80vw,1500px);margin-top:min(2.6vh,24px);opacity:0}
 #dtOverlay.show .dt-meterwrap{animation:dtRise .55s cubic-bezier(.2,.9,.3,1) .15s both}
@@ -1235,11 +1235,53 @@ body.nhl #nhlBtns{display:contents}
 .dt-ticks{position:relative;height:22px;margin-top:8px}
 .dt-ticks span{position:absolute;transform:translateX(-50%);color:#6f7f92;font-weight:800;letter-spacing:1px;
   font-size:clamp(10px,1vw,14px)}
+/* ---- the scorched shot arc: air space above the ruler where the ball flies into the hoop ---- */
+.dt-air{position:absolute;left:0;right:0;bottom:100%;height:clamp(190px,28vh,300px);pointer-events:none}
+.dt-air svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.dt-arcglow{stroke:#ff6a26;stroke-width:10;opacity:.32;fill:none;stroke-linecap:round;filter:blur(5px);
+  stroke-dasharray:1;stroke-dashoffset:1}
+.dt-arcpath{stroke:url(#dtFireG);stroke-width:4.5;fill:none;stroke-linecap:round;
+  filter:drop-shadow(0 0 8px rgba(255,122,46,.8));stroke-dasharray:1;stroke-dashoffset:1}
+#dtOverlay.show .dt-arcpath,#dtOverlay.show .dt-arcglow{animation:dtArcDraw .8s cubic-bezier(.35,.4,.6,1) 1.4s both}
+@keyframes dtArcDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.dt-arcball{position:absolute;left:0;top:0;width:17px;height:17px;border-radius:50%;opacity:0;offset-rotate:0deg;
+  background:radial-gradient(circle at 35% 30%, #ffe9a8, #ff8a2e 55%, #b3441a);
+  box-shadow:0 0 16px rgba(255,122,46,.9), 0 0 34px rgba(255,80,20,.5)}
+#dtOverlay.show .dt-arcball{animation:dtBallFly .8s cubic-bezier(.35,.4,.6,1) 1.4s both}
+@keyframes dtBallFly{0%{offset-distance:0%;opacity:0}6%{opacity:1}88%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.dt-launch{position:absolute;bottom:-6px;width:68px;height:46px;border-radius:50%;opacity:0;filter:blur(2px);
+  background:radial-gradient(circle at 50% 80%, rgba(255,214,106,.95), rgba(255,106,38,.55) 55%, transparent 75%)}
+#dtOverlay.show .dt-launch{animation:dtLaunchF .5s ease-out 1.42s both}
+@keyframes dtLaunchF{0%{opacity:0;transform:scale(.4)}30%{opacity:.95}100%{opacity:0;transform:scale(1.5) translateY(-16px)}}
+.dt-rimfx{position:absolute;width:70px;height:70px;pointer-events:none}
+.dt-rimfx b{position:absolute;inset:0;border-radius:50%;opacity:0;
+  background:radial-gradient(circle, rgba(255,244,214,.95), rgba(255,122,46,.6) 55%, transparent 75%)}
+#dtOverlay.show .dt-rimfx b{animation:dtRimB .5s ease-out 2.18s both}
+@keyframes dtRimB{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(2.4)}}
+.dt-rimfx i{position:absolute;left:50%;top:60%;width:7px;height:7px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,#ffd76a,#ff6a26)}
+#dtOverlay.show .dt-rimfx i{animation:dtRimE .7s ease-out 2.2s both}
+@keyframes dtRimE{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--dx,0),var(--dy,50px));opacity:0}}
+/* scorched setting: heat wash low + embers drifting up while the takeover holds */
+.dt-heat{position:absolute;left:0;right:0;bottom:0;height:46vh;pointer-events:none;z-index:1;
+  background:radial-gradient(70% 90% at 50% 108%, rgba(255,84,20,.22), rgba(160,40,8,.1) 45%, transparent 72%)}
+#dtOverlay.show .dt-heat{animation:dtHeatP 3.2s ease-in-out infinite alternate}
+@keyframes dtHeatP{from{opacity:.8}to{opacity:1}}
+.dt-embers{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.dt-embers i{position:absolute;left:var(--x,50%);bottom:-12px;width:var(--sz,5px);height:var(--sz,5px);
+  border-radius:50%;opacity:0;background:radial-gradient(circle,#ffd08a,#ff6a26)}
+#dtOverlay.show .dt-embers i{animation:dtEmber var(--dur,4s) linear var(--del,0s) infinite}
+@keyframes dtEmber{0%{transform:translate(0,0);opacity:0}12%{opacity:.85}60%{opacity:.5}
+  100%{transform:translate(16px,-48vh);opacity:0}}
+/* shooter stat tiles inside the house card */
+.dt-tile{text-align:center;padding:0 14px;border-left:1px solid rgba(255,255,255,.14)}
+.dt-tile .v{font-weight:900;font-style:italic;font-size:clamp(20px,2.2vw,30px);color:#fff}
+.dt-tile .k{color:#93a3b8;font-weight:800;letter-spacing:1.5px;font-size:clamp(9px,.95vw,12px);margin-top:2px}
 @keyframes dtRise{from{opacity:0;transform:translateY(46px)}to{opacity:1;transform:translateY(0)}}
 @keyframes dtShake{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,5px)}40%{transform:translate(8px,-5px)}
   60%{transform:translate(-6px,3px)}80%{transform:translate(4px,-2px)}}
 #dtOverlay .hcard{gap:14px}
-#dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.2s both}
+#dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.95s both}
 #dtOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- NET CAM: bespoke 3-pointer takeover — behind-the-cords swish (regular threes; 28+ ft go to the meter) ---- */
 #ncOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2478,14 +2520,33 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="nc-sub" id="ncSub"></div>
   <div class="hcard"><img id="ncLogo" alt=""><div><div class="hname" id="ncName"></div><div class="hstat" id="ncStat"></div></div></div>
 </div>
-<!-- FROM DOWNTOWN: bespoke 3-pointer takeover — the range ruler slams to the real shot distance -->
+<!-- FROM DOWNTOWN: bespoke 3-pointer takeover — the range ruler slams to the real shot distance,
+     then a scorched arc carries the ball from that exact spot into the hoop at the 0-ft end -->
 <div id="dtOverlay">
+  <div class="dt-heat"></div>
+  <div class="dt-embers">
+    <i style="--x:6%;--del:.2s;--dur:4.2s;--sz:5px"></i><i style="--x:14%;--del:1.6s;--dur:5.1s;--sz:4px"></i>
+    <i style="--x:23%;--del:.9s;--dur:3.8s;--sz:6px"></i><i style="--x:31%;--del:2.4s;--dur:4.6s;--sz:4px"></i>
+    <i style="--x:42%;--del:.4s;--dur:5.4s;--sz:5px"></i><i style="--x:51%;--del:1.9s;--dur:4s;--sz:6px"></i>
+    <i style="--x:60%;--del:1.1s;--dur:4.9s;--sz:4px"></i><i style="--x:69%;--del:2.8s;--dur:4.3s;--sz:5px"></i>
+    <i style="--x:77%;--del:.6s;--dur:5.2s;--sz:4px"></i><i style="--x:85%;--del:2.1s;--dur:4.5s;--sz:6px"></i>
+    <i style="--x:92%;--del:1.4s;--dur:3.9s;--sz:5px"></i><i style="--x:97%;--del:3s;--dur:4.8s;--sz:4px"></i>
+  </div>
   <div class="dt-inner">
     <div class="dt-kick" id="dtKick">FROM DOWNTOWN</div>
     <div class="dt-word nfp-chrome" id="dtWord"></div>
     <div class="dt-distwrap" id="dtDistWrap"><span class="dt-distnum" id="dtDist">0</span><span class="dt-distft">FEET</span></div>
     <div class="dt-sub" id="dtSub"></div>
     <div class="dt-meterwrap">
+      <div class="dt-air" id="dtAir">
+        <svg id="dtArcSvg" viewBox="0 0 1200 260"></svg>
+        <div class="dt-arcball" id="dtBall"></div>
+        <div class="dt-launch" id="dtLaunch"></div>
+        <div class="dt-rimfx" id="dtRimFx"><b></b>
+          <i style="--dx:-26px;--dy:44px"></i><i style="--dx:2px;--dy:56px"></i><i style="--dx:26px;--dy:46px"></i>
+          <i style="--dx:-40px;--dy:20px"></i><i style="--dx:42px;--dy:24px"></i><i style="--dx:12px;--dy:64px"></i>
+        </div>
+      </div>
       <div class="dt-streaks"></div>
       <div class="dt-meter">
         <div class="dt-zone paint"><span>PAINT</span></div>
@@ -2503,7 +2564,10 @@ body.tvmode .scorewrap{justify-content:center}
       </div>
     </div>
   </div>
-  <div class="hcard"><img id="dtLogo" alt=""><div><div class="hname" id="dtName"></div><div class="hstat" id="dtStat"></div></div></div>
+  <div class="hcard"><img id="dtLogo" alt=""><div><div class="hname" id="dtName"></div><div class="hstat" id="dtStat"></div></div>
+    <div class="dt-tile" id="dtTileP"><div class="v" id="dtTPv">0</div><div class="k">PTS TONIGHT</div></div>
+    <div class="dt-tile" id="dtTile3"><div class="v" id="dtT3v">0</div><div class="k">3PT TONIGHT</div></div>
+  </div>
 </div>
 <div id="genOverlay">
   <div class="gen-inner">
@@ -4315,9 +4379,10 @@ async function tickX(first){
         if(p.scoringPlay&&p.scoreValue===3){
           const ft=(/\b(\d{2})[-\s]?(?:foot|ft)\b/i.exec(txt)||[])[1];
           const late=(p.period&&p.period.number>=4)&&pSecs!=null&&pSecs<=24;
+          const info=nbaShooterInfo(j,p);
           if(late)momentGameWinner(team);
-          else if(ft&&+ft>=28)momentLong3(team,+ft);
-          else momentThree(team,ft?+ft:null);
+          else if(ft&&+ft>=28)momentLong3(team,+ft,info);
+          else momentThree(team,ft?+ft:null,info);
         }else if(p.scoringPlay&&/dunk/i.test(txt))momentSlam(team);
         else if(/steal/i.test(txt))momentSteal(team);
         else if(/flagrant|technical foul/i.test(txt))momentFoul(team,(p.text||"").slice(0,44));
@@ -4359,8 +4424,8 @@ function nbaDemoTick(){
     if(Math.random()<.42){                              // a three
       if(isHome)G.home.score+=3; else G.away.score+=3;
       if(XG.p>=4&&XG.sec<=24)momentGameWinner(team);
-      else if(Math.random()<.25)momentLong3(team,28+Math.floor(Math.random()*10));
-      else momentThree(team,22+Math.floor(Math.random()*6));
+      else if(Math.random()<.25)momentLong3(team,28+Math.floor(Math.random()*10),demoShooter());
+      else momentThree(team,22+Math.floor(Math.random()*6),demoShooter());
     }else{                                              // a deuce
       if(isHome)G.home.score+=2; else G.away.score+=2;
       if(Math.random()<.5)momentSlam(team);
@@ -4442,38 +4507,99 @@ function endNetCam(){ if(ncOvEl.classList.contains("show"))houseWipe();
         Ruler scale is 0-40 ft; a made three never lands short of the arc. ---- */
 let dtPlaying=false;
 const dtOvEl=$("#dtOverlay");
-function triggerDowntown(t,ft){
+function triggerDowntown(t,ft,info){
   if(takeoverBusy())return; dtPlaying=true; hideWalkup(); houseWipe();
-  t=t||{}; ft=ft?Math.round(ft):null;
+  t=t||{}; ft=ft?Math.round(ft):null; info=info||null;
   const shown=Math.max(22.5,Math.min(40,ft||24));
   const tier=(ft||24)>=33?"logo":(ft||24)>=28?"deep":"arc";
+  const tag=`${t.abbr||""}${info&&info.num?" #"+info.num:""}`.trim();
   $("#dtKick").textContent={arc:"FROM DOWNTOWN",deep:"FROM ANOTHER ZIP CODE",logo:"ARE YOU KIDDING?!"}[tier];
   $("#dtWord").textContent={arc:"SPLASH!",deep:"BANG!",logo:"FROM THE LOGO!"}[tier];
-  $("#dtSub").textContent={arc:`${t.abbr||""} DRAINS THE THREE`.trim(),
-                           deep:`${t.abbr||""} FROM WAY OUTSIDE`.trim(),
-                           logo:`${t.abbr||""} FROM WAY, WAY DOWNTOWN`.trim()}[tier];
+  $("#dtSub").textContent={arc:`${tag} DRAINS THE THREE`,
+                           deep:`${tag} FROM WAY OUTSIDE`,
+                           logo:`${tag} FROM WAY, WAY DOWNTOWN`}[tier].trim();
   dtOvEl.style.setProperty('--hacc',t.colorHex||"#e8c34a");
   dtOvEl.style.setProperty('--dtx',(shown/40*100).toFixed(2)+"%");
   $("#dtDistWrap").style.display=ft?"":"none"; $("#dtDist").textContent="0";
   $("#dtLogo").src=t.logo||""; $("#dtLogo").style.display=t.logo?"":"none";
-  $("#dtName").textContent=t.name||"";
-  $("#dtStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  // shooter identity = jersey + position ONLY (house rule: no player names on screen)
+  const hasP=!!(info&&(info.num||info.pos));
+  $("#dtName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
+  $("#dtStat").textContent=((hasP&&t.name?t.name+" • ":"")
+    +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
+  $("#dtTileP").style.display=(info&&info.pts!=null)?"":"none"; $("#dtTPv").textContent="0";
+  $("#dtTile3").style.display=(info&&info.tpm!=null)?"":"none"; $("#dtT3v").textContent="0";
   document.querySelectorAll("#dtOverlay .dt-zone").forEach(z=>z.classList.remove("lit"));
   dtOvEl.classList.remove("show"); void dtOvEl.offsetWidth; dtOvEl.classList.add("show");
+  // scorched shot arc: hoop at the 0-ft end + fiery trajectory from THIS shot's spot on the ruler
+  const air=$("#dtAir"), aw=air.clientWidth||1200, ah=air.clientHeight||260;
+  const sx=Math.max(120,Math.round(shown/40*aw)), sy=ah-2;
+  const rimX=50, rimY=Math.round(ah*0.38);
+  const cx=Math.round((sx+rimX)/2), cy=Math.max(8,Math.round(ah*(0.32-0.26*shown/40)));
+  const d=`M${sx} ${sy} Q${cx} ${cy} ${rimX+4} ${rimY-8} q-4 22 -11 34`;
+  $("#dtArcSvg").setAttribute("viewBox",`0 0 ${aw} ${ah}`);
+  $("#dtArcSvg").innerHTML=
+    `<defs><linearGradient id="dtFireG" gradientUnits="userSpaceOnUse" x1="${sx}" y1="0" x2="${rimX}" y2="0">`
+    +`<stop offset="0" stop-color="#8a3414" stop-opacity=".55"/><stop offset=".55" stop-color="#ff7a2e"/>`
+    +`<stop offset="1" stop-color="#ffd76a"/></linearGradient></defs>`
+    +`<g stroke="#cfd6df" stroke-width="4" fill="none" stroke-linecap="round" opacity=".9">`
+    +`<line x1="12" y1="${ah}" x2="12" y2="${rimY-56}"/><line x1="12" y1="${rimY-54}" x2="30" y2="${rimY-42}"/>`
+    +`<line x1="31" y1="${rimY-46}" x2="31" y2="${rimY+8}" stroke-width="6"/></g>`
+    +`<line x1="33" y1="${rimY}" x2="70" y2="${rimY}" stroke="#ff8a3d" stroke-width="5" stroke-linecap="round"/>`
+    +`<g stroke="rgba(255,255,255,.75)" stroke-width="2" fill="none">`
+    +`<line x1="36" y1="${rimY+2}" x2="44" y2="${rimY+30}"/><line x1="48" y1="${rimY+2}" x2="50" y2="${rimY+32}"/>`
+    +`<line x1="58" y1="${rimY+2}" x2="54" y2="${rimY+32}"/><line x1="68" y1="${rimY+2}" x2="60" y2="${rimY+30}"/>`
+    +`<path d="M44 ${rimY+18} Q52 ${rimY+22} 60 ${rimY+18}"/></g>`
+    +`<path class="dt-arcglow" pathLength="1" d="${d}"/>`
+    +`<path class="dt-arcpath" pathLength="1" d="${d}"/>`;
+  $("#dtBall").style.offsetPath=`path("${d}")`;
+  $("#dtLaunch").style.left=(sx-34)+"px";
+  $("#dtRimFx").style.left="16px"; $("#dtRimFx").style.top=(rimY-26)+"px";
   clearTimeout(triggerDowntown._z);
   triggerDowntown._z=setTimeout(()=>{            // impact: ignite the landed zone + count the feet
     const z=document.querySelector("#dtOverlay .dt-zone."+tier); if(z)z.classList.add("lit");
     if(ft)countUp($("#dtDist"),String(ft));
   },1020);
+  clearTimeout(triggerDowntown._s);
+  triggerDowntown._s=setTimeout(()=>{            // card lands: count the shooter's line
+    if(info&&info.pts!=null)countUp($("#dtTPv"),String(info.pts));
+    if(info&&info.tpm!=null)setTimeout(()=>countUp($("#dtT3v"),String(info.tpm)),160);
+  },3050);
   clearTimeout(triggerDowntown._t);
-  triggerDowntown._t=setTimeout(endDowntown,{arc:6400,deep:6800,logo:7400}[tier]);
+  triggerDowntown._t=setTimeout(endDowntown,{arc:7400,deep:7800,logo:8400}[tier]);
 }
 function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._z);
+  clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._z); clearTimeout(triggerDowntown._s);
   dtOvEl.classList.remove("show"); dtPlaying=false; }
+/* shooter lookup: play participants[0] = the shooter; boxscore carries jersey/position + tonight's line */
+function nbaShooterInfo(j,p){
+  try{
+    const pid=p.participants&&p.participants[0]&&p.participants[0].athlete&&String(p.participants[0].athlete.id);
+    const nm=(/^\s*([A-Za-z .'\-]+?)\s+makes\b/.exec(p.text||"")||[])[1];
+    for(const tp of (j.boxscore&&j.boxscore.players)||[]){
+      const st=(tp.statistics&&tp.statistics[0])||{};
+      const labels=st.labels||st.names||[];
+      const iP=labels.indexOf("PTS"), i3=labels.indexOf("3PT");
+      for(const a of st.athletes||[]){
+        const ath=a.athlete||{};
+        if((pid&&String(ath.id)===pid)||(nm&&ath.displayName===nm)){
+          return {num:ath.jersey||"", pos:(ath.position&&ath.position.abbreviation)||"",
+                  pts:iP>=0&&a.stats?a.stats[iP]:null, tpm:i3>=0&&a.stats?a.stats[i3]:null};
+        }
+      }
+    }
+  }catch(e){}
+  return null;
+}
+/* demo/replay shooter: plausible jersey + position + stat line */
+function demoShooter(){
+  const made=1+Math.floor(Math.random()*6);
+  return {num:String(Math.floor(Math.random()*45)), pos:["G","G","F","F","C"][Math.floor(Math.random()*5)],
+          pts:5+made*3+Math.floor(Math.random()*8), tpm:`${made}-${made+Math.floor(Math.random()*4)}`};
+}
 /* ---- the 13 moments (each becomes a bespoke build; the rest are working stubs) ---- */
-const momentThree=(t,ft)=>triggerDowntown(t,ft);   // user picked the meter for ALL threes; triggerNetCam(t,ft) kept dormant — swap back here
-const momentLong3=(t,ft)=>triggerDowntown(t,ft||30);
+const momentThree=(t,ft,info)=>triggerDowntown(t,ft,info);   // user picked the meter for ALL threes; triggerNetCam(t,ft) kept dormant — swap back here
+const momentLong3=(t,ft,info)=>triggerDowntown(t,ft||30,info);
 const momentSlam=t=>triggerMoment({team:t,kick:"HAMMER TIME",word:"SLAM!",sub:`${t.abbr} THROWS IT DOWN`,dur:5200});
 const momentSteal=t=>triggerMoment({team:t,kick:"PICKED HIS POCKET",word:"STEAL!",sub:`${t.abbr} TAKES IT AWAY`,alarm:true,dur:4600});
 const momentGameWinner=t=>triggerMoment({team:t,kick:"FOR THE WIN…",word:"DAGGER!",sub:`${t.name} WITH THE GAME-WINNER`,dur:7000});
@@ -4488,8 +4614,8 @@ const momentFaceoff=()=>triggerMoment({accent:"#7fd0ff",kick:"EYES UP",word:"FAC
 const momentPeriodEnd=p=>triggerMoment({accent:"#ffb02e",kick:"SIREN",word:"END OF "+(p<=3?["1ST","2ND","3RD"][p-1]:"OT"),sub:"PERIOD COMPLETE",alarm:true,dur:5000});
 const momentOneMinute=()=>triggerMoment({accent:"#ff4b3e",kick:"CLOCK CHECK",word:"1:00",sub:"ONE MINUTE REMAINING",alarm:true,dur:5000});
 /* preview buttons */
-$("#b3Btn").onclick=()=>momentThree(G.home,23+Math.floor(Math.random()*5));
-$("#bL3Btn").onclick=e=>{const b=e.currentTarget;b._n=(b._n||0)+1;momentLong3(G.away,b._n%2?31:35);};
+$("#b3Btn").onclick=()=>momentThree(G.home,23+Math.floor(Math.random()*5),demoShooter());
+$("#bL3Btn").onclick=e=>{const b=e.currentTarget;b._n=(b._n||0)+1;momentLong3(G.away,b._n%2?31:35,demoShooter());};
 $("#bSlamBtn").onclick=()=>momentSlam(G.home);
 $("#bStealBtn").onclick=()=>momentSteal(G.away);
 $("#bWinBtn").onclick=()=>momentGameWinner(G.home);
