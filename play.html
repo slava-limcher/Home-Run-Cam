@@ -1352,6 +1352,90 @@ body.nhl #nhlBtns{display:contents}
 #dtOverlay .hcard{gap:14px}
 #dtOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.95s both}
 #dtOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
+/* ---- GLASS CAM: bespoke slam-dunk takeover — the ball hammers through, the backboard shatters ---- */
+#gcOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#gcOverlay.show{display:block;opacity:1}
+#gcOverlay::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen;z-index:1;
+  background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
+             radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
+#gcOverlay.show::before{animation:hleakIn .8s ease-out 1.55s both}
+.gc-bloom{position:absolute;width:26vw;height:16vw;border-radius:50%;filter:blur(60px);
+  background:rgba(226,238,255,.14);pointer-events:none;z-index:0}
+.gc-bloom.l{left:-8vw;top:-4vw}.gc-bloom.r{right:-8vw;top:-4vw}
+/* the ball: fixed x, gravity drop straight through the rim and out the bottom */
+.gc-ballw{position:absolute;left:50%;top:0;z-index:4;pointer-events:none;transform:translateX(-50%)}
+.gc-bally{transform:translateY(-64vh)}
+#gcOverlay.show .gc-bally{animation:gcBallY 1.1s cubic-bezier(.42,0,.88,.6) .35s both}
+@keyframes gcBallY{from{transform:translateY(-64vh)}to{transform:translateY(120vh)}}
+.gc-bally svg{display:block;width:clamp(64px,8.4vw,120px);height:auto;
+  filter:drop-shadow(0 -16px 12px rgba(247,142,61,.3))}
+#gcOverlay.show .gc-bally svg{animation:gcBallSpin 1.1s linear .35s both}
+@keyframes gcBallSpin{from{transform:rotate(0)}to{transform:rotate(420deg)}}
+/* scene: backboard + rim + net (svg), shakes on impact and again on the shatter */
+.gc-scene{position:absolute;inset:0;z-index:3;pointer-events:none}
+.gc-scene svg{position:absolute;inset:0;width:100%;height:100%}
+#gcOverlay.show .gc-scene{animation:gcShake1 .4s linear 1.02s, gcShake2 .55s linear 1.55s}
+@keyframes gcShake1{0%,100%{transform:translate(0,0)}25%{transform:translate(-7px,4px)}
+  50%{transform:translate(6px,-4px)}75%{transform:translate(-4px,2px)}}
+@keyframes gcShake2{0%,100%{transform:translate(0,0)}18%{transform:translate(-11px,7px)}
+  38%{transform:translate(10px,-6px)}58%{transform:translate(-7px,4px)}78%{transform:translate(4px,-2px)}}
+/* glass panel + cracks vanish at the shatter */
+.gc-glass,.gc-crack1,.gc-crack2{transform-box:view-box}
+#gcOverlay.show .gc-glass{animation:gcGone .01s linear 1.55s forwards}
+@keyframes gcGone{to{opacity:0}}
+.gc-crack1 path,.gc-crack2 path{stroke-dasharray:1;stroke-dashoffset:1}
+#gcOverlay.show .gc-crack1{animation:gcGone .01s linear 1.55s forwards}
+#gcOverlay.show .gc-crack2{animation:gcGone .01s linear 1.55s forwards}
+#gcOverlay.show .gc-crack1 path{animation:gcCrackDraw .12s ease-out 1.02s both}
+#gcOverlay.show .gc-crack2 path{animation:gcCrackDraw .14s ease-out 1.18s both}
+@keyframes gcCrackDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+/* rim: snap on impact (inner), left swinging after the shatter (outer) */
+.gc-rimswing{transform-box:view-box;transform-origin:720px 368px}
+#gcOverlay.show .gc-rimswing{animation:gcRimSwing 2.6s ease-in-out 1.55s both}
+@keyframes gcRimSwing{0%{transform:rotate(0)}14%{transform:rotate(2.6deg)}32%{transform:rotate(-2deg)}
+  52%{transform:rotate(1.3deg)}72%{transform:rotate(-.7deg)}100%{transform:rotate(0)}}
+.gc-rimg{transform-box:view-box;transform-origin:720px 368px}
+#gcOverlay.show .gc-rimg{animation:gcRimSnap .7s cubic-bezier(.2,.8,.3,1) 1.02s both}
+@keyframes gcRimSnap{0%{transform:translateY(0) scaleY(1)}22%{transform:translateY(26px) scaleY(1.28)}
+  48%{transform:translateY(-7px) scaleY(.94)}72%{transform:translateY(4px) scaleY(1.04)}100%{transform:none}}
+.gc-net{transform-box:view-box;transform-origin:720px 396px}
+#gcOverlay.show .gc-net{animation:gcNet .9s cubic-bezier(.2,.8,.3,1) 1.04s both}
+@keyframes gcNet{0%{transform:scaleY(1) skewX(0)}20%{transform:scaleY(1.34) skewX(3deg)}
+  45%{transform:scaleY(.92) skewX(-2.4deg)}70%{transform:scaleY(1.08) skewX(1.2deg)}100%{transform:none}}
+/* the shards: hidden until the shatter, then fly out with gravity + spin */
+.gc-shard{opacity:0;transform-box:view-box;transform-origin:center;
+  fill:rgba(215,235,255,.30);stroke:rgba(255,255,255,.6);stroke-width:1.5}
+#gcOverlay.show .gc-shard{animation:gcShardFly 1.7s cubic-bezier(.3,0,.8,.6) forwards;
+  animation-delay:calc(1.55s + var(--d,0s))}
+@keyframes gcShardFly{0%{opacity:1;transform:translate(0,0) rotate(0)}
+  80%{opacity:.95}100%{opacity:0;transform:translate(var(--tx,0px),var(--ty,420px)) rotate(var(--rot,120deg))}}
+/* impact + shatter flashes */
+.gc-flash1,.gc-flash2{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0}
+.gc-flash1{background:radial-gradient(40vw 30vh at 50% 46%,rgba(255,255,255,.7),transparent 70%)}
+.gc-flash2{background:radial-gradient(60vw 46vh at 50% 34%,rgba(255,255,255,.95),transparent 72%)}
+#gcOverlay.show .gc-flash1{animation:gcFl .32s ease-out 1.02s both}
+#gcOverlay.show .gc-flash2{animation:gcFl .5s ease-out 1.55s both}
+@keyframes gcFl{0%{opacity:0}22%{opacity:1}100%{opacity:0}}
+/* glints sparkling in the shard rain */
+.gc-glints i{position:absolute;width:6px;height:6px;border-radius:50%;opacity:0;z-index:5;
+  background:radial-gradient(circle,#fff,rgba(214,236,255,.2))}
+#gcOverlay.show .gc-glints i{animation:gcGlint .9s ease-out both;animation-delay:calc(1.6s + var(--d,0s))}
+@keyframes gcGlint{0%{opacity:0;transform:translateY(0) scale(.4)}25%{opacity:1;transform:scale(1.3)}
+  100%{opacity:0;transform:translateY(200px) scale(.3)}}
+/* text package */
+.gc-kick{position:absolute;left:0;right:0;top:9%;text-align:center;z-index:6;
+  color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
+#gcOverlay.show .gc-kick{animation:anFade .5s .25s both}
+.gc-word{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:6;
+  font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
+#gcOverlay.show .gc-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.2s both, nfpShine 2.6s linear 2.8s infinite}
+.gc-sub{position:absolute;left:0;right:0;top:64%;text-align:center;z-index:6;
+  color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#gcOverlay.show .gc-sub{animation:anFade .45s 2.55s both}
+#gcOverlay .hcard{gap:14px;z-index:7}
+#gcOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.85s both}
+#gcOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- NET CAM: bespoke 3-pointer takeover — behind-the-cords swish (regular threes; 28+ ft go to the meter) ---- */
 #ncOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
   background:
@@ -2573,6 +2657,81 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
+<!-- GLASS CAM: bespoke slam-dunk takeover — ball hammers through, rim snaps, the backboard shatters -->
+<div id="gcOverlay">
+  <div class="gc-bloom l"></div><div class="gc-bloom r"></div>
+  <div class="gc-ballw"><div class="gc-bally"><svg viewBox="0 0 140 140">
+    <defs><radialGradient id="gcbg" cx="35%" cy="30%" r="85%">
+      <stop offset="0" stop-color="#f9974a"/><stop offset=".5" stop-color="#d96b28"/><stop offset="1" stop-color="#8a3d14"/>
+    </radialGradient></defs>
+    <circle cx="70" cy="70" r="62" fill="url(#gcbg)" stroke="#5e2c10" stroke-width="3"/>
+    <g fill="none" stroke="#5e2c10" stroke-width="3">
+      <path d="M8 70 Q70 44 132 70"/><path d="M70 8 Q98 70 70 132"/>
+      <path d="M24 26 Q70 70 24 114"/><path d="M116 26 Q70 70 116 114"/>
+    </g>
+  </svg></div></div>
+  <div class="gc-scene"><svg viewBox="0 0 1440 810" preserveAspectRatio="xMidYMid slice">
+    <g class="gc-glass">
+      <rect x="520" y="130" width="400" height="240" rx="10" fill="rgba(210,230,255,.10)" stroke="rgba(255,255,255,.5)" stroke-width="4"/>
+      <rect x="660" y="240" width="120" height="70" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
+    </g>
+    <g class="gc-crack1" fill="none" stroke="rgba(230,245,255,.85)" stroke-width="2">
+      <path pathLength="1" d="M720 352 L698 322"/><path pathLength="1" d="M720 352 L744 318"/>
+      <path pathLength="1" d="M712 352 L680 336"/>
+    </g>
+    <g class="gc-crack2" fill="none" stroke="rgba(230,245,255,.8)" stroke-width="2">
+      <path pathLength="1" d="M720 350 L560 160"/><path pathLength="1" d="M720 350 L880 155"/>
+      <path pathLength="1" d="M720 350 L525 300"/><path pathLength="1" d="M720 350 L915 290"/>
+      <path pathLength="1" d="M720 350 L660 135"/><path pathLength="1" d="M720 350 L790 132"/>
+      <path pathLength="1" d="M720 350 L600 368"/><path pathLength="1" d="M720 350 L850 366"/>
+      <path pathLength="1" d="M600 250 L650 210 L700 235 L760 205 L820 245 L860 220"/>
+      <path pathLength="1" d="M560 310 L620 280 L690 300 L760 285 L840 305 L890 275"/>
+    </g>
+    <g>
+      <polygon class="gc-shard" style="--tx:-160px;--ty:300px;--rot:-140deg;--d:.02s" points="520,130 620,130 560,200"/>
+      <polygon class="gc-shard" style="--tx:-70px;--ty:340px;--rot:90deg;--d:.05s" points="620,130 720,130 660,210"/>
+      <polygon class="gc-shard" style="--tx:70px;--ty:330px;--rot:-100deg;--d:.01s" points="720,130 820,130 780,200"/>
+      <polygon class="gc-shard" style="--tx:170px;--ty:300px;--rot:150deg;--d:.06s" points="820,130 920,130 870,210"/>
+      <polygon class="gc-shard" style="--tx:-200px;--ty:260px;--rot:-170deg;--d:.08s" points="520,130 560,200 520,260"/>
+      <polygon class="gc-shard" style="--tx:200px;--ty:270px;--rot:160deg;--d:.03s" points="920,130 870,210 920,270"/>
+      <polygon class="gc-shard" style="--tx:-120px;--ty:380px;--rot:-120deg;--d:0s" points="560,200 660,210 600,280"/>
+      <polygon class="gc-shard" style="--tx:0px;--ty:430px;--rot:70deg;--d:.04s" points="660,210 780,200 720,290"/>
+      <polygon class="gc-shard" style="--tx:130px;--ty:380px;--rot:110deg;--d:.07s" points="780,200 870,210 830,290"/>
+      <polygon class="gc-shard" style="--tx:-180px;--ty:330px;--rot:-90deg;--d:.05s" points="520,260 600,280 540,340"/>
+      <polygon class="gc-shard" style="--tx:-60px;--ty:460px;--rot:-60deg;--d:.02s" points="600,280 720,290 640,360"/>
+      <polygon class="gc-shard" style="--tx:60px;--ty:470px;--rot:80deg;--d:.06s" points="720,290 830,290 760,360"/>
+      <polygon class="gc-shard" style="--tx:190px;--ty:340px;--rot:130deg;--d:.01s" points="870,210 920,270 890,340"/>
+      <polygon class="gc-shard" style="--tx:-150px;--ty:420px;--rot:-70deg;--d:.03s" points="520,340 640,360 560,370 520,370"/>
+      <polygon class="gc-shard" style="--tx:-10px;--ty:500px;--rot:50deg;--d:.08s" points="640,360 760,360 700,370"/>
+      <polygon class="gc-shard" style="--tx:150px;--ty:430px;--rot:100deg;--d:.04s" points="760,360 890,340 920,370 800,370"/>
+      <polygon class="gc-shard" style="--tx:-20px;--ty:390px;--rot:-110deg;--d:.07s" points="720,130 780,200 660,210"/>
+      <polygon class="gc-shard" style="--tx:-110px;--ty:440px;--rot:-80deg;--d:.09s" points="600,280 640,360 560,340"/>
+    </g>
+    <g class="gc-rimswing">
+      <g class="gc-rimg">
+        <rect x="690" y="352" width="60" height="18" rx="3" fill="#8c93a0"/>
+        <ellipse cx="720" cy="392" rx="92" ry="22" fill="none" stroke="#ff8a3d" stroke-width="9"/>
+        <ellipse cx="720" cy="392" rx="92" ry="22" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+      </g>
+      <g class="gc-net" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="2.5" stroke-linecap="round">
+        <path d="M636 398 L676 505"/><path d="M664 408 L690 512"/><path d="M692 412 L706 516"/>
+        <path d="M720 414 L720 518"/><path d="M748 412 L734 516"/><path d="M776 408 L750 512"/>
+        <path d="M804 398 L764 505"/>
+        <path d="M660 448 Q720 470 780 448"/><path d="M676 480 Q720 496 764 480"/>
+      </g>
+    </g>
+  </svg></div>
+  <div class="gc-flash1"></div><div class="gc-flash2"></div>
+  <div class="gc-glints">
+    <i style="left:42%;top:28%;--d:0s"></i><i style="left:56%;top:24%;--d:.12s"></i>
+    <i style="left:48%;top:38%;--d:.06s"></i><i style="left:61%;top:36%;--d:.2s"></i>
+    <i style="left:39%;top:44%;--d:.16s"></i><i style="left:52%;top:48%;--d:.26s"></i>
+  </div>
+  <div class="gc-kick">HAMMER TIME</div>
+  <div class="gc-word nfp-chrome" id="gcWord">SLAM!</div>
+  <div class="gc-sub" id="gcSub"></div>
+  <div class="hcard"><img id="gcLogo" alt=""><div><div class="hname" id="gcName"></div><div class="hstat" id="gcStat"></div></div></div>
+</div>
 <!-- NET CAM: bespoke 3-pointer takeover — behind-the-cords swish (the ball rips the net past the lens) -->
 <div id="ncOverlay">
   <div class="nc-bloom l"></div><div class="nc-bloom r"></div>
@@ -2819,6 +2978,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endMoment==="function")endMoment();
   if(typeof endDowntown==="function")endDowntown();
   if(typeof endNetCam==="function")endNetCam();
+  if(typeof endSlamCam==="function")endSlamCam();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -2834,7 +2994,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -3650,7 +3810,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -4486,7 +4646,7 @@ async function tickX(first){
           if(late)momentGameWinner(team);
           else if(ft&&+ft>=28)momentLong3(team,+ft,info);
           else momentThree(team,ft?+ft:null,info);
-        }else if(p.scoringPlay&&/dunk/i.test(txt))momentSlam(team);
+        }else if(p.scoringPlay&&/dunk/i.test(txt))momentSlam(team,nbaShooterInfo(j,p));
         else if(/steal/i.test(txt))momentSteal(team);
         else if(/flagrant|technical foul/i.test(txt))momentFoul(team,(p.text||"").slice(0,44));
       }else{
@@ -4531,7 +4691,7 @@ function nbaDemoTick(){
       else momentThree(team,22+Math.floor(Math.random()*6),demoShooter());
     }else{                                              // a deuce
       if(isHome)G.home.score+=2; else G.away.score+=2;
-      if(Math.random()<.5)momentSlam(team);
+      if(Math.random()<.5)momentSlam(team,demoShooter());
     }
   }else if(r<.36)momentSteal(team);
   else if(r<.40){momentFoul._last=0;momentFoul(team,"Flagrant foul, penalty 1");}
@@ -4586,6 +4746,27 @@ function triggerMoment(o){
 }
 function endMoment(){ if(genOvEl&&genOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerMoment._t); if(genOvEl)genOvEl.classList.remove("show"); genPlaying=false; }
+/* ---- GLASS CAM (bespoke slam dunk): the ball hammers straight down through the rim — rim snaps
+        and springs, the glass spiderwebs in two stages, then the whole backboard SHATTERS into a
+        shard rain with the rim left swinging on its bolts. SLAM! punches through the falling glass. ---- */
+let gcPlaying=false;
+const gcOvEl=$("#gcOverlay");
+function triggerSlamCam(t,info){
+  if(takeoverBusy())return; gcPlaying=true; hideWalkup(); houseWipe();
+  t=t||{}; info=info||null;
+  gcOvEl.style.setProperty('--hacc',t.colorHex||"#e8c34a");
+  const tag=`${t.abbr||""}${info&&info.num?" #"+info.num:""}`.trim();
+  $("#gcSub").textContent=`${tag} THROWS IT DOWN`.trim();
+  $("#gcLogo").src=t.logo||""; $("#gcLogo").style.display=t.logo?"":"none";
+  const hasP=!!(info&&(info.num||info.pos));
+  $("#gcName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
+  $("#gcStat").textContent=((hasP&&t.name?t.name+" • ":"")
+    +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
+  gcOvEl.classList.remove("show"); void gcOvEl.offsetWidth; gcOvEl.classList.add("show");
+  clearTimeout(triggerSlamCam._t); triggerSlamCam._t=setTimeout(endSlamCam,7200);
+}
+function endSlamCam(){ if(gcOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerSlamCam._t); gcOvEl.classList.remove("show"); gcPlaying=false; }
 /* ---- NET CAM (bespoke 3-pointer, regular range): behind-the-cords swish — the ball arcs in
         from a distant speck, rips through the net toward the lens (staggered cord whip), white
         flash + splash droplets, SPLASH! punches through the settling net. 28+ footers go to the
@@ -4703,7 +4884,7 @@ function demoShooter(){
 /* ---- the 13 moments (each becomes a bespoke build; the rest are working stubs) ---- */
 const momentThree=(t,ft,info)=>triggerDowntown(t,ft,info);   // user picked the meter for ALL threes; triggerNetCam(t,ft) kept dormant — swap back here
 const momentLong3=(t,ft,info)=>triggerDowntown(t,ft||30,info);
-const momentSlam=t=>triggerMoment({team:t,kick:"HAMMER TIME",word:"SLAM!",sub:`${t.abbr} THROWS IT DOWN`,dur:5200});
+const momentSlam=(t,info)=>triggerSlamCam(t,info);
 const momentSteal=t=>triggerMoment({team:t,kick:"PICKED HIS POCKET",word:"STEAL!",sub:`${t.abbr} TAKES IT AWAY`,alarm:true,dur:4600});
 const momentGameWinner=t=>triggerMoment({team:t,kick:"FOR THE WIN…",word:"DAGGER!",sub:`${t.name} WITH THE GAME-WINNER`,dur:7000});
 const momentFoul=(t,txt)=>{const now=performance.now();
@@ -4719,7 +4900,7 @@ const momentOneMinute=()=>triggerMoment({accent:"#ff4b3e",kick:"CLOCK CHECK",wor
 /* preview buttons */
 $("#b3Btn").onclick=()=>momentThree(G.home,23+Math.floor(Math.random()*5),demoShooter());
 $("#bL3Btn").onclick=e=>{const b=e.currentTarget;b._n=(b._n||0)+1;momentLong3(G.away,b._n%2?31:35,demoShooter());};
-$("#bSlamBtn").onclick=()=>momentSlam(G.home);
+$("#bSlamBtn").onclick=()=>momentSlam(G.home,demoShooter());
 $("#bStealBtn").onclick=()=>momentSteal(G.away);
 $("#bWinBtn").onclick=()=>momentGameWinner(G.home);
 $("#bFoulBtn").onclick=()=>{momentFoul._last=0;momentFoul(G.away,"Flagrant foul, penalty 1");};
