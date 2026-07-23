@@ -1237,27 +1237,27 @@ body.nhl #nhlBtns{display:contents}
   background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
              radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
 #dtOverlay.show::before{animation:hleakIn .8s ease-out 2.2s both}
-.dt-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:min(1.6vh,14px);text-align:center;padding:0 6vw 9vh}
-#dtOverlay.show .dt-inner{animation:dtShake .5s linear 3.2s}
-.dt-kick{color:#93a3b8;font-weight:900;letter-spacing:8px;font-size:clamp(14px,1.8vw,22px);opacity:0}
+.dt-inner{position:absolute;inset:0;z-index:6;pointer-events:none}
+#dtOverlay.show .dt-stage{animation:dtShake .5s linear 3.2s}
+.dt-kick{position:absolute;left:0;right:0;top:8%;text-align:center;color:#93a3b8;font-weight:900;
+  letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
 #dtOverlay.show .dt-kick{animation:anFade .5s .2s both}
-.dt-word{font-size:clamp(52px,10.5vw,158px);line-height:.92;opacity:0}
+.dt-word{position:absolute;left:0;right:0;top:38%;text-align:center;
+  font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
 #dtOverlay.show .dt-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3.45s both, nfpShine 2.6s linear 4.1s infinite}
-.dt-sub{color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+.dt-sub{position:absolute;left:0;right:0;top:63%;text-align:center;color:#c6d2e0;font-weight:800;
+  letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
 #dtOverlay.show .dt-sub{animation:anFade .45s 3.8s both}
-/* ===== two-act stage: ACT 1 top-down half court (where they shot) -> ACT 2 the side-view arc ===== */
-.dt-stage{position:relative;width:min(82vw,880px);height:clamp(210px,31vh,320px);margin-top:min(2.2vh,18px)}
-/* ACT 1 — top-down half-court diagram box (MLB-HR-diagram style), no hoop, marks the shot spot */
-.dt-court{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;opacity:0;
-  background:linear-gradient(180deg,rgba(15,20,30,.94),rgba(8,11,17,.94));
-  border:1px solid rgba(255,255,255,.16);border-top:4px solid var(--hacc,#e8c34a);border-radius:14px;
-  padding:9px 14px 8px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+/* ===== FULLSCREEN two-act stage: ACT 1 top-down half court (where they shot) -> ACT 2 the side-view arc ===== */
+.dt-stage{position:absolute;inset:0;z-index:0}
+/* ACT 1 — fullscreen top-down half-court diagram (no hoop), marks the shot spot */
+.dt-court{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:min(2vh,18px);opacity:0}
 #dtOverlay.show .dt-court{animation:dtCourtIn .5s cubic-bezier(.2,.9,.3,1) .3s both, dtCourtOut .45s ease-in 2.05s both}
-@keyframes dtCourtIn{from{opacity:0;transform:scale(.92) translateY(14px)}to{opacity:1;transform:none}}
-@keyframes dtCourtOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(1.05)}}
-.dt-courtlbl{color:#93a3b8;font-weight:900;letter-spacing:5px;font-size:clamp(10px,1.15vw,14px);margin-bottom:5px}
-.dt-courtsvg{flex:1;min-height:0;width:auto;height:100%}
+@keyframes dtCourtIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes dtCourtOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(1.06)}}
+.dt-courtlbl{color:#93a3b8;font-weight:900;letter-spacing:6px;font-size:clamp(12px,1.6vw,22px)}
+.dt-courtsvg{width:auto;height:min(72vh,86vw);max-width:94vw}
 .dt-cl{fill:none;stroke:rgba(184,200,218,.5);stroke-width:3;stroke-linejoin:round}
 .dt-cl.key{fill:rgba(255,255,255,.035)}
 .dt-arc3{fill:none;stroke:color-mix(in srgb,var(--hacc,#e8c34a) 78%,#fff);stroke-width:4}
@@ -2919,27 +2919,28 @@ body.tvmode .scorewrap{justify-content:center}
     <i style="--x:77%;--del:.6s;--dur:5.2s;--sz:4px"></i><i style="--x:85%;--del:2.1s;--dur:4.5s;--sz:6px"></i>
     <i style="--x:92%;--del:1.4s;--dur:3.9s;--sz:5px"></i><i style="--x:97%;--del:3s;--dur:4.8s;--sz:4px"></i>
   </div>
+  <!-- FULLSCREEN two-act stage (behind the text) -->
+  <div class="dt-stage">
+    <!-- ACT 1: fullscreen top-down half court, marks where they were standing when they shot -->
+    <div class="dt-court">
+      <div class="dt-courtlbl">SHOT LOCATION</div>
+      <svg class="dt-courtsvg" id="dtCourtSvg" viewBox="0 0 520 368"></svg>
+    </div>
+    <!-- ACT 2: fullscreen side view of the arc they shot, into the coded hoop -->
+    <div class="dt-air" id="dtAir">
+      <svg id="dtArcSvg" viewBox="0 0 1200 260"></svg>
+      <div class="dt-arcball" id="dtBall"></div>
+      <div class="dt-launch" id="dtLaunch"></div>
+      <div class="dt-rimfx" id="dtRimFx"><b></b>
+        <i style="--dx:-26px;--dy:44px"></i><i style="--dx:2px;--dy:56px"></i><i style="--dx:26px;--dy:46px"></i>
+        <i style="--dx:-40px;--dy:20px"></i><i style="--dx:42px;--dy:24px"></i><i style="--dx:12px;--dy:64px"></i>
+      </div>
+    </div>
+  </div>
   <div class="dt-inner">
     <div class="dt-kick" id="dtKick">FROM DOWNTOWN</div>
     <div class="dt-word nfp-chrome" id="dtWord"></div>
     <div class="dt-sub" id="dtSub"></div>
-    <div class="dt-stage">
-      <!-- ACT 1: top-down half court, marks where they were standing when they shot -->
-      <div class="dt-court">
-        <div class="dt-courtlbl">SHOT LOCATION</div>
-        <svg class="dt-courtsvg" id="dtCourtSvg" viewBox="0 0 520 368"></svg>
-      </div>
-      <!-- ACT 2: side view of the arc they shot, into the coded hoop -->
-      <div class="dt-air" id="dtAir">
-        <svg id="dtArcSvg" viewBox="0 0 1200 260"></svg>
-        <div class="dt-arcball" id="dtBall"></div>
-        <div class="dt-launch" id="dtLaunch"></div>
-        <div class="dt-rimfx" id="dtRimFx"><b></b>
-          <i style="--dx:-26px;--dy:44px"></i><i style="--dx:2px;--dy:56px"></i><i style="--dx:26px;--dy:46px"></i>
-          <i style="--dx:-40px;--dy:20px"></i><i style="--dx:42px;--dy:24px"></i><i style="--dx:12px;--dy:64px"></i>
-        </div>
-      </div>
-    </div>
   </div>
   <div class="hcard"><img id="dtLogo" alt=""><div><div class="hname" id="dtName"></div><div class="hstat" id="dtStat"></div></div>
     <div class="dt-tile" id="dtTileP"><div class="v" id="dtTPv">0</div><div class="k">PTS TONIGHT</div></div>
@@ -4994,30 +4995,34 @@ function triggerDowntown(t,ft,info){
     +`<g class="dt-spot"><circle class="dt-spotring" cx="${mx}" cy="${my}" r="12"/>`
     +`<circle class="dt-spotrim" cx="${mx}" cy="${my}" r="13"/>`
     +`<circle class="dt-spotdot" cx="${mx}" cy="${my}" r="8"/></g>`;
-  // ACT 2 — side-view scorched arc from THIS distance into the coded hoop at the 0-ft end
-  const air=$("#dtAir"), aw=air.clientWidth||1200, ah=air.clientHeight||260;
-  const sx=Math.max(120,Math.round(shown/40*aw)), sy=ah-2;
-  const rimX=50, rimY=Math.round(ah*0.38);
-  const cx=Math.round((sx+rimX)/2), cy=Math.max(8,Math.round(ah*(0.32-0.26*shown/40)));
-  const d=`M${sx} ${sy} Q${cx} ${cy} ${rimX+4} ${rimY-8} q-4 22 -11 34`;
+  // ACT 2 — FULLSCREEN side-view scorched arc from THIS distance into the coded hoop at the left.
+  // Everything scales by k (=stage height / 300) so the hoop/ball grow with the screen instead of
+  // shrinking into the corner; the ball DIV shares the SVG's 1:1 px viewBox so its offset-path lines up.
+  const air=$("#dtAir"), aw=air.clientWidth||1280, ah=air.clientHeight||720;
+  const k=Math.max(1, ah/300), ks=Math.min(k,2.4), P=n=>Math.round(n*k);
+  const sx=Math.max(P(120),Math.round(shown/40*aw)), sy=ah-2;
+  const rimX=P(60), rimY=Math.round(ah*0.42);
+  const cx=Math.round((sx+rimX)/2), cy=Math.max(10,Math.round(ah*(0.30-0.24*shown/40)));
+  const d=`M${sx} ${sy} Q${cx} ${cy} ${rimX+P(5)} ${rimY-P(9)} q${-5*k} ${24*k} ${-13*k} ${38*k}`;
   $("#dtArcSvg").setAttribute("viewBox",`0 0 ${aw} ${ah}`);
   $("#dtArcSvg").innerHTML=
     `<defs><linearGradient id="dtFireG" gradientUnits="userSpaceOnUse" x1="${sx}" y1="0" x2="${rimX}" y2="0">`
     +`<stop offset="0" stop-color="#8a3414" stop-opacity=".55"/><stop offset=".55" stop-color="#ff7a2e"/>`
     +`<stop offset="1" stop-color="#ffd76a"/></linearGradient></defs>`
-    +`<g stroke="#cfd6df" stroke-width="4" fill="none" stroke-linecap="round" opacity=".9">`
-    +`<line x1="12" y1="${ah}" x2="12" y2="${rimY-56}"/><line x1="12" y1="${rimY-54}" x2="30" y2="${rimY-42}"/>`
-    +`<line x1="31" y1="${rimY-46}" x2="31" y2="${rimY+8}" stroke-width="6"/></g>`
-    +`<line x1="33" y1="${rimY}" x2="70" y2="${rimY}" stroke="#ff8a3d" stroke-width="5" stroke-linecap="round"/>`
-    +`<g stroke="rgba(255,255,255,.75)" stroke-width="2" fill="none">`
-    +`<line x1="36" y1="${rimY+2}" x2="44" y2="${rimY+30}"/><line x1="48" y1="${rimY+2}" x2="50" y2="${rimY+32}"/>`
-    +`<line x1="58" y1="${rimY+2}" x2="54" y2="${rimY+32}"/><line x1="68" y1="${rimY+2}" x2="60" y2="${rimY+30}"/>`
-    +`<path d="M44 ${rimY+18} Q52 ${rimY+22} 60 ${rimY+18}"/></g>`
-    +`<path class="dt-arcglow" pathLength="1" d="${d}"/>`
-    +`<path class="dt-arcpath" pathLength="1" d="${d}"/>`;
-  $("#dtBall").style.offsetPath=`path("${d}")`;
-  $("#dtLaunch").style.left=(sx-34)+"px";
-  $("#dtRimFx").style.left="16px"; $("#dtRimFx").style.top=(rimY-26)+"px";
+    +`<g stroke="#cfd6df" stroke-width="${(4*ks).toFixed(1)}" fill="none" stroke-linecap="round" opacity=".9">`
+    +`<line x1="${P(14)}" y1="${ah}" x2="${P(14)}" y2="${rimY-P(64)}"/><line x1="${P(14)}" y1="${rimY-P(62)}" x2="${P(34)}" y2="${rimY-P(48)}"/>`
+    +`<line x1="${P(35)}" y1="${rimY-P(52)}" x2="${P(35)}" y2="${rimY+P(10)}" stroke-width="${(7*ks).toFixed(1)}"/></g>`
+    +`<line x1="${P(37)}" y1="${rimY}" x2="${P(84)}" y2="${rimY}" stroke="#ff8a3d" stroke-width="${(6*ks).toFixed(1)}" stroke-linecap="round"/>`
+    +`<g stroke="rgba(255,255,255,.75)" stroke-width="${(2.2*ks).toFixed(1)}" fill="none">`
+    +`<line x1="${P(40)}" y1="${rimY+P(2)}" x2="${P(49)}" y2="${rimY+P(34)}"/><line x1="${P(53)}" y1="${rimY+P(2)}" x2="${P(56)}" y2="${rimY+P(36)}"/>`
+    +`<line x1="${P(64)}" y1="${rimY+P(2)}" x2="${P(60)}" y2="${rimY+P(36)}"/><line x1="${P(80)}" y1="${rimY+P(2)}" x2="${P(72)}" y2="${rimY+P(34)}"/>`
+    +`<path d="M${P(48)} ${rimY+P(20)} Q${P(58)} ${rimY+P(24)} ${P(68)} ${rimY+P(20)}"/></g>`
+    +`<path class="dt-arcglow" pathLength="1" style="stroke-width:${(10*ks).toFixed(1)}" d="${d}"/>`
+    +`<path class="dt-arcpath" pathLength="1" style="stroke-width:${(4.5*ks).toFixed(1)}" d="${d}"/>`;
+  const bd=Math.round(17*ks), bl=$("#dtBall"), ln=$("#dtLaunch"), rf=$("#dtRimFx");
+  bl.style.width=bd+"px"; bl.style.height=bd+"px"; bl.style.offsetPath=`path("${d}")`;
+  ln.style.left=(sx-P(34))+"px"; ln.style.width=P(68)+"px"; ln.style.height=P(46)+"px";
+  rf.style.left=P(20)+"px"; rf.style.top=(rimY-P(26))+"px"; rf.style.width=P(70)+"px"; rf.style.height=P(70)+"px";
   clearTimeout(triggerDowntown._s);
   triggerDowntown._s=setTimeout(()=>{            // card lands: count the shooter's line
     if(info&&info.pts!=null)countUp($("#dtTPv"),String(info.pts));
