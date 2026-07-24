@@ -1335,6 +1335,10 @@ body.nhl #nhlBtns{display:contents}
   background:radial-gradient(55vw 120vh at -12% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 50%, transparent), transparent 62%),
              radial-gradient(55vw 120vh at 112% 50%, color-mix(in srgb, var(--hacc,#e8c34a) 42%, transparent), transparent 62%)}
 #gcOverlay.show::before{animation:hleakIn .8s ease-out 1.55s both}
+.gc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:5}
+.gc-veil{position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 42%, transparent 40%, rgba(3,5,9,.7) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.38), transparent 26%, transparent 60%, rgba(3,5,9,.6))}
 .gc-bloom{position:absolute;width:26vw;height:16vw;border-radius:50%;filter:blur(60px);
   background:rgba(226,238,255,.14);pointer-events:none;z-index:0}
 .gc-bloom.l{left:-8vw;top:-4vw}.gc-bloom.r{right:-8vw;top:-4vw}
@@ -1404,12 +1408,12 @@ body.nhl #nhlBtns{display:contents}
 #gcOverlay.show .gc-kick{animation:anFade .5s .25s both}
 .gc-word{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:6;
   font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
-#gcOverlay.show .gc-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.2s both, nfpShine 2.6s linear 2.8s infinite}
+#gcOverlay.show .gc-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.4s both, nfpShine 2.6s linear 3s infinite}
 .gc-sub{position:absolute;left:0;right:0;top:64%;text-align:center;z-index:6;
   color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
-#gcOverlay.show .gc-sub{animation:anFade .45s 2.55s both}
+#gcOverlay.show .gc-sub{animation:anFade .45s 2.8s both}
 #gcOverlay .hcard{gap:14px;z-index:7}
-#gcOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 2.85s both}
+#gcOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.05s both}
 #gcOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- BUZZER BEATER: bespoke game-winner takeover — 3-2-1 countdown, ball arcs in, 0.0 detonates ---- */
 #gwOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2820,6 +2824,9 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <!-- GLASS CAM: bespoke slam-dunk takeover — ball hammers through, rim snaps, the backboard shatters -->
 <div id="gcOverlay">
+  <!-- user's dunk FILM (random of dunk1/dunk2 per dunk) covers the coded glass-shatter scene below (kept as dormant fallback) -->
+  <video class="gc-vid" id="gcVid" muted playsinline preload="auto" poster="dunk1.jpg"></video>
+  <div class="gc-veil"></div>
   <div class="gc-bloom l"></div><div class="gc-bloom r"></div>
   <div class="gc-ballw"><div class="gc-bally"><svg viewBox="0 0 140 140">
     <defs><radialGradient id="gcbg" cx="35%" cy="30%" r="85%">
@@ -4879,28 +4886,18 @@ function triggerSlamCam(t,info){
   $("#gcName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
   $("#gcStat").textContent=((hasP&&t.name?t.name+" • ":"")
     +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
-  // shatter the glass into a fine grid of small triangles (regenerated each trigger)
-  const shardG=document.getElementById("gcShards");
-  if(shardG){
-    const X0=523,Y0=133,W=394,H=234,cols=8,rows=6,cw=W/cols,ch=H/rows,cx0=X0+W/2;
-    const jt=n=>(Math.random()*2-1)*n;
-    const fly=(px,py)=>`--tx:${Math.round((px-cx0)*0.95+jt(50))}px;--ty:${Math.round(210+(py-Y0)*0.85+Math.random()*170)}px;`
-      +`--rot:${Math.round(jt(240))}deg;--d:${(Math.random()*0.12).toFixed(3)}s`;
-    let s="";
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const x=X0+c*cw,y=Y0+r*ch,
-        ax=(x+jt(5)).toFixed(1),ay=(y+jt(5)).toFixed(1), bx=(x+cw+jt(5)).toFixed(1),by=(y+jt(5)).toFixed(1),
-        dx=(x+jt(5)).toFixed(1),dy=(y+ch+jt(5)).toFixed(1), ex=(x+cw+jt(5)).toFixed(1),ey=(y+ch+jt(5)).toFixed(1);
-      s+=`<polygon class="gc-shard" style="${fly(x+cw/2,y+ch/2)}" points="${ax},${ay} ${bx},${by} ${dx},${dy}"/>`
-       +`<polygon class="gc-shard" style="${fly(x+cw/2,y+ch/2)}" points="${bx},${by} ${ex},${ey} ${dx},${dy}"/>`;
-    }
-    shardG.innerHTML=s;
-  }
   gcOvEl.classList.remove("show"); void gcOvEl.offsetWidth; gcOvEl.classList.add("show");
-  clearTimeout(triggerSlamCam._t); triggerSlamCam._t=setTimeout(endSlamCam,7200);
+  // play a RANDOM one of the user's dunk films (NOT chosen by player — just variety), hold last frame
+  const v=$("#gcVid"), clip=Math.random()<0.5?"dunk1.mp4":"dunk2.mp4";
+  v.src=clip;
+  const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
+  v.onended=()=>{ try{v.pause();}catch(e){} };
+  if(v.readyState>=2)kick(); else v.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerSlamCam._t); triggerSlamCam._t=setTimeout(endSlamCam,6200);
 }
 function endSlamCam(){ if(gcOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerSlamCam._t); gcOvEl.classList.remove("show"); gcPlaying=false; }
+  clearTimeout(triggerSlamCam._t); const v=$("#gcVid"); if(v){v.onended=null; try{v.pause();}catch(e){}}
+  gcOvEl.classList.remove("show"); gcPlaying=false; }
 /* ---- BUZZER BEATER (bespoke game-winner): 3-2-1 countdown with a ball arcing in, then the
         0.0 buzzer detonates the screen in team color and DAGGER! punches through. ---- */
 let gwPlaying=false;
