@@ -1379,8 +1379,8 @@ body.nhl #nhlBtns{display:contents}
 @keyframes gcNet{0%{transform:scaleY(1) skewX(0)}20%{transform:scaleY(1.34) skewX(3deg)}
   45%{transform:scaleY(.92) skewX(-2.4deg)}70%{transform:scaleY(1.08) skewX(1.2deg)}100%{transform:none}}
 /* the shards: hidden until the shatter, then fly out with gravity + spin */
-.gc-shard{opacity:0;transform-box:view-box;transform-origin:center;
-  fill:rgba(215,235,255,.30);stroke:rgba(255,255,255,.6);stroke-width:1.5}
+.gc-shard{opacity:0;transform-box:fill-box;transform-origin:center;
+  fill:rgba(215,235,255,.28);stroke:rgba(255,255,255,.55);stroke-width:1}
 #gcOverlay.show .gc-shard{animation:gcShardFly 1.7s cubic-bezier(.3,0,.8,.6) forwards;
   animation-delay:calc(1.55s + var(--d,0s))}
 @keyframes gcShardFly{0%{opacity:1;transform:translate(0,0) rotate(0)}
@@ -2832,8 +2832,14 @@ body.tvmode .scorewrap{justify-content:center}
     </g>
   </svg></div></div>
   <div class="gc-scene"><svg viewBox="0 0 1440 810" preserveAspectRatio="xMidYMid slice">
+    <!-- the metal FRAME stays standing after the glass blows out -->
+    <g class="gc-frame">
+      <rect x="520" y="130" width="400" height="240" rx="10" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="6"/>
+      <rect x="522" y="132" width="396" height="236" rx="9" fill="none" stroke="rgba(120,140,165,.5)" stroke-width="2"/>
+    </g>
+    <!-- the glass pane + printed shooter square shatter away -->
     <g class="gc-glass">
-      <rect x="520" y="130" width="400" height="240" rx="10" fill="rgba(210,230,255,.10)" stroke="rgba(255,255,255,.5)" stroke-width="4"/>
+      <rect x="523" y="133" width="394" height="234" rx="8" fill="rgba(210,230,255,.10)"/>
       <rect x="660" y="240" width="120" height="70" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3"/>
     </g>
     <g class="gc-crack1" fill="none" stroke="rgba(230,245,255,.85)" stroke-width="2">
@@ -2848,26 +2854,8 @@ body.tvmode .scorewrap{justify-content:center}
       <path pathLength="1" d="M600 250 L650 210 L700 235 L760 205 L820 245 L860 220"/>
       <path pathLength="1" d="M560 310 L620 280 L690 300 L760 285 L840 305 L890 275"/>
     </g>
-    <g>
-      <polygon class="gc-shard" style="--tx:-160px;--ty:300px;--rot:-140deg;--d:.02s" points="520,130 620,130 560,200"/>
-      <polygon class="gc-shard" style="--tx:-70px;--ty:340px;--rot:90deg;--d:.05s" points="620,130 720,130 660,210"/>
-      <polygon class="gc-shard" style="--tx:70px;--ty:330px;--rot:-100deg;--d:.01s" points="720,130 820,130 780,200"/>
-      <polygon class="gc-shard" style="--tx:170px;--ty:300px;--rot:150deg;--d:.06s" points="820,130 920,130 870,210"/>
-      <polygon class="gc-shard" style="--tx:-200px;--ty:260px;--rot:-170deg;--d:.08s" points="520,130 560,200 520,260"/>
-      <polygon class="gc-shard" style="--tx:200px;--ty:270px;--rot:160deg;--d:.03s" points="920,130 870,210 920,270"/>
-      <polygon class="gc-shard" style="--tx:-120px;--ty:380px;--rot:-120deg;--d:0s" points="560,200 660,210 600,280"/>
-      <polygon class="gc-shard" style="--tx:0px;--ty:430px;--rot:70deg;--d:.04s" points="660,210 780,200 720,290"/>
-      <polygon class="gc-shard" style="--tx:130px;--ty:380px;--rot:110deg;--d:.07s" points="780,200 870,210 830,290"/>
-      <polygon class="gc-shard" style="--tx:-180px;--ty:330px;--rot:-90deg;--d:.05s" points="520,260 600,280 540,340"/>
-      <polygon class="gc-shard" style="--tx:-60px;--ty:460px;--rot:-60deg;--d:.02s" points="600,280 720,290 640,360"/>
-      <polygon class="gc-shard" style="--tx:60px;--ty:470px;--rot:80deg;--d:.06s" points="720,290 830,290 760,360"/>
-      <polygon class="gc-shard" style="--tx:190px;--ty:340px;--rot:130deg;--d:.01s" points="870,210 920,270 890,340"/>
-      <polygon class="gc-shard" style="--tx:-150px;--ty:420px;--rot:-70deg;--d:.03s" points="520,340 640,360 560,370 520,370"/>
-      <polygon class="gc-shard" style="--tx:-10px;--ty:500px;--rot:50deg;--d:.08s" points="640,360 760,360 700,370"/>
-      <polygon class="gc-shard" style="--tx:150px;--ty:430px;--rot:100deg;--d:.04s" points="760,360 890,340 920,370 800,370"/>
-      <polygon class="gc-shard" style="--tx:-20px;--ty:390px;--rot:-110deg;--d:.07s" points="720,130 780,200 660,210"/>
-      <polygon class="gc-shard" style="--tx:-110px;--ty:440px;--rot:-80deg;--d:.09s" points="600,280 640,360 560,340"/>
-    </g>
+    <!-- glass shards: generated as a fine grid of small triangles per trigger (triggerSlamCam) -->
+    <g id="gcShards"></g>
     <g class="gc-rimswing">
       <g class="gc-rimg">
         <rect x="690" y="352" width="60" height="18" rx="3" fill="#8c93a0"/>
@@ -4891,6 +4879,23 @@ function triggerSlamCam(t,info){
   $("#gcName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
   $("#gcStat").textContent=((hasP&&t.name?t.name+" • ":"")
     +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
+  // shatter the glass into a fine grid of small triangles (regenerated each trigger)
+  const shardG=document.getElementById("gcShards");
+  if(shardG){
+    const X0=523,Y0=133,W=394,H=234,cols=8,rows=6,cw=W/cols,ch=H/rows,cx0=X0+W/2;
+    const jt=n=>(Math.random()*2-1)*n;
+    const fly=(px,py)=>`--tx:${Math.round((px-cx0)*0.95+jt(50))}px;--ty:${Math.round(210+(py-Y0)*0.85+Math.random()*170)}px;`
+      +`--rot:${Math.round(jt(240))}deg;--d:${(Math.random()*0.12).toFixed(3)}s`;
+    let s="";
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const x=X0+c*cw,y=Y0+r*ch,
+        ax=(x+jt(5)).toFixed(1),ay=(y+jt(5)).toFixed(1), bx=(x+cw+jt(5)).toFixed(1),by=(y+jt(5)).toFixed(1),
+        dx=(x+jt(5)).toFixed(1),dy=(y+ch+jt(5)).toFixed(1), ex=(x+cw+jt(5)).toFixed(1),ey=(y+ch+jt(5)).toFixed(1);
+      s+=`<polygon class="gc-shard" style="${fly(x+cw/2,y+ch/2)}" points="${ax},${ay} ${bx},${by} ${dx},${dy}"/>`
+       +`<polygon class="gc-shard" style="${fly(x+cw/2,y+ch/2)}" points="${bx},${by} ${ex},${ey} ${dx},${dy}"/>`;
+    }
+    shardG.innerHTML=s;
+  }
   gcOvEl.classList.remove("show"); void gcOvEl.offsetWidth; gcOvEl.classList.add("show");
   clearTimeout(triggerSlamCam._t); triggerSlamCam._t=setTimeout(endSlamCam,7200);
 }
