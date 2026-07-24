@@ -1257,22 +1257,22 @@ body.nhl #nhlBtns{display:contents}
 @keyframes dtCourtIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 @keyframes dtCourtOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(1.06)}}
 .dt-courtlbl{color:#93a3b8;font-weight:900;letter-spacing:6px;font-size:clamp(12px,1.6vw,22px)}
-.dt-courtsvg{width:auto;height:min(72vh,86vw);max-width:94vw}
+.dt-courtsvg{width:100%;height:100%}
 .dt-cl{fill:none;stroke:rgba(255,255,255,.5);stroke-width:3;stroke-linejoin:round}
 .dt-cl.key{fill:rgba(255,255,255,.03)}
 /* the 3-point line = the OUTER line: one smooth arc, no corner angles, bright white */
-.dt-arc3{fill:none;stroke:#fff;stroke-width:6;stroke-linecap:round;filter:drop-shadow(0 0 7px rgba(255,255,255,.55))}
+.dt-arc3{fill:none;stroke:#fff;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 7px rgba(255,255,255,.55))}
 /* dashed line basket->spot = team SECONDARY color */
 .dt-shotline{fill:none;stroke:var(--hacc2,#dbe4ee);stroke-width:3.5;stroke-dasharray:7 9;stroke-linecap:round;opacity:0;
   filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hacc2,#dbe4ee) 60%,transparent))}
 #dtOverlay.show .dt-shotline{animation:anFade2 .4s .8s both}
 /* the shot-spot circle = team PRIMARY color */
-.dt-spot{opacity:0;transform-box:view-box;transform-origin:center}
+.dt-spot{opacity:0;transform-box:fill-box;transform-origin:center}
 #dtOverlay.show .dt-spot{animation:dtSpotIn .42s cubic-bezier(.2,1.5,.4,1) 1.05s both}
 @keyframes dtSpotIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
 .dt-spotrim{fill:none;stroke:var(--hacc,#e8c34a);stroke-width:3;opacity:.55}
 .dt-spotdot{stroke:#fff;stroke-width:3;fill:var(--hacc,#e8c34a)}
-.dt-spotring{fill:none;stroke:var(--hacc,#e8c34a);stroke-width:3;transform-box:view-box;transform-origin:center}
+.dt-spotring{fill:none;stroke:var(--hacc,#e8c34a);stroke-width:3;transform-box:fill-box;transform-origin:center}
 #dtOverlay.show .dt-spotring{animation:dtSpotPulse 1.2s ease-out 1.3s infinite}
 @keyframes dtSpotPulse{0%{opacity:.85;transform:scale(.5)}100%{opacity:0;transform:scale(2.6)}}
 /* ACT 2 — the scorched side-view arc into the coded hoop (fills the stage, fades in as act 1 leaves) */
@@ -2925,7 +2925,7 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="dt-stage">
     <!-- ACT 1: fullscreen top-down half court, marks where they were standing when they shot -->
     <div class="dt-court">
-      <svg class="dt-courtsvg" id="dtCourtSvg" viewBox="0 0 520 368"></svg>
+      <svg class="dt-courtsvg" id="dtCourtSvg" viewBox="0 0 660 372" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
     <!-- ACT 2: fullscreen side view of the arc they shot, into the coded hoop -->
     <div class="dt-air" id="dtAir">
@@ -4983,16 +4983,16 @@ function triggerDowntown(t,ft,info){
   // ACT 1 — FLIPPED top-down half court (basket/baseline at TOP, no hoop): mark where they stood.
   // Bright-white smooth 3pt arc = the OUTER line; marker circle = team primary, dashed line = secondary.
   // Radius = real distance (9.3px/ft; arc drawn at 23.75ft), angle randomized (feed lacks the floor spot).
-  const bx=260, by=48, Rpx=Math.min((ft||24),33)*9.3;
+  const bx=330, by=48, Rpx=Math.min((ft||24),33)*9.3;
   const deg=(Math.random()*2-1)*(Rpx>250?26:48), rad=deg*Math.PI/180;
   let mx=Math.round(bx+Rpx*Math.sin(rad)), my=Math.round(by+Rpx*Math.cos(rad));
-  my=Math.min(354,my); mx=Math.max(30,Math.min(490,mx));
+  my=Math.min(360,my); mx=Math.max(30,Math.min(630,mx));
   $("#dtCourtSvg").innerHTML=
-     `<path class="dt-cl" d="M40 14 L480 14"/>`
-    +`<rect class="dt-cl key" x="180" y="14" width="160" height="186"/>`
-    +`<circle class="dt-cl" cx="260" cy="200" r="58"/>`
-    +`<path class="dt-arc3" d="M55 130 A221 221 0 0 0 465 130"/>`
-    +`<path class="dt-shotline" d="M260 48 L${mx} ${my}"/>`
+     `<path class="dt-cl" d="M10 14 L650 14"/>`
+    +`<rect class="dt-cl key" x="250" y="14" width="160" height="186"/>`
+    +`<circle class="dt-cl" cx="330" cy="200" r="58"/>`
+    +`<path class="dt-arc3" d="M125 14 L125 131 A221 221 0 0 0 535 131 L535 14"/>`
+    +`<path class="dt-shotline" d="M330 48 L${mx} ${my}"/>`
     +`<g class="dt-spot"><circle class="dt-spotring" cx="${mx}" cy="${my}" r="12"/>`
     +`<circle class="dt-spotrim" cx="${mx}" cy="${my}" r="13"/>`
     +`<circle class="dt-spotdot" cx="${mx}" cy="${my}" r="8"/></g>`;
