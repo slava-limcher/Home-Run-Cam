@@ -5001,29 +5001,47 @@ function triggerDowntown(t,ft,info){
   // shrinking into the corner; the ball DIV shares the SVG's 1:1 px viewBox so its offset-path lines up.
   const air=$("#dtAir"), aw=air.clientWidth||1280, ah=air.clientHeight||720;
   const k=Math.max(1, ah/300), ks=Math.min(k,2.4), P=n=>Math.round(n*k);
-  const sx=Math.max(P(120),Math.round(shown/40*aw)), sy=ah-2;
-  const rimX=P(60), rimY=Math.round(ah*0.42);
-  const cx=Math.round((sx+rimX)/2), cy=Math.max(10,Math.round(ah*(0.30-0.24*shown/40)));
-  const d=`M${sx} ${sy} Q${cx} ${cy} ${rimX+P(5)} ${rimY-P(9)} q${-5*k} ${24*k} ${-13*k} ${38*k}`;
+  const rimCx=P(96), rimY=Math.round(ah*0.44), rimRx=P(46), rimRy=P(12);
+  const sx=Math.max(P(150),Math.round(shown/40*aw)), sy=ah-2;
+  const cx=Math.round((sx+rimCx)/2), cy=Math.max(10,Math.round(ah*(0.30-0.24*shown/40)));
+  const d=`M${sx} ${sy} Q${cx} ${cy} ${rimCx} ${rimY-P(8)} q0 ${P(22)} 0 ${P(42)}`;
+  // white net: strands from the rim lip down to a small ring, + 2 weave arcs
+  let net="";
+  [-42,-28,-14,0,14,28,42].forEach(o=>{
+    const x1=rimCx+P(o), y1=rimY+Math.round(rimRy*Math.sqrt(Math.max(0,1-(o/46)*(o/46))))+P(1);
+    net+=`<line x1="${x1}" y1="${y1}" x2="${rimCx+Math.round(P(o)*0.4)}" y2="${rimY+P(52)}"/>`;
+  });
+  net+=`<path d="M${rimCx-P(32)} ${rimY+P(22)} Q${rimCx} ${rimY+P(28)} ${rimCx+P(32)} ${rimY+P(22)}"/>`
+     +`<path d="M${rimCx-P(22)} ${rimY+P(40)} Q${rimCx} ${rimY+P(45)} ${rimCx+P(22)} ${rimY+P(40)}"/>`;
   $("#dtArcSvg").setAttribute("viewBox",`0 0 ${aw} ${ah}`);
   $("#dtArcSvg").innerHTML=
-    `<defs><linearGradient id="dtFireG" gradientUnits="userSpaceOnUse" x1="${sx}" y1="0" x2="${rimX}" y2="0">`
+     `<defs><linearGradient id="dtFireG" gradientUnits="userSpaceOnUse" x1="${sx}" y1="0" x2="${rimCx}" y2="0">`
     +`<stop offset="0" stop-color="#8a3414" stop-opacity=".55"/><stop offset=".55" stop-color="#ff7a2e"/>`
     +`<stop offset="1" stop-color="#ffd76a"/></linearGradient></defs>`
-    +`<g stroke="#cfd6df" stroke-width="${(4*ks).toFixed(1)}" fill="none" stroke-linecap="round" opacity=".9">`
-    +`<line x1="${P(14)}" y1="${ah}" x2="${P(14)}" y2="${rimY-P(64)}"/><line x1="${P(14)}" y1="${rimY-P(62)}" x2="${P(34)}" y2="${rimY-P(48)}"/>`
-    +`<line x1="${P(35)}" y1="${rimY-P(52)}" x2="${P(35)}" y2="${rimY+P(10)}" stroke-width="${(7*ks).toFixed(1)}"/></g>`
-    +`<line x1="${P(37)}" y1="${rimY}" x2="${P(84)}" y2="${rimY}" stroke="#ff8a3d" stroke-width="${(6*ks).toFixed(1)}" stroke-linecap="round"/>`
-    +`<g stroke="rgba(255,255,255,.75)" stroke-width="${(2.2*ks).toFixed(1)}" fill="none">`
-    +`<line x1="${P(40)}" y1="${rimY+P(2)}" x2="${P(49)}" y2="${rimY+P(34)}"/><line x1="${P(53)}" y1="${rimY+P(2)}" x2="${P(56)}" y2="${rimY+P(36)}"/>`
-    +`<line x1="${P(64)}" y1="${rimY+P(2)}" x2="${P(60)}" y2="${rimY+P(36)}"/><line x1="${P(80)}" y1="${rimY+P(2)}" x2="${P(72)}" y2="${rimY+P(34)}"/>`
-    +`<path d="M${P(48)} ${rimY+P(20)} Q${P(58)} ${rimY+P(24)} ${P(68)} ${rimY+P(20)}"/></g>`
+    // pole (dark tube + lighter edge highlight)
+    +`<line x1="${P(20)}" y1="${ah}" x2="${P(20)}" y2="${rimY-P(96)}" stroke="#2a2f36" stroke-width="${(10*ks).toFixed(1)}" stroke-linecap="round"/>`
+    +`<line x1="${P(23)}" y1="${ah}" x2="${P(23)}" y2="${rimY-P(94)}" stroke="#4b535d" stroke-width="${(2.5*ks).toFixed(1)}" stroke-linecap="round"/>`
+    // angled support truss (pole -> backboard back)
+    +`<g stroke="#3a424c" stroke-width="${(5*ks).toFixed(1)}" fill="none" stroke-linecap="round">`
+    +`<line x1="${P(20)}" y1="${rimY-P(86)}" x2="${P(46)}" y2="${rimY-P(84)}"/>`
+    +`<line x1="${P(20)}" y1="${rimY-P(40)}" x2="${P(46)}" y2="${rimY-P(12)}"/>`
+    +`<line x1="${P(32)}" y1="${rimY-P(90)}" x2="${P(32)}" y2="${rimY-P(24)}"/></g>`
+    // backboard: framed rectangle + inner shooter square
+    +`<rect x="${P(46)}" y="${rimY-P(92)}" width="${P(86)}" height="${P(100)}" rx="${P(3)}" fill="rgba(200,220,245,.06)" stroke="#eef3f8" stroke-width="${(4*ks).toFixed(1)}"/>`
+    +`<rect x="${P(74)}" y="${rimY-P(36)}" width="${P(40)}" height="${P(32)}" fill="none" stroke="#dfe8f2" stroke-width="${(2.6*ks).toFixed(1)}" opacity=".85"/>`
+    // rim: bracket + orange ellipse (opening toward the incoming ball) + inner highlight
+    +`<line x1="${P(114)}" y1="${rimY}" x2="${P(128)}" y2="${rimY}" stroke="#ff7a1e" stroke-width="${(5*ks).toFixed(1)}" stroke-linecap="round"/>`
+    +`<ellipse cx="${rimCx}" cy="${rimY}" rx="${rimRx}" ry="${rimRy}" fill="none" stroke="#ff7a1e" stroke-width="${(6*ks).toFixed(1)}"/>`
+    +`<ellipse cx="${rimCx}" cy="${rimY}" rx="${rimRx}" ry="${rimRy}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="${(2*ks).toFixed(1)}"/>`
+    // net
+    +`<g stroke="rgba(255,255,255,.82)" stroke-width="${(2*ks).toFixed(1)}" fill="none" stroke-linecap="round">${net}</g>`
+    // the scorched fire arc
     +`<path class="dt-arcglow" pathLength="1" style="stroke-width:${(10*ks).toFixed(1)}" d="${d}"/>`
     +`<path class="dt-arcpath" pathLength="1" style="stroke-width:${(4.5*ks).toFixed(1)}" d="${d}"/>`;
   const bd=Math.round(17*ks), bl=$("#dtBall"), ln=$("#dtLaunch"), rf=$("#dtRimFx");
   bl.style.width=bd+"px"; bl.style.height=bd+"px"; bl.style.offsetPath=`path("${d}")`;
   ln.style.left=(sx-P(34))+"px"; ln.style.width=P(68)+"px"; ln.style.height=P(46)+"px";
-  rf.style.left=P(20)+"px"; rf.style.top=(rimY-P(26))+"px"; rf.style.width=P(70)+"px"; rf.style.height=P(70)+"px";
+  rf.style.left=(rimCx-P(35))+"px"; rf.style.top=(rimY-P(35))+"px"; rf.style.width=P(70)+"px"; rf.style.height=P(70)+"px";
   clearTimeout(triggerDowntown._s);
   triggerDowntown._s=setTimeout(()=>{            // card lands: count the shooter's line
     if(info&&info.pts!=null)countUp($("#dtTPv"),String(info.pts));
