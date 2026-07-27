@@ -1483,12 +1483,24 @@ body.nhl #nhlBtns{display:contents}
 @keyframes gwRaysSpin{to{transform:rotate(360deg)}}
 .gw-word{position:absolute;left:0;right:0;top:42%;text-align:center;z-index:6;
   font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
+/* video-driven game-winner: hide the coded buzzer-beater layers, add the film + legibility veil */
+#gwOverlay.vid .gw-led,#gwOverlay.vid .gw-clock,#gwOverlay.vid .gw-count,#gwOverlay.vid .gw-rays,
+#gwOverlay.vid .gw-boom,#gwOverlay.vid .gw-trail,#gwOverlay.vid .gw-ballw,#gwOverlay.vid .gw-flash{display:none!important}
+.gw-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:5;display:none}
+#gwOverlay.vid .gw-vid{display:block}
+.gw-veil{position:absolute;inset:0;z-index:5;pointer-events:none;display:none;
+  background:radial-gradient(120% 90% at 50% 42%, transparent 42%, rgba(3,5,9,.66) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.34), transparent 26%, transparent 62%, rgba(3,5,9,.55))}
+#gwOverlay.vid .gw-veil{display:block}
 #gwOverlay.show .gw-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.5s both, nfpShine 2.6s linear 3.1s infinite}
+#gwOverlay.vid.show .gw-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3.2s both, nfpShine 2.6s linear 3.8s infinite}
 .gw-sub{position:absolute;left:0;right:0;top:66%;text-align:center;z-index:6;
   color:#c6d2e0;font-weight:800;letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
 #gwOverlay.show .gw-sub{animation:anFade .45s 2.85s both}
+#gwOverlay.vid.show .gw-sub{animation:anFade .45s 3.55s both}
 #gwOverlay .hcard{gap:14px;z-index:7}
 #gwOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.15s both}
+#gwOverlay.vid.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.85s both}
 #gwOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- THE WHISTLE: bespoke foul takeover — whistle blast + sound rings + official's call placard ---- */
 #flOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .3s;overflow:hidden;
@@ -2783,6 +2795,9 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <!-- BUZZER BEATER: bespoke game-winner takeover — 3-2-1 countdown, ball arcs in, 0.0 detonates -->
 <div id="gwOverlay">
+  <!-- user's game-winner FILM (buzzer make 0-5s + arena eruption 5-10s); .vid hides the coded buzzer-beater below (dormant fallback) -->
+  <video class="gw-vid" id="gwVid" muted playsinline preload="auto" poster="gwin.jpg"><source src="gwin.mp4" type="video/mp4"></video>
+  <div class="gw-veil"></div>
   <div class="gw-led"></div>
   <div class="gw-clock">0:0<b>3</b></div>
   <div class="gw-count"><i>3</i><i>2</i><i>1</i></div>
@@ -4913,18 +4928,18 @@ function triggerBuzzer(t,info){
   $("#gwName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
   $("#gwStat").textContent=((hasP&&t.name?t.name+" • ":"")
     +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
-  // the clock chip ticks 3 -> 2 -> 1 -> 0.0 in step with the numerals, then locks red
-  const chip=gwOvEl.querySelector(".gw-clock");
-  chip.innerHTML="0:0<b>3</b>";
-  clearTimeout(triggerBuzzer._c2); clearTimeout(triggerBuzzer._c1); clearTimeout(triggerBuzzer._c0);
-  triggerBuzzer._c2=setTimeout(()=>chip.innerHTML="0:0<b>2</b>",900);
-  triggerBuzzer._c1=setTimeout(()=>chip.innerHTML="0:0<b>1</b>",1600);
-  triggerBuzzer._c0=setTimeout(()=>chip.innerHTML='<b style="color:#ff2420">0.0</b>',2300);
+  gwOvEl.classList.add("vid");   // use the user's film (buzzer make -> arena eruption); hides the coded buzzer-beater
   gwOvEl.classList.remove("show"); void gwOvEl.offsetWidth; gwOvEl.classList.add("show");
-  clearTimeout(triggerBuzzer._t); triggerBuzzer._t=setTimeout(endBuzzer,8200);
+  // play the 10s game-winner film (0-5s make, 5-10s celebration), hold last frame
+  const v=$("#gwVid");
+  const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
+  v.onended=()=>{ try{v.pause();}catch(e){} };
+  if(v.readyState>=2)kick(); else v.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerBuzzer._t); triggerBuzzer._t=setTimeout(endBuzzer,9800);
 }
 function endBuzzer(){ if(gwOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerBuzzer._t); clearTimeout(triggerBuzzer._c2); clearTimeout(triggerBuzzer._c1); clearTimeout(triggerBuzzer._c0);
+  clearTimeout(triggerBuzzer._t);
+  const v=$("#gwVid"); if(v){v.onended=null; try{v.pause();}catch(e){}}
   gwOvEl.classList.remove("show"); gwPlaying=false; }
 /* ---- THE WHISTLE (bespoke foul): whistle blast + concentric sound rings, red FOUL!, then the
         official's-call placard flips up with the foul type (from the play text). No people. ---- */
