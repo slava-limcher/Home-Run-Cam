@@ -2230,6 +2230,7 @@ body.tvmode .scorewrap{justify-content:center}
         <button class="ghostbtn" id="bStealBtn">🧤 Steal</button>
         <button class="ghostbtn" id="bWinBtn">🗡️ Game-Winner</button>
         <button class="ghostbtn" id="bFoulBtn">📣 Foul</button>
+        <button class="ghostbtn" id="bFtBtn">🎯 Free Throw</button>
         <button class="ghostbtn" id="bFinBtn">🏆 Final</button>
       </span>
       <span id="nhlBtns">
@@ -4806,6 +4807,7 @@ async function tickX(first){
         }else if(p.scoringPlay&&/dunk/i.test(txt))momentSlam(team,nbaShooterInfo(j,p));
         else if(/steal/i.test(txt))momentSteal(team,nbaShooterInfo(j,p));
         else if(/flagrant|technical foul/i.test(txt))momentFoul(team,(p.text||"").slice(0,44));
+        else if(p.scoringPlay&&p.scoreValue===1&&/free throw/i.test(txt))momentFreeThrow(team,nbaShooterInfo(j,p));
       }else{
         if(p.scoringPlay){
           if(XG.p>3&&XG.p<5)momentGoldenGoal(team); else momentGoal(team);
@@ -5111,6 +5113,13 @@ const momentGameWinner=(t,info)=>triggerBuzzer(t,info);
 const momentFoul=(t,txt)=>{const now=performance.now();
   if(momentFoul._last&&now-momentFoul._last<180000)return; momentFoul._last=now;
   triggerFoulCam(t,txt);};
+/* free throw — house-style takeover (cooldown so it doesn't fire on every FT); swap to a film later like the others */
+const momentFreeThrow=(t,info)=>{const now=performance.now();
+  if(momentFreeThrow._last&&now-momentFreeThrow._last<150000)return; momentFreeThrow._last=now;
+  t=t||{}; info=info||null;
+  const tag=`${t.abbr||""}${info&&info.num?" #"+info.num:""}`.trim();
+  const nm=(info&&(info.num||info.pos))?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
+  triggerMoment({team:t,kick:"FROM THE STRIPE",word:"COUNT IT!",sub:`${tag} FROM THE LINE`.trim(),name:nm,dur:4200});};
 const momentGoal=t=>triggerMoment({team:t,kick:"LIGHT THE LAMP",word:"GOAL!",sub:`${t.name} SCORE`,dur:6000});
 const momentGoldenGoal=t=>triggerMoment({team:t,kick:"OVERTIME",word:"GOLDEN GOAL!",sub:`${t.name} WIN IT`,dur:7000});
 const momentPenalty=(t,txt)=>triggerMoment({team:t,kick:"TO THE BOX",word:"PENALTY!",sub:(txt||"").toUpperCase(),alarm:true,dur:5000});
@@ -5125,6 +5134,7 @@ $("#bSlamBtn").onclick=()=>momentSlam(G.home,demoShooter());
 $("#bStealBtn").onclick=e=>{const b=e.currentTarget;b._n=(b._n||0)+1;momentSteal(b._n%2?G.away:G.home,demoShooter());};
 $("#bWinBtn").onclick=()=>momentGameWinner(G.home,demoShooter());
 $("#bFoulBtn").onclick=()=>{momentFoul._last=0;momentFoul(G.away,"Flagrant foul, penalty 1");};
+$("#bFtBtn").onclick=()=>{momentFreeThrow._last=0;momentFreeThrow(G.home,demoShooter());};
 $("#hGoalBtn").onclick=()=>momentGoal(G.home);
 $("#hGoldBtn").onclick=()=>momentGoldenGoal(G.home);
 $("#hPenBtn").onclick=()=>momentPenalty(G.away,"Slashing — 2 min");
