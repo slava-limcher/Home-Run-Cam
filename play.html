@@ -5033,11 +5033,12 @@ function triggerDowntown(t,ft,info){
   $("#dtTileP").style.display=(info&&info.pts!=null)?"":"none"; $("#dtTPv").textContent="0";
   $("#dtTile3").style.display=(info&&info.tpm!=null)?"":"none"; $("#dtT3v").textContent="0";
   dtOvEl.classList.remove("show"); void dtOvEl.offsetWidth; dtOvEl.classList.add("show");
-  // play the under-the-net swish film (first 3s: ball drops in ~2.3s), then hold on the last frame
+  // regular three (<28ft) = under-the-net swish film; long-range (28+) = random of the 2 deep-bomb films
   const v=$("#dtVid");
+  v.src=(ft||24)>=28 ? (Math.random()<0.5?"longrange1.mp4":"longrange2.mp4") : "three.mp4";
   const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
   v.onended=()=>{ try{v.pause();}catch(e){} };
-  if(v.readyState>=1)kick(); else v.addEventListener('loadedmetadata',kick,{once:true});
+  if(v.readyState>=2)kick(); else v.addEventListener('canplay',kick,{once:true});
   clearTimeout(triggerDowntown._s);
   triggerDowntown._s=setTimeout(()=>{            // card lands: count the shooter's line
     if(info&&info.pts!=null)countUp($("#dtTPv"),String(info.pts));
