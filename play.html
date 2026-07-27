@@ -1556,6 +1556,29 @@ body.nhl #nhlBtns{display:contents}
 #flOverlay.vid.show .hcard{animation:hcardIn .5s cubic-bezier(.2,.9,.3,1) 2.9s both}
 #flOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- STEAL: user's light-sweep FILM — half 1 (away/team1) sweeps one way, half 2 (home/team2) the other ---- */
+/* ---- NHL GOAL: user's goal FILMs (rotate goal1/goal2) — slap shot, follow the puck, into the net + red lamp ---- */
+#ngOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
+#ngOverlay.show{display:block;opacity:1}
+.ng-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#ngOverlay::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 90% at 50% 44%, transparent 40%, rgba(3,5,9,.64) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.36), transparent 26%, transparent 60%, rgba(3,5,9,.56))}
+#ngOverlay::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(60vw 120vh at -10% 50%, color-mix(in srgb,var(--hacc,#ff2a2a) 55%,transparent), transparent 60%),
+             radial-gradient(60vw 120vh at 110% 50%, color-mix(in srgb,var(--hacc,#ff2a2a) 45%,transparent), transparent 60%)}
+#ngOverlay.show::before{animation:hleakIn .9s ease-out 3.9s both}
+.ng-kick{position:absolute;left:0;right:0;top:10%;text-align:center;z-index:3;color:#e6edf5;font-weight:900;
+  letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#ngOverlay.show .ng-kick{animation:anFade .5s .3s both}
+.ng-word{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:3;
+  font-size:clamp(60px,13vw,190px);line-height:.92;opacity:0}
+#ngOverlay.show .ng-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 4.2s both, nfpShine 2.6s linear 4.8s infinite}
+.ng-sub{position:absolute;left:0;right:0;top:63%;text-align:center;z-index:3;color:#dbe4ee;font-weight:800;
+  letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#ngOverlay.show .ng-sub{animation:anFade .45s 4.6s both}
+#ngOverlay .hcard{z-index:4}
+#ngOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 4.9s both}
+#ngOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- FREE THROW: user's make FILM — POV at the line, goal ahead, clean swish ---- */
 #ftOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
 #ftOverlay.show{display:block;opacity:1}
@@ -2828,6 +2851,14 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <!-- STEAL: user's light-sweep film — away team plays the first half, home team the second half -->
+<!-- NHL GOAL: user's goal films (rotate goal1/goal2) — slap shot, follow the puck, into the net + red lamp -->
+<div id="ngOverlay">
+  <video class="ng-vid" id="ngVid" muted playsinline preload="auto" poster="goal1.jpg"></video>
+  <div class="ng-kick">LIGHT THE LAMP</div>
+  <div class="ng-word nfp-chrome" id="ngWord">GOAL!</div>
+  <div class="ng-sub" id="ngSub"></div>
+  <div class="hcard"><img id="ngLogo" alt=""><div><div class="hname" id="ngName"></div><div class="hstat" id="ngStat"></div></div></div>
+</div>
 <!-- FREE THROW: user's make film (POV at the line, goal ahead); miss variant flips the word to NO GOOD -->
 <div id="ftOverlay">
   <video class="ft-vid" id="ftVid" muted playsinline preload="auto" poster="freethrow.jpg"><source src="freethrow.mp4" type="video/mp4"></video>
@@ -3172,6 +3203,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endFoulCam==="function")endFoulCam();
   if(typeof endSteal==="function")endSteal();
   if(typeof endFreeThrow==="function")endFreeThrow();
+  if(typeof endGoal==="function")endGoal();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -3187,7 +3219,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -4003,7 +4035,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -5021,6 +5053,27 @@ function triggerFreeThrow(t,info,made){
 function endFreeThrow(){ if(ftOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerFreeThrow._t); if(ftVid){ftVid.onended=null; try{ftVid.pause();}catch(e){}}
   ftOvEl.classList.remove("show"); ftPlaying=false; }
+/* ---- NHL GOAL (user's films): slap shot -> follow the puck -> past the goalie into the net + red lamp. Rotates goal1/goal2. ---- */
+let ngPlaying=false;
+const ngOvEl=$("#ngOverlay"), ngVid=$("#ngVid");
+function triggerGoal(t){
+  if(takeoverBusy())return; ngPlaying=true; hideWalkup(); houseWipe();
+  t=t||{};
+  ngOvEl.style.setProperty('--hacc',t.colorHex||"#ff2a2a");
+  $("#ngSub").textContent=`${(t.name||"").toUpperCase()} SCORE`;
+  $("#ngLogo").src=t.logo||""; $("#ngLogo").style.display=t.logo?"":"none";
+  $("#ngName").textContent=t.name||"";
+  $("#ngStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  ngVid.src=Math.random()<0.5?"goal1.mp4":"goal2.mp4";
+  ngOvEl.classList.remove("show"); void ngOvEl.offsetWidth; ngOvEl.classList.add("show");
+  const kick=()=>{ try{ngVid.currentTime=0;}catch(e){} const p=ngVid.play(); if(p&&p.catch)p.catch(()=>{}); };
+  ngVid.onended=()=>{ try{ngVid.pause();}catch(e){} };
+  if(ngVid.readyState>=2)kick(); else ngVid.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerGoal._t); triggerGoal._t=setTimeout(endGoal,7500);
+}
+function endGoal(){ if(ngOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerGoal._t); if(ngVid){ngVid.onended=null; try{ngVid.pause();}catch(e){}}
+  ngOvEl.classList.remove("show"); ngPlaying=false; }
 /* ---- THE WHISTLE (bespoke foul): whistle blast + concentric sound rings, red FOUL!, then the
         official's-call placard flips up with the foul type (from the play text). No people. ---- */
 let flPlaying=false;
@@ -5179,7 +5232,7 @@ const momentFoul=(t,txt)=>{const now=performance.now();
 const momentFreeThrow=(t,info,made)=>{const now=performance.now();
   if(momentFreeThrow._last&&now-momentFreeThrow._last<150000)return; momentFreeThrow._last=now;
   triggerFreeThrow(t,info,made);};
-const momentGoal=t=>triggerMoment({team:t,kick:"LIGHT THE LAMP",word:"GOAL!",sub:`${t.name} SCORE`,dur:6000});
+const momentGoal=t=>triggerGoal(t);
 const momentGoldenGoal=t=>triggerMoment({team:t,kick:"OVERTIME",word:"GOLDEN GOAL!",sub:`${t.name} WIN IT`,dur:7000});
 const momentPenalty=(t,txt)=>triggerMoment({team:t,kick:"TO THE BOX",word:"PENALTY!",sub:(txt||"").toUpperCase(),alarm:true,dur:5000});
 const momentShootout=(t,scored)=>triggerMoment({team:t,kick:"SHOOTOUT",word:scored?"HE SCORES!":"DENIED!",sub:scored?`${t.abbr} CONVERTS`:"WHAT A SAVE",alarm:!scored,dur:5200});
