@@ -1556,6 +1556,32 @@ body.nhl #nhlBtns{display:contents}
 #flOverlay.vid.show .hcard{animation:hcardIn .5s cubic-bezier(.2,.9,.3,1) 2.9s both}
 #flOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- STEAL: user's light-sweep FILM — half 1 (away/team1) sweeps one way, half 2 (home/team2) the other ---- */
+/* ---- FREE THROW: user's make FILM — POV at the line, goal ahead, clean swish ---- */
+#ftOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
+#ftOverlay.show{display:block;opacity:1}
+.ft-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#ftOverlay::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 90% at 50% 44%, transparent 40%, rgba(3,5,9,.68) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.38), transparent 26%, transparent 60%, rgba(3,5,9,.58))}
+#ftOverlay::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(60vw 120vh at -10% 50%, color-mix(in srgb,var(--hacc,#e8c34a) 50%,transparent), transparent 60%),
+             radial-gradient(60vw 120vh at 110% 50%, color-mix(in srgb,var(--hacc,#e8c34a) 42%,transparent), transparent 60%)}
+#ftOverlay.show::before{animation:hleakIn .8s ease-out 2.4s both}
+.ft-kick{position:absolute;left:0;right:0;top:10%;text-align:center;z-index:3;color:#93a3b8;font-weight:900;
+  letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#ftOverlay.show .ft-kick{animation:anFade .5s .3s both}
+.ft-word{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:3;
+  font-size:clamp(58px,12vw,175px);line-height:.92;opacity:0}
+#ftOverlay.show .ft-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.7s both, nfpShine 2.6s linear 3.3s infinite}
+/* miss variant = red word, no shine */
+#ftOverlay.miss .ft-word{background:none;-webkit-text-fill-color:#ff5f52;color:#ff5f52;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,.8));animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 2.7s both!important}
+.ft-sub{position:absolute;left:0;right:0;top:63%;text-align:center;z-index:3;color:#dbe4ee;font-weight:800;
+  letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#ftOverlay.show .ft-sub{animation:anFade .45s 3.05s both}
+#ftOverlay .hcard{z-index:4}
+#ftOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.35s both}
+#ftOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 #stOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
 #stOverlay.show{display:block;opacity:1}
 .st-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -2802,6 +2828,14 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <!-- STEAL: user's light-sweep film — away team plays the first half, home team the second half -->
+<!-- FREE THROW: user's make film (POV at the line, goal ahead); miss variant flips the word to NO GOOD -->
+<div id="ftOverlay">
+  <video class="ft-vid" id="ftVid" muted playsinline preload="auto" poster="freethrow.jpg"><source src="freethrow.mp4" type="video/mp4"></video>
+  <div class="ft-kick" id="ftKick">FROM THE STRIPE</div>
+  <div class="ft-word nfp-chrome" id="ftWord">COUNT IT!</div>
+  <div class="ft-sub" id="ftSub"></div>
+  <div class="hcard"><img id="ftLogo" alt=""><div><div class="hname" id="ftName"></div><div class="hstat" id="ftStat"></div></div></div>
+</div>
 <div id="stOverlay">
   <video class="st-vid" id="stVid" muted playsinline preload="auto" poster="steal.jpg"><source src="steal.mp4" type="video/mp4"></video>
   <div class="st-kick">PICKED HIS POCKET</div>
@@ -3137,6 +3171,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endBuzzer==="function")endBuzzer();
   if(typeof endFoulCam==="function")endFoulCam();
   if(typeof endSteal==="function")endSteal();
+  if(typeof endFreeThrow==="function")endFreeThrow();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -3152,7 +3187,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -3968,7 +4003,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -4961,6 +4996,31 @@ function endBuzzer(){ if(gwOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerBuzzer._t);
   const v=$("#gwVid"); if(v){v.onended=null; try{v.pause();}catch(e){}}
   gwOvEl.classList.remove("show"); gwPlaying=false; }
+/* ---- FREE THROW (user's make film): POV at the line, goal ahead, clean swish. made=false flips to NO GOOD (miss clip TBD). ---- */
+let ftPlaying=false;
+const ftOvEl=$("#ftOverlay"), ftVid=$("#ftVid");
+function triggerFreeThrow(t,info,made){
+  if(takeoverBusy())return; ftPlaying=true; hideWalkup(); houseWipe();
+  t=t||{}; info=info||null; made=(made!==false);
+  ftOvEl.style.setProperty('--hacc',t.colorHex||"#e8c34a");
+  const tag=`${t.abbr||""}${info&&info.num?" #"+info.num:""}`.trim();
+  $("#ftWord").textContent=made?"COUNT IT!":"NO GOOD";
+  $("#ftSub").textContent=(made?`${tag} FROM THE LINE`:`${tag} RIMS IT OUT`).trim();
+  $("#ftLogo").src=t.logo||""; $("#ftLogo").style.display=t.logo?"":"none";
+  const hasP=!!(info&&(info.num||info.pos));
+  $("#ftName").textContent=hasP?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
+  $("#ftStat").textContent=((hasP&&t.name?t.name+" • ":"")
+    +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
+  ftOvEl.classList.toggle("miss",!made);
+  ftOvEl.classList.remove("show"); void ftOvEl.offsetWidth; ftOvEl.classList.add("show");
+  const kick=()=>{ try{ftVid.currentTime=0;}catch(e){} const p=ftVid.play(); if(p&&p.catch)p.catch(()=>{}); };
+  ftVid.onended=()=>{ try{ftVid.pause();}catch(e){} };
+  if(ftVid.readyState>=2)kick(); else ftVid.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerFreeThrow._t); triggerFreeThrow._t=setTimeout(endFreeThrow,6000);
+}
+function endFreeThrow(){ if(ftOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerFreeThrow._t); if(ftVid){ftVid.onended=null; try{ftVid.pause();}catch(e){}}
+  ftOvEl.classList.remove("show"); ftPlaying=false; }
 /* ---- THE WHISTLE (bespoke foul): whistle blast + concentric sound rings, red FOUL!, then the
         official's-call placard flips up with the foul type (from the play text). No people. ---- */
 let flPlaying=false;
@@ -5116,12 +5176,9 @@ const momentFoul=(t,txt)=>{const now=performance.now();
   if(momentFoul._last&&now-momentFoul._last<180000)return; momentFoul._last=now;
   triggerFoulCam(t,txt);};
 /* free throw — house-style takeover (cooldown so it doesn't fire on every FT); swap to a film later like the others */
-const momentFreeThrow=(t,info)=>{const now=performance.now();
+const momentFreeThrow=(t,info,made)=>{const now=performance.now();
   if(momentFreeThrow._last&&now-momentFreeThrow._last<150000)return; momentFreeThrow._last=now;
-  t=t||{}; info=info||null;
-  const tag=`${t.abbr||""}${info&&info.num?" #"+info.num:""}`.trim();
-  const nm=(info&&(info.num||info.pos))?("#"+(info.num||"?")+(info.pos?" • "+info.pos:"")):(t.name||"");
-  triggerMoment({team:t,kick:"FROM THE STRIPE",word:"COUNT IT!",sub:`${tag} FROM THE LINE`.trim(),name:nm,dur:4200});};
+  triggerFreeThrow(t,info,made);};
 const momentGoal=t=>triggerMoment({team:t,kick:"LIGHT THE LAMP",word:"GOAL!",sub:`${t.name} SCORE`,dur:6000});
 const momentGoldenGoal=t=>triggerMoment({team:t,kick:"OVERTIME",word:"GOLDEN GOAL!",sub:`${t.name} WIN IT`,dur:7000});
 const momentPenalty=(t,txt)=>triggerMoment({team:t,kick:"TO THE BOX",word:"PENALTY!",sub:(txt||"").toUpperCase(),alarm:true,dur:5000});
