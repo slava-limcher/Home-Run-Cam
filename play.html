@@ -4958,7 +4958,7 @@ function triggerSlamCam(t,info){
     +`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`).toUpperCase();
   gcOvEl.classList.remove("show"); void gcOvEl.offsetWidth; gcOvEl.classList.add("show");
   // play a RANDOM one of the user's dunk films (NOT chosen by player — just variety), hold last frame
-  const v=$("#gcVid"), clip=Math.random()<0.5?"dunk1.mp4":"dunk2.mp4";
+  const v=$("#gcVid"), clip=["dunk1.mp4","dunk2.mp4","dunk3.mp4"][Math.floor(Math.random()*3)];
   v.src=clip;
   const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
   v.onended=()=>{ try{v.pause();}catch(e){} };
