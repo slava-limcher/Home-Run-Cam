@@ -5062,7 +5062,9 @@ function triggerDowntown(t,ft,info){
   dtOvEl.classList.remove("show"); void dtOvEl.offsetWidth; dtOvEl.classList.add("show");
   // regular three (<28ft) = under-the-net swish film; long-range (28+) = random of the 2 deep-bomb films
   const v=$("#dtVid");
-  v.src=(ft||24)>=28 ? (Math.random()<0.5?"longrange1.mp4":"longrange2.mp4") : "three.mp4";
+  const clip=(ft||24)>=28 ? (Math.random()<0.5?"longrange1.mp4":"longrange2.mp4")
+                          : (Math.random()<0.5?"three.mp4":"three2.mp4");
+  v.src=clip;
   const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
   v.onended=()=>{ try{v.pause();}catch(e){} };
   if(v.readyState>=2)kick(); else v.addEventListener('canplay',kick,{once:true});
@@ -5072,7 +5074,7 @@ function triggerDowntown(t,ft,info){
     if(info&&info.tpm!=null)setTimeout(()=>countUp($("#dtT3v"),String(info.tpm)),160);
   },3400);
   clearTimeout(triggerDowntown._t);
-  triggerDowntown._t=setTimeout(endDowntown,{arc:5800,deep:10000,logo:10000}[tier]);
+  triggerDowntown._t=setTimeout(endDowntown, clip==="three.mp4"?5800:10000);   // short under-net swish 5.8s; full-length clips play out to 10s
 }
 function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._s);
