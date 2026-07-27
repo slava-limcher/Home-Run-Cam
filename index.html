@@ -918,6 +918,9 @@ button{font-family:inherit;cursor:pointer;border:none;color:inherit}
   filter:brightness(.58) saturate(.9)}
 #finalOverlay.mlb .fg-vid.mlb{display:block}
 #finalOverlay.nfl .fg-vid.nfl{display:block}
+#finalOverlay.nba .fg-vid.nba{display:block}
+/* NBA arena backdrop reads lighter than the other dimmed finals */
+.fg-vid.nba{filter:brightness(.95) saturate(.95)}
 #finalOverlay.show .fg-bg{animation:anFade2 .6s both, fgKen 9s ease-out both}
 @keyframes fgKen{from{transform:scale(1)}to{transform:scale(1.08)}}
 /* dark vignette + warm center glow so the gold reads over the scene */
@@ -2476,6 +2479,7 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="fg-bg">
     <video class="fg-vid mlb" id="fVid" autoplay muted loop playsinline preload="auto" poster="lineup.jpg"><source src="lineup.mp4" type="video/mp4"></video>
     <video class="fg-vid nfl" id="fVidN" autoplay muted loop playsinline preload="auto" poster="opening_rev.jpg"><source src="opening_rev.mp4" type="video/mp4"></video>
+    <video class="fg-vid nba" id="fVidX" autoplay muted loop playsinline preload="auto" poster="arena.jpg"><source src="arena.mp4" type="video/mp4"></video>
   </div>
   <div class="fg-rays"></div>
   <div class="fg-shock"></div>
