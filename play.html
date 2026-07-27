@@ -5066,7 +5066,7 @@ function triggerDowntown(t,ft,info){
     if(info&&info.tpm!=null)setTimeout(()=>countUp($("#dtT3v"),String(info.tpm)),160);
   },3400);
   clearTimeout(triggerDowntown._t);
-  triggerDowntown._t=setTimeout(endDowntown,{arc:5800,deep:6000,logo:6400}[tier]);
+  triggerDowntown._t=setTimeout(endDowntown,{arc:10000,deep:6000,logo:6400}[tier]);
 }
 function endDowntown(){ if(dtOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerDowntown._t); clearTimeout(triggerDowntown._s);
