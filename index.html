@@ -1556,6 +1556,24 @@ body.nhl #nhlBtns{display:contents}
 #flOverlay.vid.show .hcard{animation:hcardIn .5s cubic-bezier(.2,.9,.3,1) 2.9s both}
 #flOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- STEAL: user's light-sweep FILM — half 1 (away/team1) sweeps one way, half 2 (home/team2) the other ---- */
+/* ---- NHL FACE-OFF: user's stare-down FILM — two silhouettes over the dot, the puck drops, they clash ---- */
+#foOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
+#foOverlay.show{display:block;opacity:1}
+.fo-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#foOverlay::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 90% at 50% 44%, transparent 42%, rgba(3,5,9,.6) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.32), transparent 26%, transparent 62%, rgba(3,5,9,.55))}
+.fo-kick{position:absolute;left:0;right:0;top:10%;text-align:center;z-index:3;color:#bfe0ff;font-weight:900;
+  letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#foOverlay.show .fo-kick{animation:anFade .5s .3s both}
+.fo-word{position:absolute;left:0;right:0;top:40%;text-align:center;z-index:3;
+  font-size:clamp(58px,12vw,175px);line-height:.92;opacity:0}
+#foOverlay.show .fo-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) 3s both, nfpShine 2.6s linear 3.6s infinite}
+.fo-sub{position:absolute;left:0;right:0;top:63%;text-align:center;z-index:3;color:#dbe4ee;font-weight:800;
+  letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#foOverlay.show .fo-sub{animation:anFade .45s 3.35s both}
+#foOverlay .hcard{z-index:4}
+#foOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 3.65s both}
 /* ---- NHL SHOOTOUT announcement: user's title FILM (OVERTIME -> giant SHOOTOUT! over the ice) ---- */
 #soOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;background:#04060a}
 #soOverlay.show{display:block;opacity:1}
@@ -2887,6 +2905,14 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <!-- STEAL: user's light-sweep film — away team plays the first half, home team the second half -->
+<!-- NHL FACE-OFF: user's stare-down film — two silhouettes over the dot, the puck drops, they clash -->
+<div id="foOverlay">
+  <video class="fo-vid" id="foVid" muted playsinline preload="auto" poster="faceoff.jpg"><source src="faceoff.mp4" type="video/mp4"></video>
+  <div class="fo-kick">EYES UP</div>
+  <div class="fo-word nfp-chrome" id="foWord">FACE-OFF</div>
+  <div class="fo-sub" id="foSub">PUCK DROPS NOW</div>
+  <div class="hcard"><img id="foLogo" alt="" style="display:none"><div><div class="hname" id="foName"></div><div class="hstat" id="foStat"></div></div></div>
+</div>
 <!-- NHL SHOOTOUT announcement: user's title film (OVERTIME -> giant SHOOTOUT!) — the film carries the words -->
 <div id="soOverlay">
   <video class="so-vid" id="soVid" muted playsinline preload="auto" poster="shootout.jpg"><source src="shootout.mp4" type="video/mp4"></video>
@@ -3255,6 +3281,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endGoal==="function")endGoal();
   if(typeof endPenalty==="function")endPenalty();
   if(typeof endShootoutFilm==="function")endShootoutFilm();
+  if(typeof endFaceoff==="function")endFaceoff();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -3270,7 +3297,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm","endFaceoff"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -4086,7 +4113,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying||foPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -5108,6 +5135,22 @@ function triggerFreeThrow(t,info,made){
 function endFreeThrow(){ if(ftOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerFreeThrow._t); if(ftVid){ftVid.onended=null; try{ftVid.pause();}catch(e){}}
   ftOvEl.classList.remove("show"); ftPlaying=false; }
+/* ---- NHL FACE-OFF (user's film): two backlit silhouettes over the dot, the puck drops, they clash. ---- */
+let foPlaying=false;
+const foOvEl=$("#foOverlay"), foVid=$("#foVid");
+function triggerFaceoff(){
+  if(takeoverBusy())return; foPlaying=true; hideWalkup(); houseWipe();
+  $("#foName").textContent=`PERIOD ${XG.p||1}`;
+  $("#foStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  foOvEl.classList.remove("show"); void foOvEl.offsetWidth; foOvEl.classList.add("show");
+  const kick=()=>{ try{foVid.currentTime=0;}catch(e){} const p=foVid.play(); if(p&&p.catch)p.catch(()=>{}); };
+  foVid.onended=()=>{ try{foVid.pause();}catch(e){} };
+  if(foVid.readyState>=2)kick(); else foVid.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerFaceoff._t); triggerFaceoff._t=setTimeout(endFaceoff,7800);
+}
+function endFaceoff(){ if(foOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerFaceoff._t); if(foVid){foVid.onended=null; try{foVid.pause();}catch(e){}}
+  foOvEl.classList.remove("show"); foPlaying=false; }
 /* ---- NHL SHOOTOUT announcement (user's title film): OVERTIME -> giant SHOOTOUT! over the ice.
         Fires ONCE when the game reaches the shootout; each attempt still gets HE SCORES!/DENIED!. ---- */
 let soPlaying=false;
@@ -5337,7 +5380,7 @@ const momentGoal=t=>triggerGoal(t);
 const momentGoldenGoal=t=>triggerGoal(t,true);
 const momentPenalty=(t,txt)=>triggerPenalty(t,txt);
 const momentShootout=(t,scored)=>triggerMoment({team:t,kick:"SHOOTOUT",word:scored?"HE SCORES!":"DENIED!",sub:scored?`${t.abbr} CONVERTS`:"WHAT A SAVE",alarm:!scored,dur:5200});
-const momentFaceoff=()=>triggerMoment({accent:"#7fd0ff",kick:"EYES UP",word:"FACE-OFF",sub:"PUCK DROPS NOW",dur:4200});
+const momentFaceoff=()=>triggerFaceoff();
 const momentPeriodEnd=p=>triggerMoment({accent:"#ffb02e",kick:"SIREN",word:"END OF "+(p<=3?["1ST","2ND","3RD"][p-1]:"OT"),sub:"PERIOD COMPLETE",alarm:true,dur:5000});
 const momentOneMinute=()=>triggerMoment({accent:"#ff4b3e",kick:"CLOCK CHECK",word:"1:00",sub:"ONE MINUTE REMAINING",alarm:true,dur:5000});
 /* preview buttons */
