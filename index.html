@@ -1556,6 +1556,36 @@ body.nhl #nhlBtns{display:contents}
 #flOverlay.vid.show .hcard{animation:hcardIn .5s cubic-bezier(.2,.9,.3,1) 2.9s both}
 #flOverlay .hcard img{width:clamp(38px,4.2vw,56px);height:clamp(38px,4.2vw,56px);object-fit:contain}
 /* ---- STEAL: user's light-sweep FILM — half 1 (away/team1) sweeps one way, half 2 (home/team2) the other ---- */
+/* ---- NHL 1:00 WARNING: red-urgency takeover (video layer activates when oneminute.mp4 lands) ---- */
+#omOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:
+    radial-gradient(120% 55% at 50% 118%, rgba(184,216,236,.24) 0%, rgba(95,137,168,.12) 34%, transparent 66%),
+    radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#omOverlay.show{display:block;opacity:1}
+.om-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#omOverlay.vid .om-vid{display:block}
+#omOverlay.vid::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(120% 90% at 50% 44%, transparent 40%, rgba(3,5,9,.66) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.36), transparent 26%, transparent 60%, rgba(3,5,9,.58))}
+/* red urgency pulse over everything */
+.om-pulse{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(80vw 60vh at 50% 46%, rgba(255,59,46,.24), transparent 70%)}
+#omOverlay.show .om-pulse{animation:omPulse 1s ease-in-out .5s infinite}
+@keyframes omPulse{0%,100%{opacity:.25}50%{opacity:.85}}
+.om-kick{position:absolute;left:0;right:0;top:14%;text-align:center;z-index:3;color:#ffb3ad;font-weight:900;
+  letter-spacing:8px;font-size:clamp(14px,1.9vw,24px);opacity:0}
+#omOverlay.show .om-kick{animation:anFade .5s .25s both}
+/* the big 1:00 — red LED clock style */
+.om-word{position:absolute;left:0;right:0;top:32%;text-align:center;z-index:3;
+  font-size:clamp(90px,20vw,300px);line-height:.92;font-weight:900;letter-spacing:4px;
+  color:#ff3b2e;text-shadow:0 0 34px rgba(255,59,46,.75), 0 0 90px rgba(255,59,46,.4);opacity:0}
+#omOverlay.show .om-word{animation:nfpSlam .5s cubic-bezier(.2,1.1,.3,1) .6s both, omBlink 1s steps(2,jump-none) 1.4s infinite}
+@keyframes omBlink{from{opacity:1}to{opacity:.55}}
+.om-sub{position:absolute;left:0;right:0;top:64%;text-align:center;z-index:3;color:#ffd7d2;font-weight:800;
+  letter-spacing:2px;font-size:clamp(15px,1.9vw,24px);opacity:0}
+#omOverlay.show .om-sub{animation:anFade .45s 1.1s both}
+#omOverlay .hcard{z-index:4}
+#omOverlay.show .hcard{animation:hcardIn .55s cubic-bezier(.2,.9,.3,1) 1.6s both}
 /* ---- NHL PERIOD SIREN (coded): rotating amber beacon sweeps the dark rink, siren rings pulse,
         horn-blast shake, END OF n slams in, period-tally pips light up ---- */
 #psOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2969,6 +2999,15 @@ body.tvmode .scorewrap{justify-content:center}
 <div id="reelBadge" class="hidden">● DEMO REEL</div>
 
 <!-- STEAL: user's light-sweep film — away team plays the first half, home team the second half -->
+<!-- NHL 1:00 WARNING: red-urgency takeover; the aerial-flyover film activates via OM_VID when it lands -->
+<div id="omOverlay">
+  <video class="om-vid" id="omVid" muted playsinline preload="auto"></video>
+  <div class="om-pulse"></div>
+  <div class="om-kick">CLOCK CHECK</div>
+  <div class="om-word" id="omWord">1:00</div>
+  <div class="om-sub" id="omSub">ONE MINUTE REMAINING</div>
+  <div class="hcard"><img id="omLogo" alt="" style="display:none"><div><div class="hname" id="omName"></div><div class="hstat" id="omStat"></div></div></div>
+</div>
 <!-- NHL PERIOD SIREN (coded): rotating amber beacon + siren rings + END OF n + period-tally pips -->
 <div id="psOverlay">
   <div class="ps-beam"></div>
@@ -3361,6 +3400,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endShootoutFilm==="function")endShootoutFilm();
   if(typeof endFaceoff==="function")endFaceoff();
   if(typeof endPeriodSiren==="function")endPeriodSiren();
+  if(typeof endOneMinute==="function")endOneMinute();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -3376,7 +3416,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm","endFaceoff","endPeriodSiren"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm","endFaceoff","endPeriodSiren","endOneMinute"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -4192,7 +4232,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying||foPlaying||psPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying||foPlaying||psPlaying||omPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -5214,6 +5254,28 @@ function triggerFreeThrow(t,info,made){
 function endFreeThrow(){ if(ftOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerFreeThrow._t); if(ftVid){ftVid.onended=null; try{ftVid.pause();}catch(e){}}
   ftOvEl.classList.remove("show"); ftPlaying=false; }
+/* ---- NHL 1:00 WARNING: red-urgency takeover. Set OM_VID="oneminute.mp4" when the user's
+        aerial arena-flyover film lands — the video layer activates automatically. ---- */
+const OM_VID="";   // <- set to "oneminute.mp4" when the flyover clip is delivered
+let omPlaying=false;
+const omOvEl=$("#omOverlay"), omVid=$("#omVid");
+function triggerOneMinute(){
+  if(takeoverBusy())return; omPlaying=true; hideWalkup(); houseWipe();
+  $("#omName").textContent=`PERIOD ${XG.p||1} — FINAL MINUTE`;
+  $("#omStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  omOvEl.classList.toggle("vid",!!OM_VID);
+  omOvEl.classList.remove("show"); void omOvEl.offsetWidth; omOvEl.classList.add("show");
+  if(OM_VID){
+    if(!omVid.getAttribute("src"))omVid.src=OM_VID;
+    const kick=()=>{ try{omVid.currentTime=0;}catch(e){} const p=omVid.play(); if(p&&p.catch)p.catch(()=>{}); };
+    omVid.onended=()=>{ try{omVid.pause();}catch(e){} };
+    if(omVid.readyState>=2)kick(); else omVid.addEventListener('canplay',kick,{once:true});
+  }
+  clearTimeout(triggerOneMinute._t); triggerOneMinute._t=setTimeout(endOneMinute,6000);
+}
+function endOneMinute(){ if(omOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerOneMinute._t); if(omVid){omVid.onended=null; try{omVid.pause();}catch(e){}}
+  omOvEl.classList.remove("show"); omPlaying=false; }
 /* ---- NHL PERIOD SIREN (coded): amber beacon sweep + siren rings + END OF n + period-tally pips ---- */
 let psPlaying=false;
 const psOvEl=$("#psOverlay");
@@ -5479,7 +5541,7 @@ const momentPenalty=(t,txt)=>triggerPenalty(t,txt);
 const momentShootout=(t,scored)=>triggerMoment({team:t,kick:"SHOOTOUT",word:scored?"HE SCORES!":"DENIED!",sub:scored?`${t.abbr} CONVERTS`:"WHAT A SAVE",alarm:!scored,dur:5200});
 const momentFaceoff=()=>triggerFaceoff();
 const momentPeriodEnd=p=>triggerPeriodSiren(p);
-const momentOneMinute=()=>triggerMoment({accent:"#ff4b3e",kick:"CLOCK CHECK",word:"1:00",sub:"ONE MINUTE REMAINING",alarm:true,dur:5000});
+const momentOneMinute=()=>triggerOneMinute();
 /* preview buttons */
 $("#b3Btn").onclick=()=>momentThree(G.home,23+Math.floor(Math.random()*5),demoShooter());
 $("#bL3Btn").onclick=e=>{const b=e.currentTarget;b._n=(b._n||0)+1;momentLong3(G.away,b._n%2?31:35,demoShooter());};
