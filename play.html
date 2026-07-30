@@ -1567,6 +1567,8 @@ body.nhl #nhlBtns{display:contents}
 #omOverlay.vid::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
   background:radial-gradient(120% 90% at 50% 44%, transparent 40%, rgba(3,5,9,.66) 100%),
              linear-gradient(180deg, rgba(3,5,9,.36), transparent 26%, transparent 60%, rgba(3,5,9,.58))}
+/* the film's own LED clock carries the 1:00 — hide the coded giant clock in film mode */
+#omOverlay.vid .om-word{display:none}
 /* red urgency pulse over everything */
 .om-pulse{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;mix-blend-mode:screen;
   background:radial-gradient(80vw 60vh at 50% 46%, rgba(255,59,46,.24), transparent 70%)}
@@ -1593,6 +1595,14 @@ body.nhl #nhlBtns{display:contents}
     radial-gradient(120% 55% at 50% 118%, rgba(184,216,236,.28) 0%, rgba(95,137,168,.14) 34%, transparent 66%),
     radial-gradient(1100px 700px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
 #psOverlay.show{display:block;opacity:1}
+/* film mode: the rink-wash siren film plays under the word/pips; coded beacon hidden (fallback) */
+.ps-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#psOverlay.vid .ps-vid{display:block}
+.ps-veil{position:absolute;inset:0;pointer-events:none;z-index:2;display:none;
+  background:radial-gradient(120% 90% at 50% 44%, transparent 42%, rgba(3,5,9,.6) 100%),
+             linear-gradient(180deg, rgba(3,5,9,.3), transparent 26%, transparent 62%, rgba(3,5,9,.52))}
+#psOverlay.vid .ps-veil{display:block}
+#psOverlay.vid .ps-scene,#psOverlay.vid .ps-beam,#psOverlay.vid .ps-flash{display:none!important}
 #psOverlay.show .ps-scene{animation:psShake .5s linear .55s}
 @keyframes psShake{0%,100%{transform:translate(0,0)}22%{transform:translate(-8px,5px)}
   46%{transform:translate(7px,-4px)}70%{transform:translate(-5px,3px)}}
@@ -3010,6 +3020,8 @@ body.tvmode .scorewrap{justify-content:center}
 </div>
 <!-- NHL PERIOD SIREN (coded): rotating amber beacon + siren rings + END OF n + period-tally pips -->
 <div id="psOverlay">
+  <video class="ps-vid" id="psVid" muted playsinline preload="auto" poster="siren.jpg"><source src="siren.mp4" type="video/mp4"></video>
+  <div class="ps-veil"></div>
   <div class="ps-beam"></div>
   <div class="ps-scene">
     <div class="ps-rings"><b></b><b></b><b></b></div>
@@ -5256,7 +5268,7 @@ function endFreeThrow(){ if(ftOvEl.classList.contains("show"))houseWipe();
   ftOvEl.classList.remove("show"); ftPlaying=false; }
 /* ---- NHL 1:00 WARNING: red-urgency takeover. Set OM_VID="oneminute.mp4" when the user's
         aerial arena-flyover film lands — the video layer activates automatically. ---- */
-const OM_VID="";   // <- set to "oneminute.mp4" when the flyover clip is delivered
+const OM_VID="oneminute.mp4";   // user's film: LED clock ticks to 1:00 -> crossfade -> red-alert rink
 let omPlaying=false;
 const omOvEl=$("#omOverlay"), omVid=$("#omVid");
 function triggerOneMinute(){
@@ -5271,7 +5283,7 @@ function triggerOneMinute(){
     omVid.onended=()=>{ try{omVid.pause();}catch(e){} };
     if(omVid.readyState>=2)kick(); else omVid.addEventListener('canplay',kick,{once:true});
   }
-  clearTimeout(triggerOneMinute._t); triggerOneMinute._t=setTimeout(endOneMinute,6000);
+  clearTimeout(triggerOneMinute._t); triggerOneMinute._t=setTimeout(endOneMinute,OM_VID?9300:6000);
 }
 function endOneMinute(){ if(omOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerOneMinute._t); if(omVid){omVid.onended=null; try{omVid.pause();}catch(e){}}
@@ -5289,11 +5301,18 @@ function triggerPeriodSiren(p){
   $("#psPips").innerHTML=pips.join("");
   $("#psName").textContent="INTERMISSION";
   $("#psStat").textContent=`${G.away.abbr} ${G.away.score} — ${G.home.score} ${G.home.abbr}`.toUpperCase();
+  psOvEl.classList.add("vid");   // user's rink-wash siren film; coded beacon stays as dormant fallback
   psOvEl.classList.remove("show"); void psOvEl.offsetWidth; psOvEl.classList.add("show");
-  clearTimeout(triggerPeriodSiren._t); triggerPeriodSiren._t=setTimeout(endPeriodSiren,6500);
+  const v=$("#psVid");
+  const kick=()=>{ try{v.currentTime=0;}catch(e){} const p=v.play(); if(p&&p.catch)p.catch(()=>{}); };
+  v.onended=()=>{ try{v.pause();}catch(e){} };
+  if(v.readyState>=2)kick(); else v.addEventListener('canplay',kick,{once:true});
+  clearTimeout(triggerPeriodSiren._t); triggerPeriodSiren._t=setTimeout(endPeriodSiren,7800);
 }
 function endPeriodSiren(){ if(psOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerPeriodSiren._t); psOvEl.classList.remove("show"); psPlaying=false; }
+  clearTimeout(triggerPeriodSiren._t);
+  const v=$("#psVid"); if(v){v.onended=null; try{v.pause();}catch(e){}}
+  psOvEl.classList.remove("show"); psPlaying=false; }
 /* ---- NHL FACE-OFF (user's film): two backlit silhouettes over the dot, the puck drops, they clash. ---- */
 let foPlaying=false;
 const foOvEl=$("#foOverlay"), foVid=$("#foVid");
