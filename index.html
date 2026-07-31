@@ -5704,39 +5704,41 @@ function mwStartTdLinked(T0,members,grid,dur){
   MW.live=true;
   mwShowTd(T0);
 }
-/* -- TEXAS FIGHT CHANT: odd screens slam "TEXAS" (burnt orange, white rim), even screens
-      answer "FIGHT!" (white, burnt-orange rim) — pop 1s, fade, alternate, 3 cycles.
-      A single screen alternates both words itself. -- */
+/* -- TEXAS FIGHT CHANT: BOTH words tile the wall at once — TEXAS (burnt orange, white rim)
+      on every other screen, FIGHT! (white, burnt-orange rim) on the rest — pop, hold ~1s,
+      fade, then the words SWAP screens; 3 swap-cycles. A single screen alternates the words. -- */
 function mwTfDom(){
-  const many=(MW.wallN||MW.panels.length)>1;
-  mwPanelBox.innerHTML=MW.panels.map((r,i)=>{
-    const n=(MWL.idx||i+1), words=many?[(n%2===1)?"t":"f"]:["t","f"];
+  mwPanelBox.innerHTML=MW.panels.map(r=>{
     const fs=Math.round(r.h*.34), st=Math.max(2,Math.round(fs*.014));
     return `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
        <div class="mw-tfglow"></div>
-       ${words.map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")}
+       ${["t","f"].map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")}
      </div>`;}).join("");
   MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
-    return {tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
+    return {n:(MWL.idx||i+1), tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
   mwOvEl.classList.add("paneled");
 }
-function mwTfEnv(f){ // pop-hold-fade envelope within one word's phase (f: 0..1)
+function mwTfEnv(f){ // pop-hold-fade envelope within one beat (f: 0..1)
   if(f<.12)return {a:f/.12, s:1.35-.35*(f/.12)};
   if(f<.75)return {a:1, s:1};
   return {a:Math.max(0,1-(f-.75)/.25), s:1};
 }
+function mwTfWord(n,phase,many){ // which word this screen shows this beat (checkerboard, swapping)
+  if(!many)return phase===0?"t":"f";
+  return ((n+phase)%2===1)?"t":"f";
+}
 function mwTfRender(){
   const D=MW.dur||8400, el=Date.now()-MW.t0, t=Math.max(0,el);
   const cyc=D/3, p=(t%cyc)/cyc, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
+  const many=(MW.wallN||MW.panels.length)>1;
   MW.dom.forEach(d=>{ if(!d.tf)return;
-    let lit=false;
+    const mine=mwTfWord(d.n,phase,many);
     d.tf.forEach(w=>{
-      const active=(w.dataset.w==="t"?0:1)===phase;
-      if(active)lit=true;
+      const active=w.dataset.w===mine;
       w.style.opacity=active?e.a.toFixed(3):"0";
       w.style.transform=`translate(-50%,-50%) scale(${active?e.s.toFixed(3):1})`;
     });
-    if(d.tfg)d.tfg.style.opacity=lit?(e.a*.55).toFixed(3):"0";
+    if(d.tfg)d.tfg.style.opacity=(e.a*.55).toFixed(3);
   });
   if(el<D)MW.raf=requestAnimationFrame(mwTfRender); else MW.raf=0;
 }
@@ -5943,9 +5945,7 @@ function mwPrevTf(ctx,W,H,t){
   ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
   ctx.textAlign="center"; ctx.textBaseline="middle";
   cells.forEach((cell,i)=>{
-    const n=i+1, mine=many?((n%2===1)?0:1):phase;    // odd screens TEXAS, even FIGHT!; solo alternates
-    if(mine!==phase)return;
-    const word=phase===0?"TEXAS":"FIGHT!";
+    const w=mwTfWord(i+1,phase,many), word=w==="t"?"TEXAS":"FIGHT!";
     const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
     ctx.save(); ctx.globalAlpha=e.a;
     ctx.translate(cx,cy); ctx.scale(e.s,e.s);
@@ -5953,9 +5953,9 @@ function mwPrevTf(ctx,W,H,t){
     gl.addColorStop(0,"rgba(191,87,0,.4)"); gl.addColorStop(1,"rgba(191,87,0,0)");
     ctx.fillStyle=gl; ctx.fillRect(-cw/2,-ch/2,cw,ch);
     ctx.lineJoin="round"; ctx.lineWidth=Math.max(1.5,f*.06);
-    ctx.strokeStyle=phase===0?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)";
+    ctx.strokeStyle=w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)";
     ctx.strokeText(word,0,0);
-    ctx.fillStyle=phase===0?"#bf5700":"#ffffff";
+    ctx.fillStyle=w==="t"?"#bf5700":"#ffffff";
     ctx.fillText(word,0,0);
     ctx.restore();
   });
