@@ -1714,6 +1714,7 @@ body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
 .mw-plabel span{display:block;color:#93a3b8;letter-spacing:4px;font-size:clamp(12px,1.4vw,20px);margin-top:6px}
 #mwOverlay.cal .mw-plabel{opacity:1}
 #mwOverlay.cal .mw-panel{outline:3px dashed rgba(255,205,130,.5);outline-offset:-3px}
+#multiBtns .ghostbtn.on{border-color:var(--gold,#e8c34a);color:var(--gold,#e8c34a);box-shadow:0 0 14px rgba(232,195,74,.25)}
 /* ---- NHL PERIOD SIREN (coded): rotating amber beacon sweeps the dark rink, siren rings pulse,
         horn-blast shake, END OF n slams in, period-tally pips light up ---- */
 #psOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2609,6 +2610,8 @@ body.tvmode .scorewrap{justify-content:center}
       </span>
       <span id="multiBtns">
         <button class="hrbtn" id="mwBallBtn">⚪ Ball Cross</button>
+        <button class="ghostbtn" id="mwS1Btn">1️⃣ Screen 1</button>
+        <button class="ghostbtn" id="mwS2Btn">2️⃣ Screen 2</button>
         <button class="ghostbtn" id="mwScanBtn">🔍 Analyze Screens</button>
       </span>
     </div>
@@ -5149,7 +5152,7 @@ function startMultiScreen(){
   MODE="demo"; stopAll(); applyLeagueClass("multi");
   $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
   $("#statusTxt").textContent="MULTI-SCREEN"; $("#liveDot").style.display="none";
-  $("#boardHint").textContent="One PC, one window: stretch this browser across the whole TV row (extended desktop), tap 🔍 Analyze Screens once so the wall knows where each display sits, then fire an animation.";
+  $("#boardHint").textContent="Wall setup: open this page in a window on EACH display, tap 1️⃣ on one and 2️⃣ on the other (each goes fullscreen and they link up) — then fire ⚪ Ball Cross from either. Or stretch ONE window across all displays and tap 🔍 Analyze Screens.";
   showBoard();
 }
 function mwWinRect(){ // this window's CONTENT rect on the desktop, in the browser's scaled coords
@@ -5170,21 +5173,23 @@ function mwBuildPanels(){
   if(!rects.length)rects=[{x:0,y:0,w:win.w,h:win.h}];
   MW.panels=rects;
   const sh=Math.min(...rects.map(p=>p.h)),          // shared metrics off the SHORTEST screen
-        size=Math.round(sh*.11), fl=Math.round(sh*.16),
-        total=rects.reduce((a,p)=>a+p.w,0), m=Math.round(sh*.12);
-  MW.geom={sh,size,fl,total,m};
-  const hidden="transform:translate(-99999px,0)";
-  mwPanelBox.innerHTML=rects.map((r,i)=>
+        total=rects.reduce((a,p)=>a+p.w,0);
+  MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
+  mwPanelDom();
+}
+function mwPanelDom(){ // panel DOM from MW.panels + MW.geom (per-panel label optional)
+  const g=MW.geom, hidden="transform:translate(-99999px,0)";
+  mwPanelBox.innerHTML=MW.panels.map((r,i)=>
     `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="mw-pfloor" style="height:${fl}px"></div>
-       <div class="mw-pshadow" style="width:${Math.round(size*1.2)}px;height:${Math.max(10,Math.round(sh*.026))}px;bottom:${fl-8}px;${hidden}"></div>
-       <div class="mw-pball gh g3" style="width:${size}px;height:${size}px;${hidden}"></div>
-       <div class="mw-pball gh g2" style="width:${size}px;height:${size}px;${hidden}"></div>
-       <div class="mw-pball gh g1" style="width:${size}px;height:${size}px;${hidden}"></div>
-       <div class="mw-pball mn" style="width:${size}px;height:${size}px;${hidden}"></div>
-       <div class="mw-plabel"><b>SCREEN ${i+1}</b><span>${r.w} × ${r.h}</span></div>
+       <div class="mw-pfloor" style="height:${g.fl}px"></div>
+       <div class="mw-pshadow" style="width:${Math.round(g.size*1.2)}px;height:${Math.max(10,Math.round(g.sh*.026))}px;bottom:${g.fl-8}px;${hidden}"></div>
+       <div class="mw-pball gh g3" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
+       <div class="mw-pball gh g2" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
+       <div class="mw-pball gh g1" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
+       <div class="mw-pball mn" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
+       <div class="mw-plabel"><b>${r.label||("SCREEN "+(i+1))}</b><span>${r.w} × ${r.h}</span></div>
      </div>`).join("");
-  MW.dom=rects.map((r,i)=>{const el=mwPanelBox.children[i];
+  MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
     return {balls:[el.querySelector(".mn"),el.querySelector(".g1"),el.querySelector(".g2"),el.querySelector(".g3")],
             shadow:el.querySelector(".mw-pshadow")};});
   mwOvEl.classList.add("paneled");
@@ -5218,22 +5223,24 @@ function mwArcY(t){ // bounce height 0..~.54 in units of geom.sh; contacts at .1
 function mwSquashAmt(t){let m=0;
   for(const c of[.125,.375,.625,.875]){const d=Math.abs(t-c); if(d<.02)m=Math.max(m,1-d/.02);}
   return m;}
-function mwRender(ts){
-  const g=MW.geom, D=8000, t=Math.min((ts-MW.t0)/D,1);
+function mwRender(){
+  // wall-clock driven (Date.now) so LINKED windows on the same PC render the same frame
+  const g=MW.geom, D=8000, t=Math.min((Date.now()-MW.t0)/D,1);
   const lags=[0,.00875,.0175,.02625];               // main + 3 trail ghosts (70/140/210ms of 8s)
   const wallXAt=f=>-g.m+(g.total+2*g.m)*f;
   let acc=0;
   MW.panels.forEach((p,i)=>{
     const d=MW.dom[i]; if(!d)return;
+    const off=(p.off!=null)?p.off:acc;              // linked windows carry their wall offset
     d.balls.forEach((node,bi)=>{
       const tg=t-lags[bi];
       if(tg<0){node.style.transform="translate(-99999px,0)";return;}
-      const lx=wallXAt(tg)-acc, y=mwArcY(tg)*g.sh;
+      const lx=wallXAt(tg)-off, y=mwArcY(tg)*g.sh;
       let s="";
       if(bi===0){const q=mwSquashAmt(tg); if(q>0)s=` scale(${(1+.24*q).toFixed(3)},${(1-.28*q).toFixed(3)})`;}
       node.style.transform=`translate(${(lx-g.size/2).toFixed(1)}px,${(-(g.fl+y)).toFixed(1)}px)`+s;
     });
-    const lx=wallXAt(t)-acc, y=mwArcY(t)*g.sh,
+    const lx=wallXAt(t)-off, y=mwArcY(t)*g.sh,
           k=Math.max(.3,1-(y/(.5*g.sh))*.65),
           op=Math.max(.1,.55-(y/(.5*g.sh))*.45);
     d.shadow.style.transform=`translate(${(lx-g.size*.6).toFixed(1)}px,0) scale(${k.toFixed(3)})`;
@@ -5243,31 +5250,94 @@ function mwRender(ts){
   for(const h of MW.hits){
     if(!h.done&&t>=h.t){h.done=true;
       let a=0;
-      for(let i=0;i<MW.panels.length;i++){const p=MW.panels[i];
-        if(h.wx>=a&&h.wx<a+p.w){
+      for(let i=0;i<MW.panels.length;i++){const p=MW.panels[i], po=(p.off!=null)?p.off:a;
+        if(h.wx>=po&&h.wx<po+p.w){
           const r=document.createElement("div"); r.className="mw-pring";
-          r.style.cssText=`left:${Math.round(h.wx-a)}px;bottom:${g.fl}px;width:${Math.round(g.sh*.32)}px;height:${Math.round(g.sh*.10)}px`;
+          r.style.cssText=`left:${Math.round(h.wx-po)}px;bottom:${g.fl}px;width:${Math.round(g.sh*.32)}px;height:${Math.round(g.sh*.10)}px`;
           mwPanelBox.children[i].appendChild(r); setTimeout(()=>r.remove(),800); break;}
-        a+=p.w;}
+        a=po+p.w;}
     }
   }
   if(t<1)MW.raf=requestAnimationFrame(mwRender); else MW.raf=0;
 }
-function triggerBallCross(){
-  if(takeoverBusy())return; mwPlaying=true; hideWalkup(); houseWipe();
-  mwBuildPanels();                                   // re-map from the window's CURRENT position
-  mwOvEl.classList.remove("cal");
+function mwShowCross(T0){
   MW.hits=[.125,.375,.625,.875].map(f=>({t:f,wx:-MW.geom.m+(MW.geom.total+2*MW.geom.m)*f,done:false}));
+  mwOvEl.classList.remove("cal");
   mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
-  cancelAnimationFrame(MW.raf); MW.t0=performance.now(); MW.raf=requestAnimationFrame(mwRender);
-  clearTimeout(triggerBallCross._t); triggerBallCross._t=setTimeout(endBallCross,8600);
+  cancelAnimationFrame(MW.raf); MW.t0=T0; MW.raf=requestAnimationFrame(mwRender);
+  clearTimeout(triggerBallCross._t);
+  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+8600);
+}
+function triggerBallCross(){
+  if(takeoverBusy())return;
+  if(MWL.idx&&MWL.ch){ mwFireLinked(); return; }     // linked wall: broadcast to every screen
+  mwPlaying=true; hideWalkup(); houseWipe();
+  mwBuildPanels();                                   // re-map from the window's CURRENT position
+  mwShowCross(Date.now());
 }
 function endBallCross(){ if(mwOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerBallCross._t); clearTimeout(mwAnalyzeScreens._t);
   cancelAnimationFrame(MW.raf); MW.raf=0;
+  if(MW.live){ MW.live=false; if(MWL.ch&&MWL.idx){try{MWL.ch.postMessage({type:"stop"});}catch(e){}} }
   mwOvEl.classList.remove("show"); mwOvEl.classList.remove("cal"); mwPlaying=false; }
+/* -- LINKED WINDOWS: each display runs its OWN fullscreen window of this page; windows in the
+      same browser sync over BroadcastChannel. Same PC = same clock, so a shared Date.now()
+      start time gives frame-tight timing with zero servers. Join via 1️⃣/2️⃣ (or ?wallscreen=N);
+      firing Ball Cross from ANY joined window plays it across the whole wall. -- */
+const MWL={ch:null,idx:0,roster:{},beatT:0};
+function mwEnsureCh(){ if(!MWL.ch&&("BroadcastChannel" in window)){ MWL.ch=new BroadcastChannel("hrcam_wall"); MWL.ch.onmessage=mwOnMsg; } return !!MWL.ch; }
+function mwJoin(n){
+  if(!mwEnsureCh()){ $("#boardHint").textContent="This browser can't link windows (no BroadcastChannel) — use 🔍 Analyze Screens with one stretched window instead."; return; }
+  MWL.idx=n;                                         // re-tapping = re-join (and retry fullscreen)
+  clearInterval(MWL.beatT); MWL.beatT=setInterval(mwBeat,3000); mwBeat(true);
+  $("#mwS1Btn").classList.toggle("on",n===1); $("#mwS2Btn").classList.toggle("on",n===2);
+  $("#statusTxt").textContent="WALL SCREEN "+n;
+  $("#boardHint").textContent=`Linked as SCREEN ${n} — open this same page in another window on the other display, join it as the other screen, then fire ⚪ Ball Cross from either window.`;
+  const el=document.documentElement; if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
+}
+function mwLeave(){
+  MWL.idx=0; clearInterval(MWL.beatT); MWL.beatT=0;
+  $("#mwS1Btn").classList.remove("on"); $("#mwS2Btn").classList.remove("on");
+  $("#statusTxt").textContent="MULTI-SCREEN";
+  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}
+function mwBeat(hello){ if(!MWL.ch||!MWL.idx)return;
+  try{MWL.ch.postMessage({type:hello===true?"hello":"beat",idx:MWL.idx,w:innerWidth,h:innerHeight});}catch(e){} }
+function mwMembers(){                                // fresh roster (self + <9s heartbeats), wall order
+  const now=Date.now(), list=[{idx:MWL.idx,w:innerWidth,h:innerHeight}];
+  for(const k in MWL.roster){ const r=MWL.roster[k];
+    if(now-r.ts<9000&&+k!==MWL.idx)list.push({idx:+k,w:r.w,h:r.h}); }
+  return list.sort((a,b)=>a.idx-b.idx);
+}
+function mwFireLinked(){
+  const members=mwMembers(), T0=Date.now()+350;      // small lead so every window starts together
+  try{MWL.ch.postMessage({type:"cross",t0:T0,members});}catch(e){}
+  mwStartLinked(T0,members);
+}
+function mwStartLinked(T0,members){
+  const me=(members||[]).find(x=>x.idx===MWL.idx);
+  if(!me)return;                                     // this window wasn't in the firing snapshot
+  MW.live=false;                                     // superseding quietly — no stop broadcast
+  skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
+  let off=0; for(const x of members){ if(x.idx<MWL.idx)off+=x.w; }
+  const sh=Math.min(...members.map(x=>x.h)), total=members.reduce((a,x)=>a+x.w,0);
+  MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
+  MW.panels=[{x:0,y:0,w:innerWidth,h:innerHeight,off,label:"SCREEN "+MWL.idx}];
+  mwPanelDom();
+  MW.live=true;
+  mwShowCross(T0);
+}
+function mwOnMsg(e){ const d=e.data||{};
+  if((d.type==="hello"||d.type==="beat")&&d.idx){
+    if(d.idx!==MWL.idx)MWL.roster[d.idx]={w:d.w,h:d.h,ts:Date.now()};
+    if(d.type==="hello")mwBeat();                    // answer newcomers so they learn the roster fast
+  }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(d.t0,d.members); }
+  else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
+}
 $("#mwBallBtn").onclick=()=>triggerBallCross();
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
+$("#mwS1Btn").onclick=()=>mwJoin(1);
+$("#mwS2Btn").onclick=()=>mwJoin(2);
 $("#lgMULTI").onclick=()=>startMultiScreen();
 $("#lgMLB").onclick=()=>setLeague("mlb");
 $("#lgNFL").onclick=()=>setLeague("nfl");
@@ -6069,6 +6139,8 @@ async function startReel(){
     else { applyLeagueClass("mlb"); startDemo(); }
     return;
   }
+  const ws=q.get("wallscreen")||new URLSearchParams((location.hash||"").replace(/^#/,"")).get("wallscreen");
+  if(ws){ startMultiScreen(); mwJoin(parseInt(ws,10)||1); return; }  // pre-linked wall window (fullscreen needs one click/F11)
   loadSchedule();
 })();
 
