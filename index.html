@@ -1623,6 +1623,71 @@ body.nhl #nhlBtns{display:contents}
 #psOverlay.vid .ps-word{top:auto;bottom:min(27vh,245px);font-size:clamp(40px,7.5vw,110px)}
 #psOverlay.vid .ps-pips{top:auto;bottom:min(20vh,185px)}
 #xpOverlay .xp2-top{top:auto;bottom:min(19vh,175px)}
+/* ===== MULTI-SCREEN WALL (2026-07-31) =====
+   Scenario A: ONE PC drives the whole TV row (extended desktop) — the browser window
+   spans every screen, so the window IS the wall and sync is perfect by construction.
+   body.multi turns the board into a clean control surface (scoreboard hidden).
+   BALL CROSS: comet ball bounces the full window width on a lit runway;
+   floor contacts land at 12.5/37.5/62.5/87.5% of the crossing (one per screen). */
+#multiBtns{display:none}
+body.multi #multiBtns{display:contents}
+body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
+#mwOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
+  background:
+    linear-gradient(180deg,transparent 78%,rgba(180,120,40,.10) 100%),
+    radial-gradient(1400px 800px at 50% -10%,#141a24 0%,#0a0e15 55%,#04060a 100%)}
+#mwOverlay.show{display:block;opacity:1}
+.mw-floor{position:absolute;left:0;right:0;bottom:0;height:16vh;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 70%);
+  border-top:2px solid rgba(255,205,130,.35);
+  box-shadow:0 -18px 60px rgba(255,160,50,.08)}
+/* runner: linear X across the whole window (= the whole wall) */
+.mw-run,.mw-shadowrun{position:absolute;left:0;bottom:16vh;width:0;height:0}
+#mwOverlay.show .mw-run,#mwOverlay.show .mw-shadowrun{animation:mwX 8s linear both}
+@keyframes mwX{from{transform:translateX(-8vw)}to{transform:translateX(108vw)}}
+/* bounce: fall = ease-in, rise = ease-out, per segment */
+.mw-bounce{position:absolute;left:0;bottom:0;width:0;height:0}
+#mwOverlay.show .mw-bounce{animation:mwY 8s both}
+@keyframes mwY{
+  0%{transform:translateY(-54vh);animation-timing-function:cubic-bezier(.4,0,.85,.5)}
+  12.5%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.5,.6,1)}
+  25%{transform:translateY(-46vh);animation-timing-function:cubic-bezier(.4,0,.85,.5)}
+  37.5%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.5,.6,1)}
+  50%{transform:translateY(-46vh);animation-timing-function:cubic-bezier(.4,0,.85,.5)}
+  62.5%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.5,.6,1)}
+  75%{transform:translateY(-46vh);animation-timing-function:cubic-bezier(.4,0,.85,.5)}
+  87.5%{transform:translateY(0);animation-timing-function:cubic-bezier(.15,.5,.6,1)}
+  100%{transform:translateY(-54vh)}}
+.mw-ball{position:absolute;left:0;bottom:0;width:min(11vh,150px);height:min(11vh,150px);border-radius:50%;
+  transform:translate(-50%,50%);
+  background:radial-gradient(circle at 32% 28%,#fff 0%,#ffe9c2 26%,#f2a53a 58%,#7c3f0e 100%);
+  box-shadow:0 0 44px rgba(255,175,70,.9),0 0 140px rgba(255,150,40,.45)}
+#mwOverlay.show .mw-main .mw-ball{animation:mwSquash 8s linear both}
+@keyframes mwSquash{
+  0%,11%,14.2%,36%,39.2%,61%,64.2%,86%,89.2%,100%{transform:translate(-50%,50%) scale(1)}
+  12.5%,37.5%,62.5%,87.5%{transform:translate(-50%,50%) scale(1.24,.72)}}
+/* comet trail: three lagged ghosts (fill BOTH holds them off-screen during their lag) */
+.mw-ghost .mw-ball{box-shadow:none;filter:blur(3px)}
+.mw-ghost.g1{--lag:.07s}.mw-ghost.g2{--lag:.14s}.mw-ghost.g3{--lag:.21s}
+.mw-ghost.g1 .mw-ball{opacity:.4}.mw-ghost.g2 .mw-ball{opacity:.24}.mw-ghost.g3 .mw-ball{opacity:.13}
+#mwOverlay.show .mw-run.mw-ghost{animation-delay:var(--lag)}
+#mwOverlay.show .mw-ghost .mw-bounce{animation-delay:var(--lag)}
+.mw-shadow{position:absolute;left:0;top:-1.2vh;width:min(13vh,170px);height:2.6vh;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent 70%);transform:translateX(-50%)}
+#mwOverlay.show .mw-shadow{animation:mwShadow 8s linear both}
+@keyframes mwShadow{
+  0%,100%{transform:translateX(-50%) scale(.35);opacity:.1}
+  12.5%,37.5%,62.5%,87.5%{transform:translateX(-50%) scale(1);opacity:.55}
+  25%,50%,75%{transform:translateX(-50%) scale(.4);opacity:.14}}
+/* impact rings on the floor at the 4 contact points (x = -8vw + 116vw·t; forwards = hidden until fire) */
+.mw-hit{position:absolute;bottom:16vh;width:min(16vh,210px);height:min(5vh,70px);border-radius:50%;
+  border:3px solid rgba(255,200,120,.8);transform:translate(-50%,50%) scale(.2);opacity:0;pointer-events:none}
+.mw-hit.h1{left:6.5vw}.mw-hit.h2{left:35.5vw}.mw-hit.h3{left:64.5vw}.mw-hit.h4{left:93.5vw}
+#mwOverlay.show .mw-hit.h1{animation:mwHit .7s ease-out 1s forwards}
+#mwOverlay.show .mw-hit.h2{animation:mwHit .7s ease-out 3s forwards}
+#mwOverlay.show .mw-hit.h3{animation:mwHit .7s ease-out 5s forwards}
+#mwOverlay.show .mw-hit.h4{animation:mwHit .7s ease-out 7s forwards}
+@keyframes mwHit{0%{opacity:.9;transform:translate(-50%,50%) scale(.2)}100%{opacity:0;transform:translate(-50%,50%) scale(1.5)}}
 /* ---- NHL PERIOD SIREN (coded): rotating amber beacon sweeps the dark rink, siren rings pulse,
         horn-blast shake, END OF n slams in, period-tally pips light up ---- */
 #psOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2401,6 +2466,7 @@ body.tvmode .scorewrap{justify-content:center}
     <button id="lgNFL">🏈 NFL</button>
     <button id="lgNBA">🏀 NBA</button>
     <button id="lgNHL">🏒 NHL</button>
+    <button id="lgMULTI">🖥️ Multi-Screen</button>
   </div>
 
   <div class="datebar">
@@ -2514,6 +2580,9 @@ body.tvmode .scorewrap{justify-content:center}
         <button class="ghostbtn" id="tmBtn">⏱ 2-Minute</button>
         <button class="ghostbtn" id="toBtn">🔄 Turnover</button>
         <button class="ghostbtn" id="nfBtn">🏆 Final</button>
+      </span>
+      <span id="multiBtns">
+        <button class="hrbtn" id="mwBallBtn">⚪ Ball Cross</button>
       </span>
     </div>
     <div class="hint" id="boardHint"></div>
@@ -3076,6 +3145,17 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="ps-pips" id="psPips"></div>
   <div class="hcard"><img id="psLogo" alt="" style="display:none"><div><div class="hname" id="psName"></div><div class="hstat" id="psStat"></div></div></div>
 </div>
+<!-- MULTI-SCREEN WALL: one PC stretched across the bar's TV row = one canvas, perfect sync.
+     BALL CROSS: a comet ball bounces the full window width — 4 floor hits, one per screen on a 4-wide wall. -->
+<div id="mwOverlay">
+  <div class="mw-floor"></div>
+  <div class="mw-hit h1"></div><div class="mw-hit h2"></div><div class="mw-hit h3"></div><div class="mw-hit h4"></div>
+  <div class="mw-shadowrun"><div class="mw-shadow"></div></div>
+  <div class="mw-run mw-ghost g3"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
+  <div class="mw-run mw-ghost g2"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
+  <div class="mw-run mw-ghost g1"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
+  <div class="mw-run mw-main"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
+</div>
 <!-- NHL FACE-OFF: user's stare-down film — two silhouettes over the dot, the puck drops, they clash -->
 <div id="foOverlay">
   <video class="fo-vid" id="foVid" muted playsinline preload="auto" poster="faceoff.jpg"><source src="faceoff.mp4" type="video/mp4"></video>
@@ -3362,6 +3442,8 @@ function dateLabel(d){
   return nice;
 }
 async function loadSchedule(){
+  if(LEAGUE==="multi"){$("#dlabel").textContent="—";
+    $("#games").innerHTML='<div class="empty">Multi-Screen is a display mode — no games here.<br>Tap 🖥️ Multi-Screen again to open the wall stage, or pick a league above.</div>';return;}
   if(LEAGUE==="nfl")return loadScheduleNFL();
   if(LEAGUE==="nba"||LEAGUE==="nhl")return loadScheduleESPNX(LEAGUE);
   $("#dlabel").textContent=dateLabel(curDate);
@@ -3455,6 +3537,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endFaceoff==="function")endFaceoff();
   if(typeof endPeriodSiren==="function")endPeriodSiren();
   if(typeof endOneMinute==="function")endOneMinute();
+  if(typeof endBallCross==="function")endBallCross();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -3470,7 +3553,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
 /* dismiss whatever takeover is on-screen, but leave the game/poll/demo loops running */
 function skipTakeover(){
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover",
-   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm","endFaceoff","endPeriodSiren","endOneMinute"]
+   "endHomeRun","endHR2","endAnthem","endK","endStretch","endRally","endFinal","endLineup","endMoment","endDowntown","endNetCam","endSlamCam","endBuzzer","endFoulCam","endSteal","endFreeThrow","endGoal","endPenalty","endShootoutFilm","endFaceoff","endPeriodSiren","endOneMinute","endBallCross"]
     .forEach(f=>{if(typeof window[f]==="function")window[f]();});
   if(wuCard){clearTimeout(wuHideT);wuCard.classList.remove("show");}
 }
@@ -4286,7 +4369,7 @@ async function replayLastHR(fn){
    Trigger/end call sites remain; restore the old body here to bring it back. */
 function houseWipe(){}
 function takeoverBusy(){return hrPlaying||hr2Playing||anthemPlaying||kPlaying||stretchPlaying||rallyPlaying||finalPlaying||lineupPlaying
-  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying||foPlaying||psPlaying||omPlaying;}
+  ||koPlaying||rzPlaying||nmPlaying||tdPlaying||tmPlaying||toPlaying||xpPlaying||tpPlaying||genPlaying||dtPlaying||ncPlaying||gcPlaying||gwPlaying||flPlaying||stPlaying||ftPlaying||ngPlaying||pnPlaying||soPlaying||foPlaying||psPlaying||omPlaying||mwPlaying;}
 function hideWalkup(){wuCard.classList.remove("show");clearTimeout(wuHideT);}
 const stOv=$("#stretchOverlay"), rOv=$("#rallyOverlay"), fOv=$("#finalOverlay");
 let stretchPlaying=false, rallyPlaying=false, finalPlaying=false;
@@ -4465,10 +4548,12 @@ function applyLeagueClass(l){   // league visuals only, no schedule fetch (used 
   document.body.classList.toggle("nfl",l==="nfl");
   document.body.classList.toggle("nba",l==="nba");
   document.body.classList.toggle("nhl",l==="nhl");
+  document.body.classList.toggle("multi",l==="multi");
   $("#lgMLB").classList.toggle("on",l==="mlb");
   $("#lgNFL").classList.toggle("on",l==="nfl");
   $("#lgNBA").classList.toggle("on",l==="nba");
   $("#lgNHL").classList.toggle("on",l==="nhl");
+  $("#lgMULTI").classList.toggle("on",l==="multi");
 }
 function setLeague(l){ applyLeagueClass(l); loadSchedule(); }
 async function loadScheduleNFL(){
@@ -5024,6 +5109,27 @@ async function fetchBatter(id,oppId){
    ============================================================ */
 $("#demoBtn").onclick=()=>({nfl:startDemoNFL,nba:startDemoNBA,nhl:startDemoNHL}[LEAGUE]||startDemo)();
 $("#backBtn").onclick=showSetup;
+/* ---- MULTI-SCREEN WALL: one PC stretched across the TV row = one canvas, perfect sync.
+        The tab opens the wall stage (scoreboard hidden); BALL CROSS bounces a comet ball
+        across the full window width — on a 4-wide wall that's one floor hit per screen. ---- */
+let mwPlaying=false;
+const mwOvEl=$("#mwOverlay");
+function startMultiScreen(){
+  MODE="demo"; stopAll(); applyLeagueClass("multi");
+  $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
+  $("#statusTxt").textContent="MULTI-SCREEN"; $("#liveDot").style.display="none";
+  $("#boardHint").textContent="One PC, one window: stretch this browser across the whole TV row (extended desktop), press F11 for fullscreen, then fire an animation — it travels every screen as one canvas.";
+  showBoard();
+}
+function triggerBallCross(){
+  if(takeoverBusy())return; mwPlaying=true; hideWalkup(); houseWipe();
+  mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
+  clearTimeout(triggerBallCross._t); triggerBallCross._t=setTimeout(endBallCross,8600);
+}
+function endBallCross(){ if(mwOvEl.classList.contains("show"))houseWipe();
+  clearTimeout(triggerBallCross._t); mwOvEl.classList.remove("show"); mwPlaying=false; }
+$("#mwBallBtn").onclick=()=>triggerBallCross();
+$("#lgMULTI").onclick=()=>startMultiScreen();
 $("#lgMLB").onclick=()=>setLeague("mlb");
 $("#lgNFL").onclick=()=>setLeague("nfl");
 $("#lgNBA").onclick=()=>setLeague("nba");
