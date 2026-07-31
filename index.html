@@ -1629,6 +1629,12 @@ body.nhl #nhlBtns{display:contents}
    body.multi turns the board into a clean control surface (scoreboard hidden).
    BALL CROSS: comet ball bounces the full window width on a lit runway;
    floor contacts land at 12.5/37.5/62.5/87.5% of the crossing (one per screen). */
+/* dashboard mode tabs: Single-Screen (the four leagues) vs Multi-Screen (the wall) */
+.dashtabs{display:flex;gap:12px;justify-content:center;margin:16px 0 2px}
+.dashtabs button{cursor:pointer;border:1px solid rgba(255,255,255,.22);border-radius:14px;
+  background:rgba(255,255,255,.05);padding:13px 30px;font-weight:900;font-size:17px;
+  letter-spacing:1px;color:var(--dim)}
+.dashtabs button.on{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;border-color:transparent}
 #multiBtns{display:none}
 body.multi #multiBtns{display:contents}
 body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
@@ -2512,12 +2518,16 @@ body.tvmode .scorewrap{justify-content:center}
   </div>
   <p class="tag">Pick tonight's game. We'll follow the live scoreboard on your TV — and the instant someone goes deep, the Home Run cinematic takes over the screen. 💥</p>
 
+  <div class="dashtabs">
+    <button id="dashSingle" class="on">📺 Single-Screen Dashboard</button>
+    <button id="dashMulti">🖥️ Multi-Screen Dashboard</button>
+  </div>
+
   <div class="lgtabs">
     <button id="lgMLB" class="on">⚾ MLB</button>
     <button id="lgNFL">🏈 NFL</button>
     <button id="lgNBA">🏀 NBA</button>
     <button id="lgNHL">🏒 NHL</button>
-    <button id="lgMULTI">🖥️ Multi-Screen</button>
   </div>
 
   <div class="datebar">
@@ -3498,8 +3508,7 @@ function dateLabel(d){
   return nice;
 }
 async function loadSchedule(){
-  if(LEAGUE==="multi"){$("#dlabel").textContent="—";
-    $("#games").innerHTML='<div class="empty">Multi-Screen is a display mode — no games here.<br>Tap 🖥️ Multi-Screen again to open the wall stage, or pick a league above.</div>';return;}
+  if(LEAGUE==="multi")applyLeagueClass("mlb");   // backing out of the wall -> Single-Screen dashboard
   if(LEAGUE==="nfl")return loadScheduleNFL();
   if(LEAGUE==="nba"||LEAGUE==="nhl")return loadScheduleESPNX(LEAGUE);
   $("#dlabel").textContent=dateLabel(curDate);
@@ -4609,7 +4618,8 @@ function applyLeagueClass(l){   // league visuals only, no schedule fetch (used 
   $("#lgNFL").classList.toggle("on",l==="nfl");
   $("#lgNBA").classList.toggle("on",l==="nba");
   $("#lgNHL").classList.toggle("on",l==="nhl");
-  $("#lgMULTI").classList.toggle("on",l==="multi");
+  $("#dashMulti").classList.toggle("on",l==="multi");
+  $("#dashSingle").classList.toggle("on",l!=="multi");
 }
 function setLeague(l){ applyLeagueClass(l); loadSchedule(); }
 async function loadScheduleNFL(){
@@ -5527,7 +5537,8 @@ $("#mwBallBtn").onclick=()=>triggerBallCross();
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
 $("#mwS1Btn").onclick=()=>mwJoin(1);
 $("#mwS2Btn").onclick=()=>mwJoin(2);
-$("#lgMULTI").onclick=()=>startMultiScreen();
+$("#dashMulti").onclick=()=>startMultiScreen();
+$("#dashSingle").onclick=()=>{ if(LEAGUE==="multi")setLeague("mlb"); };
 $("#lgMLB").onclick=()=>setLeague("mlb");
 $("#lgNFL").onclick=()=>setLeague("nfl");
 $("#lgNBA").onclick=()=>setLeague("nba");
