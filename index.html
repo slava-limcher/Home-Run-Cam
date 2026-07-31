@@ -5288,7 +5288,7 @@ function mwBuildPanels(){
     rects.sort((a,b)=>a.x-b.x);
   }
   if(!rects.length)rects=[{x:0,y:0,w:win.w,h:win.h}];
-  let cum=0; rects.forEach(p=>{p.off=cum; cum+=p.w;});   // wall offset of each panel
+  let cum=0; rects.forEach((p,i)=>{p.off=cum; cum+=p.w; p.row=0; p.col=i;});   // wall offset + grid slot
   MW.panels=rects;
   const sh=Math.min(...rects.map(p=>p.h)),          // shared metrics off the SHORTEST screen
         total=rects.reduce((a,p)=>a+p.w,0),
@@ -5477,7 +5477,7 @@ function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min mem
                 arc:Math.round((wallH*.81-fl-size)/.54),   // bounce amplitude FILLS the wall (peak ~81% up)
                 total:cols*cellW,wallH,m:Math.round(sh*.12)},
           panel:{x:0,y:0,w:Math.min(innerWidth,cellW),h:Math.min(innerHeight,cellH),
-                 off:pos[1]*cellW,offY:pos[0]*cellH,label:"SCREEN "+MWL.idx}};
+                 off:pos[1]*cellW,offY:pos[0]*cellH,row:pos[0],col:pos[1],label:"SCREEN "+MWL.idx}};
 }
 function mwStartLinked(T0,members,grid,move,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
@@ -5704,9 +5704,10 @@ function mwStartTdLinked(T0,members,grid,dur){
   MW.live=true;
   mwShowTd(T0);
 }
-/* -- TEXAS FIGHT CHANT: BOTH words tile the wall at once — TEXAS (burnt orange, white rim)
-      on every other screen, FIGHT! (white, burnt-orange rim) on the rest — pop, hold ~1s,
-      fade, then the words SWAP screens; 3 swap-cycles. A single screen alternates the words. -- */
+/* -- TEXAS FIGHT CHANT (strict call-and-response): TEXAS (burnt orange, white rim) pops on its
+      screens — every other screen, checkerboarded so each new row starts with the opposite word —
+      holds ~1s, fades; the instant it clears, FIGHT! (white, burnt-orange rim) answers on the
+      remaining screens. Only ONE word is ever on the wall. 3 cycles; solo screen voices both. -- */
 function mwTfDom(){
   mwPanelBox.innerHTML=MW.panels.map(r=>{
     const fs=Math.round(r.h*.34), st=Math.max(2,Math.round(fs*.014));
@@ -5714,8 +5715,9 @@ function mwTfDom(){
        <div class="mw-tfglow"></div>
        ${["t","f"].map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")}
      </div>`;}).join("");
-  MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
-    return {n:(MWL.idx||i+1), tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
+  MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
+    return {n:(MWL.idx||i+1), r:p.row||0, c:(p.col!=null?p.col:i),
+            tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
   mwOvEl.classList.add("paneled");
 }
 function mwTfEnv(f){ // pop-hold-fade envelope within one beat (f: 0..1)
@@ -5723,17 +5725,18 @@ function mwTfEnv(f){ // pop-hold-fade envelope within one beat (f: 0..1)
   if(f<.75)return {a:1, s:1};
   return {a:Math.max(0,1-(f-.75)/.25), s:1};
 }
-function mwTfWord(n,phase,many){ // fixed homes: odd screens = TEXAS, even = FIGHT!; a word is
-  const w=phase===0?"t":"f";     // visible ONLY during its own beat — never both at once
-  if(!many)return w;             // a solo screen voices both words itself
-  return ((n%2===1)?"t":"f")===w?w:null;   // not this screen's turn -> stays dark
+function mwTfWord(r,c,phase,many){ // CHECKERBOARD HOMES: words alternate along each row AND each
+  const w=phase===0?"t":"f";       // new row starts with the other word (row0 TEXAS-first, row1
+  if(!many)return w;               // FIGHT!-first, row2 TEXAS-first…). A word shows ONLY on its own
+  const home=(((r||0)+(c||0))%2===0)?"t":"f";   // beat — never both at once; solo screen voices both.
+  return home===w?w:null;          // not this screen's turn -> stays dark
 }
 function mwTfRender(){
   const D=MW.dur||8400, el=Date.now()-MW.t0, t=Math.max(0,el);
   const cyc=D/3, p=(t%cyc)/cyc, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
   const many=(MW.wallN||MW.panels.length)>1;
   MW.dom.forEach(d=>{ if(!d.tf)return;
-    const mine=mwTfWord(d.n,phase,many);
+    const mine=mwTfWord(d.r,d.c,phase,many);
     d.tf.forEach(w=>{
       const active=mine!==null&&w.dataset.w===mine;
       w.style.opacity=active?e.a.toFixed(3):"0";
@@ -5946,7 +5949,7 @@ function mwPrevTf(ctx,W,H,t){
   ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
   ctx.textAlign="center"; ctx.textBaseline="middle";
   cells.forEach((cell,i)=>{
-    const w=mwTfWord(i+1,phase,many); if(w===null)return;   // not this screen's beat
+    const w=mwTfWord(cell[0],cell[1],phase,many); if(w===null)return;   // not this screen's beat
     const word=w==="t"?"TEXAS":"FIGHT!";
     const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
     ctx.save(); ctx.globalAlpha=e.a;
