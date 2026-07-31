@@ -1635,9 +1635,43 @@ body.nhl #nhlBtns{display:contents}
   background:rgba(255,255,255,.05);padding:13px 30px;font-weight:900;font-size:17px;
   letter-spacing:1px;color:var(--dim)}
 .dashtabs button.on{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;border-color:transparent}
-#multiBtns{display:none}
-body.multi #multiBtns{display:contents}
 body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
+/* the wall control board: LAYOUT (tiles) / OUTPUT (preview) / CONTENT (cards + fire) */
+#mwDash{display:none}
+body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;margin:8px auto 0;width:100%}
+.mwd-sec{background:linear-gradient(180deg,rgba(13,25,48,.9),rgba(9,17,34,.92));
+  border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 18px}
+.mwd-h{font-weight:900;letter-spacing:3px;color:var(--gold,#e8c34a);font-size:13px;margin-bottom:10px}
+.mwd-sub{color:var(--dim);letter-spacing:.5px;font-weight:600;font-size:11px}
+.mwd-lay{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mwd-step{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.06);color:#fff;font-size:18px;font-weight:900;cursor:pointer}
+.mwd-cnt{font-weight:900;color:#fff;letter-spacing:1px;font-size:12px}
+.mwd-cnt b{font-size:18px;color:var(--gold,#e8c34a)}
+.mwd-grid{display:flex;align-items:center;gap:6px}
+.mwd-x{color:var(--dim);font-weight:900;padding:0 4px}
+.mwd-tiles{flex:1;display:grid;gap:6px;min-width:220px;grid-template-columns:repeat(var(--mwCols,4),1fr)}
+.mwd-tile{flex:1;min-width:52px;height:56px;border-radius:10px;border:1px dashed rgba(255,255,255,.3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+  color:var(--dim);font-weight:900;gap:2px}
+.mwd-tile b{font-size:16px;color:#fff}
+.mwd-tile small{font-size:9px;letter-spacing:.5px;white-space:nowrap}
+.mwd-tile.live{border-style:solid;border-color:rgba(90,220,140,.65);background:rgba(30,120,70,.18);
+  box-shadow:0 0 12px rgba(60,200,120,.25)}
+.mwd-tile.me{border-style:solid;border-color:var(--gold,#e8c34a);background:rgba(232,195,74,.12);
+  box-shadow:0 0 12px rgba(232,195,74,.3)}
+.mwd-tile.off{opacity:.4;border-style:dotted;cursor:default}
+.mwd-tile.off.edit{cursor:pointer;opacity:.75;border-color:rgba(232,195,74,.5)}
+.mwd-tile.edit{cursor:pointer}
+.mwd-lay .ghostbtn.on{border-color:var(--gold,#e8c34a);color:var(--gold,#e8c34a);
+  box-shadow:0 0 12px rgba(232,195,74,.25)}
+#mwPrev{width:100%;height:120px;border-radius:12px;background:#04070d;display:block}
+.mwd-content{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mwd-card{border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 18px;cursor:pointer;
+  background:rgba(255,255,255,.04);color:#fff;font-weight:900;letter-spacing:1px}
+.mwd-card.sel{border-color:var(--gold,#e8c34a);background:rgba(232,195,74,.12);
+  box-shadow:0 0 14px rgba(232,195,74,.25)}
+.mwd-fire{width:100%}
 #mwOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
   background:
     linear-gradient(180deg,transparent 78%,rgba(180,120,40,.10) 100%),
@@ -2642,13 +2676,32 @@ body.tvmode .scorewrap{justify-content:center}
         <button class="ghostbtn" id="toBtn">🔄 Turnover</button>
         <button class="ghostbtn" id="nfBtn">🏆 Final</button>
       </span>
-      <span id="multiBtns">
-        <button class="hrbtn" id="mwWpBtn">⚡ Win Probability</button>
-        <button class="ghostbtn" id="mwBallBtn">⚪ Ball Cross</button>
-        <button class="ghostbtn" id="mwS1Btn">1️⃣ Screen 1</button>
-        <button class="ghostbtn" id="mwS2Btn">2️⃣ Screen 2</button>
-        <button class="ghostbtn" id="mwScanBtn">🔍 Analyze Screens</button>
-      </span>
+    </div>
+    <div id="mwDash">
+      <div class="mwd-sec">
+        <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · ✏️ Edit, then click cells to add/remove screens · numbers run left→right, top→bottom · tap a screen to make THIS window that screen</span></div>
+        <div class="mwd-lay">
+          <div class="mwd-grid">
+            <span class="mwd-cnt">ROWS <b id="mwRowNum">1</b></span>
+            <button class="mwd-step" id="mwRowMinus">−</button><button class="mwd-step" id="mwRowPlus">+</button>
+            <span class="mwd-x">×</span>
+            <span class="mwd-cnt">COLS <b id="mwColNum">4</b></span>
+            <button class="mwd-step" id="mwColMinus">−</button><button class="mwd-step" id="mwColPlus">+</button>
+            <button class="ghostbtn" id="mwEditBtn">✏️ Edit Layout</button>
+          </div>
+          <div class="mwd-tiles" id="mwTiles"></div>
+          <button class="ghostbtn" id="mwScanBtn">🔍 Analyze (stretched window)</button>
+        </div>
+      </div>
+      <div class="mwd-sec">
+        <div class="mwd-h">OUTPUT <span class="mwd-sub">— live preview of the wall (lines = screen edges)</span></div>
+        <canvas id="mwPrev"></canvas>
+      </div>
+      <div class="mwd-sec">
+        <div class="mwd-h">CONTENT</div>
+        <div class="mwd-content" id="mwContent"></div>
+        <button class="hrbtn mwd-fire" id="mwFireBtn">🔥 FIRE ON WALL</button>
+      </div>
     </div>
     <div class="hint" id="boardHint"></div>
   </div>
@@ -3603,6 +3656,7 @@ function stopAll(){ if(poll){clearInterval(poll);poll=null;} if(demoTimer){clear
   if(typeof endPeriodSiren==="function")endPeriodSiren();
   if(typeof endOneMinute==="function")endOneMinute();
   if(typeof endBallCross==="function")endBallCross();
+  if(typeof mwDashStop==="function")mwDashStop();
   clearTimeout(nflDemoPAT);
   if(typeof stopAmbient==="function")stopAmbient();
   ["endKickoff","endRedZone","endNoise","endTouchdown","endXP","endTwoPoint","endTwoMin","endTurnover"].forEach(f=>{if(typeof window[f]==="function")window[f]();});
@@ -5187,8 +5241,13 @@ function startMultiScreen(){
   MODE="demo"; stopAll(); applyLeagueClass("multi");
   $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
   $("#statusTxt").textContent="MULTI-SCREEN"; $("#liveDot").style.display="none";
-  $("#boardHint").textContent="Wall setup: open this page in a window on EACH display, tap 1️⃣ on one and 2️⃣ on the other (each goes fullscreen and they link up) — then fire ⚪ Ball Cross from either. Or stretch ONE window across all displays and tap 🔍 Analyze Screens.";
+  $("#boardHint").textContent="LAYOUT: set the screen count, open this page on each TV (WALL-LAUNCH.bat pre-joins them) and its tile lights up. OUTPUT: live preview of the wall. CONTENT: pick an animation, then 🔥 FIRE.";
   showBoard();
+  mwEnsureCh();                                       // listen for screen heartbeats even if unjoined
+  mwDashRender();
+  clearInterval(MWD.tick);
+  MWD.tick=setInterval(()=>{if(document.body.classList.contains("multi"))mwDashRender();},3000);
+  mwPrevStart();
 }
 function mwWinRect(){ // this window's CONTENT rect on the desktop, in the browser's scaled coords
   const bw=(window.outerWidth-window.innerWidth)/2;
@@ -5213,18 +5272,22 @@ function mwBuildPanels(){
   MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
   mwPanelDom();
 }
+function mwBotOff(g,p){ // how far this panel's bottom edge sits ABOVE the wall floor (grid rows)
+  return g.wallH?Math.max(0,g.wallH-((p.offY||0)+p.h)):0;
+}
 function mwPanelDom(){ // panel DOM from MW.panels + MW.geom (per-panel label optional)
   const g=MW.geom, hidden="transform:translate(-99999px,0)";
-  mwPanelBox.innerHTML=MW.panels.map((r,i)=>
+  mwPanelBox.innerHTML=MW.panels.map((r,i)=>{
+    const bo=mwBotOff(g,r); return (
     `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="mw-pfloor" style="height:${g.fl}px"></div>
-       <div class="mw-pshadow" style="width:${Math.round(g.size*1.2)}px;height:${Math.max(10,Math.round(g.sh*.026))}px;bottom:${g.fl-8}px;${hidden}"></div>
+       <div class="mw-pfloor" style="height:${g.fl}px;bottom:${-bo}px"></div>
+       <div class="mw-pshadow" style="width:${Math.round(g.size*1.2)}px;height:${Math.max(10,Math.round(g.sh*.026))}px;bottom:${g.fl-8-bo}px;${hidden}"></div>
        <div class="mw-pball gh g3" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball gh g2" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball gh g1" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball mn" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-plabel"><b>${r.label||("SCREEN "+(i+1))}</b><span>${r.w} × ${r.h}</span></div>
-     </div>`).join("");
+     </div>`);}).join("");
   MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
     return {balls:[el.querySelector(".mn"),el.querySelector(".g1"),el.querySelector(".g2"),el.querySelector(".g3")],
             shadow:el.querySelector(".mw-pshadow")};});
@@ -5268,13 +5331,14 @@ function mwRender(){
   MW.panels.forEach((p,i)=>{
     const d=MW.dom[i]; if(!d)return;
     const off=(p.off!=null)?p.off:acc;              // linked windows carry their wall offset
+    const bo=mwBotOff(g,p);                         // grid rows: panel bottom sits above the wall floor
     d.balls.forEach((node,bi)=>{
       const tg=t-lags[bi];
       if(tg<0){node.style.transform="translate(-99999px,0)";return;}
       const lx=wallXAt(tg)-off, y=mwArcY(tg)*g.sh;
       let s="";
       if(bi===0){const q=mwSquashAmt(tg); if(q>0)s=` scale(${(1+.24*q).toFixed(3)},${(1-.28*q).toFixed(3)})`;}
-      node.style.transform=`translate(${(lx-g.size/2).toFixed(1)}px,${(-(g.fl+y)).toFixed(1)}px)`+s;
+      node.style.transform=`translate(${(lx-g.size/2).toFixed(1)}px,${(-(g.fl+y-bo)).toFixed(1)}px)`+s;
     });
     const lx=wallXAt(t)-off, y=mwArcY(t)*g.sh,
           k=Math.max(.3,1-(y/(.5*g.sh))*.65),
@@ -5287,7 +5351,7 @@ function mwRender(){
     if(!h.done&&t>=h.t){h.done=true;
       let a=0;
       for(let i=0;i<MW.panels.length;i++){const p=MW.panels[i], po=(p.off!=null)?p.off:a;
-        if(h.wx>=po&&h.wx<po+p.w){
+        if(h.wx>=po&&h.wx<po+p.w&&mwBotOff(g,p)===0){   // rings live on the wall floor (bottom row)
           const r=document.createElement("div"); r.className="mw-pring";
           r.style.cssText=`left:${Math.round(h.wx-po)}px;bottom:${g.fl}px;width:${Math.round(g.sh*.32)}px;height:${Math.round(g.sh*.10)}px`;
           mwPanelBox.children[i].appendChild(r); setTimeout(()=>r.remove(),800); break;}
@@ -5306,7 +5370,7 @@ function mwShowCross(T0){
 }
 function triggerBallCross(){
   if(takeoverBusy())return;
-  if(MWL.idx&&MWL.ch){ mwFireLinked(); return; }     // linked wall: broadcast to every screen
+  if(mwFireWall("cross"))return;                     // wall fire whenever any screens are linked
   mwPlaying=true; hideWalkup(); houseWipe();
   mwBuildPanels();                                   // re-map from the window's CURRENT position
   mwShowCross(Date.now());
@@ -5321,44 +5385,66 @@ function endBallCross(){ if(mwOvEl.classList.contains("show"))houseWipe();
       start time gives frame-tight timing with zero servers. Join via 1️⃣/2️⃣ (or ?wallscreen=N);
       firing Ball Cross from ANY joined window plays it across the whole wall. -- */
 const MWL={ch:null,idx:0,roster:{},beatT:0};
+function mwGrowTo(n){ if(mwCount()>=n)return;        // occupy empty cells (reading order), widening when full
+  while(mwCount()<n){
+    let placed=false;
+    for(let r=0;r<MWD.rows&&!placed;r++)for(let c=0;c<MWD.cols&&!placed;c++){
+      if(!MWD.cells.some(p=>p[0]===r&&p[1]===c)){MWD.cells.push([r,c]);placed=true;}}
+    if(!placed){ if(MWD.cols<12)MWD.cols++; else if(MWD.rows<6)MWD.rows++; else break; }
+  }
+  mwSaveGrid();
+}
 function mwEnsureCh(){ if(!MWL.ch&&("BroadcastChannel" in window)){ MWL.ch=new BroadcastChannel("hrcam_wall"); MWL.ch.onmessage=mwOnMsg; } return !!MWL.ch; }
 function mwJoin(n){
   if(!mwEnsureCh()){ $("#boardHint").textContent="This browser can't link windows (no BroadcastChannel) — use 🔍 Analyze Screens with one stretched window instead."; return; }
-  MWL.idx=n;                                         // re-tapping = re-join (and retry fullscreen)
+  MWL.idx=n;                                         // re-tapping a different tile = switch roles
   clearInterval(MWL.beatT); MWL.beatT=setInterval(mwBeat,3000); mwBeat(true);
-  $("#mwS1Btn").classList.toggle("on",n===1); $("#mwS2Btn").classList.toggle("on",n===2);
   $("#statusTxt").textContent="WALL SCREEN "+n;
-  $("#boardHint").textContent=`Linked as SCREEN ${n} — open this same page in another window on the other display, join it as the other screen, then fire ⚪ Ball Cross from either window.`;
+  mwGrowTo(n);                                       // joining a higher slot grows the layout
+  mwDashRender();
   const el=document.documentElement; if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
 }
 function mwLeave(){
   MWL.idx=0; clearInterval(MWL.beatT); MWL.beatT=0;
-  $("#mwS1Btn").classList.remove("on"); $("#mwS2Btn").classList.remove("on");
   $("#statusTxt").textContent="MULTI-SCREEN";
+  mwDashRender();
   if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
 }
 function mwBeat(hello){ if(!MWL.ch||!MWL.idx)return;
   try{MWL.ch.postMessage({type:hello===true?"hello":"beat",idx:MWL.idx,w:innerWidth,h:innerHeight});}catch(e){} }
-function mwMembers(){                                // fresh roster (self + <9s heartbeats), wall order
-  const now=Date.now(), list=[{idx:MWL.idx,w:innerWidth,h:innerHeight}];
+function mwMembers(){                                // fresh roster (self if joined + <9s heartbeats), wall order
+  const now=Date.now(), list=MWL.idx?[{idx:MWL.idx,w:innerWidth,h:innerHeight}]:[];
   for(const k in MWL.roster){ const r=MWL.roster[k];
     if(now-r.ts<9000&&+k!==MWL.idx)list.push({idx:+k,w:r.w,h:r.h}); }
   return list.sort((a,b)=>a.idx-b.idx);
 }
-function mwFireLinked(){
-  const members=mwMembers(), T0=Date.now()+350;      // small lead so every window starts together
-  try{MWL.ch.postMessage({type:"cross",t0:T0,members});}catch(e){}
-  mwStartLinked(T0,members);
+function mwFireWall(msgType,extra){                  // true = handled as a wall fire (screens are linked)
+  if(!mwEnsureCh())return false;
+  const members=mwMembers(); if(!members.length)return false;
+  const T0=Date.now()+350,
+        msg=Object.assign({type:msgType,t0:T0,members,grid:{rows:MWD.rows,cols:MWD.cols,cells:mwCells()}},extra||{});
+  try{MWL.ch.postMessage(msg);}catch(e){}
+  if(msgType==="cross")mwStartLinked(T0,members,msg.grid); else mwStartWpLinked(T0,members,msg.seed,msg.grid);
+  return true;                                       // unjoined dashboard: broadcast only, stays a control surface
 }
-function mwStartLinked(T0,members){
+function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min member size); null = no slot
   const me=(members||[]).find(x=>x.idx===MWL.idx);
-  if(!me)return;                                     // this window wasn't in the firing snapshot
+  if(!me)return null;
+  const cols=Math.max(1,(grid&&grid.cols)||members.length),
+        rows=Math.max(1,(grid&&grid.rows)||1),
+        cells=(grid&&grid.cells&&grid.cells.length)?grid.cells:Array.from({length:cols},(_,c)=>[0,c]);
+  const pos=cells[MWL.idx-1]; if(!pos)return null;   // screen n = nth occupied cell (reading order)
+  const cellW=Math.min(...members.map(x=>x.w)), cellH=Math.min(...members.map(x=>x.h)), sh=cellH;
+  return {geom:{sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),
+                total:cols*cellW,wallH:rows*cellH,m:Math.round(sh*.12)},
+          panel:{x:0,y:0,w:Math.min(innerWidth,cellW),h:Math.min(innerHeight,cellH),
+                 off:pos[1]*cellW,offY:pos[0]*cellH,label:"SCREEN "+MWL.idx}};
+}
+function mwStartLinked(T0,members,grid){
+  const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
   skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
-  let off=0; for(const x of members){ if(x.idx<MWL.idx)off+=x.w; }
-  const sh=Math.min(...members.map(x=>x.h)), total=members.reduce((a,x)=>a+x.w,0);
-  MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
-  MW.panels=[{x:0,y:0,w:innerWidth,h:innerHeight,off,label:"SCREEN "+MWL.idx}];
+  MW.geom=gg.geom; MW.panels=[gg.panel];
   mwPanelDom();
   MW.live=true;
   mwShowCross(T0);
@@ -5367,8 +5453,10 @@ function mwOnMsg(e){ const d=e.data||{};
   if((d.type==="hello"||d.type==="beat")&&d.idx){
     if(d.idx!==MWL.idx)MWL.roster[d.idx]={w:d.w,h:d.h,ts:Date.now()};
     if(d.type==="hello")mwBeat();                    // answer newcomers so they learn the roster fast
-  }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(d.t0,d.members); }
-  else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(d.t0,d.members,d.seed); }
+    mwGrowTo(d.idx);                                 // a higher screen appeared -> grow the layout
+    if(document.body.classList.contains("multi"))mwDashRender();
+  }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(d.t0,d.members,d.grid); }
+  else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(d.t0,d.members,d.seed,d.grid); }
   else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
 }
 /* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR engine, ported 1:1 from mlb-betting.
@@ -5456,11 +5544,14 @@ function wpcDraw(u,T){
 }
 function mwWpDom(){
   const g=MW.geom, barX=g.m, barW=g.total-2*g.m, barH=Math.round(g.sh*.13),
-        barB=Math.round(g.sh*.44), labB=barB+barH+Math.round(g.sh*.025),
+        wallH=g.wallH||g.sh, rowsN=Math.max(1,Math.round(wallH/g.sh)),
+        // center the bar within a real row (odd: middle row; even: the row just below the seam)
+        cFb=(rowsN%2)?wallH*.5:((rowsN/2)-.5)*g.sh,
+        barB=Math.round(cFb-barH/2), labB=barB+barH+Math.round(g.sh*.025),
         labF=Math.round(g.sh*.06), midF=Math.round(g.sh*.028);
   mwPanelBox.innerHTML=MW.panels.map(r=>
     `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:0;width:${g.total}px">
+       <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
          <div class="wpw-lab a" style="left:${barX}px;bottom:${labB}px;font-size:${labF}px">${MW.wp.an} 50%</div>
          <div class="wpw-lab h" style="right:${g.m}px;bottom:${labB}px;font-size:${labF}px">50% ${MW.wp.hn}</div>
          <div class="wpw-mid" style="left:50%;bottom:${labB+Math.round(labF*1.45)}px;font-size:${midF}px">WIN PROBABILITY</div>
@@ -5476,8 +5567,8 @@ function mwWpDom(){
                 units:[wpcUnit(away,"cyan",3),wpcUnit(home,"orange",11)]}};});  // app's fixed TV seeds
   mwOvEl.classList.add("paneled");
 }
-function wpwSplitAt(t){ // eased tug-of-war through the seeded keyframes
-  const kf=MW.wp.kf;
+function wpwSplitAt(t,kfIn){ // eased tug-of-war through the seeded keyframes
+  const kf=kfIn||MW.wp.kf;
   if(t<=kf[0].t)return kf[0].v;
   for(let i=0;i<kf.length-1;i++){const a=kf[i],b=kf[i+1];
     if(t<=b.t){const p=(t-a.t)/(b.t-a.t),e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;return a.v+(b.v-a.v)*e;}}
@@ -5511,32 +5602,152 @@ function mwShowWp(T0,seed){
 function triggerWinProbWall(){
   if(takeoverBusy())return;
   const seed=Date.now()&0x7fffffff;
-  if(MWL.idx&&MWL.ch){
-    const members=mwMembers(), T0=Date.now()+350;
-    try{MWL.ch.postMessage({type:"wp",t0:T0,members,seed});}catch(e){}
-    mwStartWpLinked(T0,members,seed); return;
-  }
+  if(mwFireWall("wp",{seed}))return;                 // wall fire whenever any screens are linked
   mwPlaying=true; hideWalkup(); houseWipe();
   mwBuildPanels();                                   // panel rects + geom (offs assigned)
   mwShowWp(Date.now(),seed);
 }
-function mwStartWpLinked(T0,members,seed){
-  const me=(members||[]).find(x=>x.idx===MWL.idx);
-  if(!me)return;
+function mwStartWpLinked(T0,members,seed,grid){
+  const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
   skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
-  let off=0; for(const x of members){ if(x.idx<MWL.idx)off+=x.w; }
-  const sh=Math.min(...members.map(x=>x.h)), total=members.reduce((a,x)=>a+x.w,0);
-  MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
-  MW.panels=[{x:0,y:0,w:innerWidth,h:innerHeight,off,label:"SCREEN "+MWL.idx}];
+  MW.geom=gg.geom; MW.panels=[gg.panel];
   MW.live=true;
   mwShowWp(T0,seed);
 }
-$("#mwWpBtn").onclick=()=>triggerWinProbWall();
-$("#mwBallBtn").onclick=()=>triggerBallCross();
+/* -- WALL DASHBOARD: LAYOUT (screen tiles, count scales 2..24) / OUTPUT (live looping
+      preview with screen-edge lines) / CONTENT (animation cards + FIRE). Tiles light up
+      from the link heartbeats: green = that screen's window is connected, gold = this one. -- */
+const MWD={rows:Math.min(6,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-rows"))||1)),
+  cols:Math.min(12,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-cols"))||parseInt(localStorage.getItem("hrcam-wall-count"))||4)),
+  cells:(()=>{try{const j=JSON.parse(localStorage.getItem("hrcam-wall-cells"));
+    if(Array.isArray(j)&&j.length)return j;}catch(e){} return null;})(),
+  edit:false, sel:localStorage.getItem("hrcam-wall-sel")||"wp",
+  tick:0, praf:0, pu:null, pT0:0, pcyc:-1, pseed:7, pkf:null};
+if(!MWD.cells)MWD.cells=Array.from({length:MWD.cols},(_,c)=>[0,c]);   // default: one full row
+function mwCells(){ // occupied cells inside the canvas, reading order; self-heals to ≥1
+  MWD.cells=MWD.cells.filter(p=>p[0]<MWD.rows&&p[1]<MWD.cols);
+  if(!MWD.cells.length)MWD.cells=[[0,0]];
+  MWD.cells.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  return MWD.cells;
+}
+function mwCount(){return mwCells().length;}
+function mwSaveGrid(){mwCells();  // crop cells to the canvas before persisting
+  localStorage.setItem("hrcam-wall-rows",MWD.rows);localStorage.setItem("hrcam-wall-cols",MWD.cols);
+  localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));}
+const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"}];
+function mwDashRender(){
+  if(!$("#mwRowNum"))return;
+  $("#mwRowNum").textContent=MWD.rows; $("#mwColNum").textContent=MWD.cols;
+  $("#mwTiles").style.setProperty("--mwCols",MWD.cols);
+  $("#mwPrev").style.height=(MWD.rows>1?Math.min(320,110*MWD.rows):120)+"px";
+  $("#mwEditBtn").classList.toggle("on",MWD.edit);
+  const cells=mwCells(), now=Date.now(), tiles=[];
+  for(let r=0;r<MWD.rows;r++)for(let c=0;c<MWD.cols;c++){
+    const n=cells.findIndex(p=>p[0]===r&&p[1]===c)+1;
+    if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>${MWD.edit?"＋":"·"}</b><small>${MWD.edit?"ADD":"NO SCREEN"}</small></div>`);continue;}
+    const me=(MWL.idx===n), rr=MWL.roster[n], live=me||(rr&&now-rr.ts<9000);
+    const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?rr.w+"×"+rr.h:"WAITING"));
+    tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
+  }
+  $("#mwTiles").innerHTML=tiles.join("");
+  $("#mwContent").innerHTML=MW_CONTENT.map(c=>
+    `<div class="mwd-card${MWD.sel===c.id?" sel":""}" data-c="${c.id}">${c.name}</div>`).join("");
+}
+function mwDashStop(){ clearInterval(MWD.tick); MWD.tick=0; mwPrevStop(); }
+/* output preview: loops the selected content on a mini wall, reseeded every cycle */
+function mwPrevStart(){ mwPrevStop(); MWD.pT0=performance.now(); MWD.pcyc=-1; MWD.praf=requestAnimationFrame(mwPrevFrame); }
+function mwPrevStop(){ cancelAnimationFrame(MWD.praf); MWD.praf=0; MWD.pu=null; }
+function mwPrevSeedKf(){ const rng=mwRng(MWD.pseed), fin=Math.round(30+rng()*40);
+  MWD.pkf=[{t:0,v:50},{t:.06,v:50},{t:.24,v:Math.round(50+(rng()-.5)*44)},
+    {t:.46,v:Math.round(50+(rng()-.5)*56)},{t:.66,v:Math.round(50+(rng()-.5)*44)},{t:.84,v:fin},{t:1,v:fin}]; }
+function mwPrevFrame(ts){
+  const cv=$("#mwPrev");
+  if(!cv||!document.body.classList.contains("multi")){MWD.praf=0;return;}
+  const w=cv.clientWidth, h=cv.clientHeight;
+  if(w<10||h<10){MWD.praf=requestAnimationFrame(mwPrevFrame);return;}
+  const dpr=Math.min(2,window.devicePixelRatio||1), W=Math.round(w*dpr), H=Math.round(h*dpr);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  const ctx=cv.getContext("2d");
+  const D=MWD.sel==="wp"?10500:8000, CYC=D+1400;      // play, hold, loop with a fresh seed
+  const cyc=Math.floor((ts-MWD.pT0)/CYC);
+  if(cyc!==MWD.pcyc){MWD.pcyc=cyc; MWD.pseed=(MWD.pseed+9973)|0; mwPrevSeedKf(); MWD.pu=null;}
+  const t=Math.min(((ts-MWD.pT0)%CYC)/D,1);
+  ctx.fillStyle="#04070d"; ctx.fillRect(0,0,W,H);
+  // letterboxed wall rect at the layout's real aspect (16:9 cells)
+  const wa=(MWD.cols*16)/(MWD.rows*9);
+  let ww=W, wh=Math.round(W/wa); if(wh>H){wh=H; ww=Math.round(H*wa);}
+  const wx=Math.round((W-ww)/2), wy=Math.round((H-wh)/2);
+  ctx.save(); ctx.translate(wx,wy);
+  ctx.beginPath(); ctx.rect(0,0,ww,wh); ctx.clip();
+  if(MWD.sel==="wp")mwPrevWp(ctx,ww,wh,t,dpr,ts); else mwPrevBall(ctx,ww,wh,t);
+  const cells=mwCells();                               // mask cells with no screen (the wall's real shape)
+  ctx.fillStyle="rgba(2,4,8,.9)";
+  for(let r=0;r<MWD.rows;r++)for(let c=0;c<MWD.cols;c++){
+    if(cells.some(p=>p[0]===r&&p[1]===c))continue;
+    const x=Math.round(ww*c/MWD.cols), y=Math.round(wh*r/MWD.rows);
+    ctx.fillRect(x,y,Math.round(ww*(c+1)/MWD.cols)-x,Math.round(wh*(r+1)/MWD.rows)-y);
+  }
+  ctx.fillStyle="rgba(255,255,255,.30)";               // screen-edge lines
+  for(let n=1;n<MWD.cols;n++){const x=Math.round(ww*n/MWD.cols);ctx.fillRect(x-1,0,2,wh);}
+  for(let r=1;r<MWD.rows;r++){const y=Math.round(wh*r/MWD.rows);ctx.fillRect(0,y-1,ww,2);}
+  ctx.restore();
+  ctx.strokeStyle="rgba(255,255,255,.18)"; ctx.strokeRect(wx+.5,wy+.5,ww-1,wh-1);
+  MWD.praf=requestAnimationFrame(mwPrevFrame);
+}
+function mwPrevWp(ctx,W,H,t,dpr,ts){
+  const split=wpwSplitAt(t,MWD.pkf), a=Math.round(split);
+  const rowH=H/MWD.rows, cFb=(MWD.rows%2)?H*.5:((MWD.rows/2)-.5)*rowH;   // mirror the real bar's row placement
+  const m=Math.round(W*.035), barW=W-2*m, barH=Math.round(rowH*.40), barY=Math.round(H-cFb-barH/2);
+  const aw=Math.max(4,Math.round(barW*split/100));
+  if(!MWD.pu)MWD.pu=[wpcUnit(document.createElement("div"),"cyan",3),
+                     wpcUnit(document.createElement("div"),"orange",11)];
+  const T=(ts-MWD.pT0)/1000;
+  MWD.pu[0].host={clientWidth:Math.max(2,Math.round(aw/dpr)),clientHeight:Math.round(barH/dpr)};
+  MWD.pu[1].host={clientWidth:Math.max(2,Math.round((barW-aw)/dpr)),clientHeight:Math.round(barH/dpr)};
+  wpcDraw(MWD.pu[0],T); wpcDraw(MWD.pu[1],T);
+  ctx.drawImage(MWD.pu[0].c,m,barY,aw,barH);
+  ctx.drawImage(MWD.pu[1].c,m+aw,barY,barW-aw,barH);
+  ctx.shadowColor="#ffe9b0"; ctx.shadowBlur=8*dpr; ctx.fillStyle="#fff";
+  ctx.fillRect(m+aw-1.5*dpr,barY-2,3*dpr,barH+4); ctx.shadowBlur=0;
+  const f=Math.max(10,Math.round(H*.17));
+  ctx.font="900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textBaseline="bottom";
+  ctx.fillStyle="#4dd7f0"; ctx.textAlign="left";
+  ctx.fillText(((G.away&&G.away.abbr)||"AWAY")+" "+a+"%",m,barY-4*dpr);
+  ctx.fillStyle="#ff8a55"; ctx.textAlign="right";
+  ctx.fillText((100-a)+"% "+((G.home&&G.home.abbr)||"HOME"),W-m,barY-4*dpr);
+}
+function mwPrevBall(ctx,W,H,t){
+  const rowH=H/MWD.rows;                              // bounce scale tracks one screen-row, floor at the wall bottom
+  const m=W*.05, floor=H-rowH*.15, x=-m+(W+2*m)*t, y=mwArcY(t)*(rowH*.52), r=Math.max(5,rowH*.09);
+  ctx.strokeStyle="rgba(255,205,130,.5)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,floor); ctx.lineTo(W,floor); ctx.stroke();
+  const cy=floor-y-r;
+  const g=ctx.createRadialGradient(x-r*.3,cy-r*.35,r*.15,x,cy,r);
+  g.addColorStop(0,"#fff"); g.addColorStop(.5,"#f2a53a"); g.addColorStop(1,"#7c3f0e");
+  ctx.shadowColor="rgba(255,170,60,.9)"; ctx.shadowBlur=16;
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,cy,r,0,7); ctx.fill(); ctx.shadowBlur=0;
+}
+$("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
+  if(MWD.edit){                                       // sculpt the wall: toggle cells on/off
+    const rc=el.dataset.rc.split(",").map(Number);
+    const i=MWD.cells.findIndex(p=>p[0]===rc[0]&&p[1]===rc[1]);
+    if(i>=0){ if(MWD.cells.length>1)MWD.cells.splice(i,1); }
+    else MWD.cells.push(rc);
+    mwSaveGrid(); mwDashRender(); return;
+  }
+  const n=+el.dataset.n||0; if(!n)return;
+  if(MWL.idx===n)mwLeave(); else mwJoin(n);};
+$("#mwEditBtn").onclick=()=>{MWD.edit=!MWD.edit; mwDashRender();};
+$("#mwContent").onclick=e=>{const c=e.target.closest(".mwd-card"); if(!c)return;
+  MWD.sel=c.dataset.c; localStorage.setItem("hrcam-wall-sel",MWD.sel);
+  MWD.pT0=performance.now(); MWD.pcyc=-1; mwDashRender();};
+$("#mwRowMinus").onclick=()=>{MWD.rows=Math.max(1,MWD.rows-1); mwSaveGrid(); mwDashRender();};
+$("#mwRowPlus").onclick=()=>{MWD.rows=Math.min(6,MWD.rows+1); mwSaveGrid(); mwDashRender();};
+$("#mwColMinus").onclick=()=>{MWD.cols=Math.max(1,MWD.cols-1); mwSaveGrid(); mwDashRender();};
+$("#mwColPlus").onclick=()=>{MWD.cols=Math.min(12,MWD.cols+1); mwSaveGrid(); mwDashRender();};
+$("#mwFireBtn").onclick=()=>{ if(MWD.sel==="wp")triggerWinProbWall(); else triggerBallCross(); };
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
-$("#mwS1Btn").onclick=()=>mwJoin(1);
-$("#mwS2Btn").onclick=()=>mwJoin(2);
 $("#dashMulti").onclick=()=>startMultiScreen();
 $("#dashSingle").onclick=()=>{ if(LEAGUE==="multi")setLeague("mlb"); };
 $("#lgMLB").onclick=()=>setLeague("mlb");
