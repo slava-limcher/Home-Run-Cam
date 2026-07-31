@@ -1680,6 +1680,13 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 #mwSpd{width:150px;accent-color:var(--gold,#e8c34a);margin-left:4px}
 .mwd-spdv{color:var(--gold,#e8c34a);font-weight:900;font-size:12px;min-width:44px}
 .mwd-fire{width:100%}
+/* TEXAS FIGHT chant wall: burnt-orange/white words alternate across the screens */
+.mw-tf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;
+  font-weight:900;font-style:italic;letter-spacing:.04em;opacity:0;will-change:transform,opacity}
+.mw-tf.t{color:#bf5700;text-shadow:0 0 60px rgba(191,87,0,.6),0 10px 30px rgba(0,0,0,.55)}
+.mw-tf.f{color:#ffffff;text-shadow:0 0 60px rgba(191,87,0,.65),0 10px 30px rgba(0,0,0,.55)}
+.mw-tfglow{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(62% 58% at 50% 50%,rgba(191,87,0,.38),transparent 72%)}
 /* TOUCHDOWN wall ride: giant chrome-silver letters slide across the whole wall */
 .mw-tdwrap{position:absolute;height:0}
 .mw-td{position:absolute;left:0;white-space:nowrap;font-weight:900;font-style:italic;letter-spacing:.02em;
@@ -5454,6 +5461,7 @@ function mwFireWall(msgType,extra){                  // true = handled as a wall
   if(msgType==="cross")mwStartLinked(T0,members,msg.grid,msg.move,msg.dur);
   else if(msgType==="wp")mwStartWpLinked(T0,members,msg.seed,msg.grid,msg.dur);
   else if(msgType==="td")mwStartTdLinked(T0,members,msg.grid,msg.dur);
+  else if(msgType==="tf")mwStartTfLinked(T0,members,msg.grid,msg.dur);
   return true;                                       // unjoined dashboard: broadcast only, stays a control surface
 }
 function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min member size); null = no slot
@@ -5490,6 +5498,7 @@ function mwOnMsg(e){ const d=e.data||{};
   }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(d.t0,d.members,d.grid,d.move,d.dur); }
   else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(d.t0,d.members,d.seed,d.grid,d.dur); }
   else if(d.type==="td"&&MWL.idx){ mwStartTdLinked(d.t0,d.members,d.grid,d.dur); }
+  else if(d.type==="tf"&&MWL.idx){ mwStartTfLinked(d.t0,d.members,d.grid,d.dur); }
   else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
 }
 /* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR engine, ported 1:1 from mlb-betting.
@@ -5695,6 +5704,67 @@ function mwStartTdLinked(T0,members,grid,dur){
   MW.live=true;
   mwShowTd(T0);
 }
+/* -- TEXAS FIGHT CHANT: odd screens slam "TEXAS" (burnt orange, white rim), even screens
+      answer "FIGHT!" (white, burnt-orange rim) — pop 1s, fade, alternate, 3 cycles.
+      A single screen alternates both words itself. -- */
+function mwTfDom(){
+  const many=(MW.wallN||MW.panels.length)>1;
+  mwPanelBox.innerHTML=MW.panels.map((r,i)=>{
+    const n=(MWL.idx||i+1), words=many?[(n%2===1)?"t":"f"]:["t","f"];
+    const fs=Math.round(r.h*.34), st=Math.max(2,Math.round(fs*.014));
+    return `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
+       <div class="mw-tfglow"></div>
+       ${words.map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")}
+     </div>`;}).join("");
+  MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
+    return {tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
+  mwOvEl.classList.add("paneled");
+}
+function mwTfEnv(f){ // pop-hold-fade envelope within one word's phase (f: 0..1)
+  if(f<.12)return {a:f/.12, s:1.35-.35*(f/.12)};
+  if(f<.75)return {a:1, s:1};
+  return {a:Math.max(0,1-(f-.75)/.25), s:1};
+}
+function mwTfRender(){
+  const D=MW.dur||8400, el=Date.now()-MW.t0, t=Math.max(0,el);
+  const cyc=D/3, p=(t%cyc)/cyc, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
+  MW.dom.forEach(d=>{ if(!d.tf)return;
+    let lit=false;
+    d.tf.forEach(w=>{
+      const active=(w.dataset.w==="t"?0:1)===phase;
+      if(active)lit=true;
+      w.style.opacity=active?e.a.toFixed(3):"0";
+      w.style.transform=`translate(-50%,-50%) scale(${active?e.s.toFixed(3):1})`;
+    });
+    if(d.tfg)d.tfg.style.opacity=lit?(e.a*.55).toFixed(3):"0";
+  });
+  if(el<D)MW.raf=requestAnimationFrame(mwTfRender); else MW.raf=0;
+}
+function mwShowTf(T0){
+  mwOvEl.classList.remove("cal");
+  mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
+  cancelAnimationFrame(MW.raf); MW.t0=T0; MW.raf=requestAnimationFrame(mwTfRender);
+  clearTimeout(triggerBallCross._t);
+  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+(MW.dur||8400)+600);
+}
+function triggerTfWall(){
+  if(takeoverBusy())return;
+  if(mwFireWall("tf",{dur:mwTfDur()}))return;        // wall fire whenever any screens are linked
+  mwPlaying=true; hideWalkup(); houseWipe();
+  MW.dur=mwTfDur();
+  mwBuildPanels(); MW.wallN=MW.panels.length; mwTfDom();
+  mwShowTf(Date.now());
+}
+function mwStartTfLinked(T0,members,grid,dur){
+  const gg=mwGridGeom(members,grid); if(!gg)return;
+  MW.live=false;                                     // superseding quietly — no stop broadcast
+  skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
+  MW.geom=gg.geom; MW.panels=[gg.panel]; MW.dur=dur||8400;
+  MW.wallN=(members||[]).length;
+  mwTfDom();
+  MW.live=true;
+  mwShowTf(T0);
+}
 function mwStartWpLinked(T0,members,seed,grid,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
@@ -5730,8 +5800,9 @@ function mwCount(){return mwCells().length;}
 function mwSaveGrid(){mwCells();  // crop cells to the canvas before persisting
   localStorage.setItem("hrcam-wall-rows",MWD.rows);localStorage.setItem("hrcam-wall-cols",MWD.cols);
   localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));}
-const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"},{id:"td",name:"🏈 Touchdown"}];
+const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"},{id:"td",name:"🏈 Touchdown"},{id:"tf",name:"🤘 Texas Fight"}];
 function mwTdDur(){return Math.round(7500/(MWD.spd||1));}
+function mwTfDur(){return Math.round(8400/(MWD.spd||1));}   // 3 full TEXAS→FIGHT! cycles
 function mwDashRender(){
   if(!$("#mwRowNum"))return;
   $("#mwRowNum").textContent=MWD.rows; $("#mwColNum").textContent=MWD.cols;
@@ -5784,7 +5855,7 @@ function mwPrevFrame(ts){
   const dpr=Math.min(2,window.devicePixelRatio||1), W=Math.round(w*dpr), H=Math.round(h*dpr);
   if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
   const ctx=cv.getContext("2d");
-  const D=(MWD.sel==="wp"?10500:MWD.sel==="td"?7500:8000)/(MWD.spd||1), CYC=D+1400;  // speed-scaled; play, hold, loop
+  const D=(MWD.sel==="wp"?10500:MWD.sel==="td"?7500:MWD.sel==="tf"?8400:8000)/(MWD.spd||1), CYC=D+1400;  // speed-scaled; play, hold, loop
   const cyc=Math.floor((ts-MWD.pT0)/CYC);
   if(cyc!==MWD.pcyc){MWD.pcyc=cyc; MWD.pseed=(MWD.pseed+9973)|0; mwPrevSeedKf(); MWD.pu=null;}
   const t=Math.min(((ts-MWD.pT0)%CYC)/D,1);
@@ -5797,6 +5868,7 @@ function mwPrevFrame(ts){
   ctx.beginPath(); ctx.rect(0,0,ww,wh); ctx.clip();
   if(MWD.sel==="wp")mwPrevWp(ctx,ww,wh,t,dpr,ts);
   else if(MWD.sel==="td")mwPrevTd(ctx,ww,wh,t);
+  else if(MWD.sel==="tf")mwPrevTf(ctx,ww,wh,t);
   else mwPrevBall(ctx,ww,wh,t);
   const cells=mwCells();                               // mask cells with no screen (the wall's real shape)
   ctx.fillStyle="rgba(2,4,8,.9)";
@@ -5864,6 +5936,30 @@ function mwPrevTd(ctx,W,H,t){
   ctx.strokeText("TOUCHDOWN!",x,y);
   ctx.fillStyle=grad; ctx.fillText("TOUCHDOWN!",x,y);
 }
+function mwPrevTf(ctx,W,H,t){
+  const cells=mwCells(), many=cells.length>1;
+  const p=(t*3)%1, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
+  const cw=W/MWD.cols, ch=H/MWD.rows, f=Math.max(10,Math.round(ch*.3));
+  ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  cells.forEach((cell,i)=>{
+    const n=i+1, mine=many?((n%2===1)?0:1):phase;    // odd screens TEXAS, even FIGHT!; solo alternates
+    if(mine!==phase)return;
+    const word=phase===0?"TEXAS":"FIGHT!";
+    const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
+    ctx.save(); ctx.globalAlpha=e.a;
+    ctx.translate(cx,cy); ctx.scale(e.s,e.s);
+    const gl=ctx.createRadialGradient(0,0,4,0,0,ch*.5);
+    gl.addColorStop(0,"rgba(191,87,0,.4)"); gl.addColorStop(1,"rgba(191,87,0,0)");
+    ctx.fillStyle=gl; ctx.fillRect(-cw/2,-ch/2,cw,ch);
+    ctx.lineJoin="round"; ctx.lineWidth=Math.max(1.5,f*.06);
+    ctx.strokeStyle=phase===0?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)";
+    ctx.strokeText(word,0,0);
+    ctx.fillStyle=phase===0?"#bf5700":"#ffffff";
+    ctx.fillText(word,0,0);
+    ctx.restore();
+  });
+}
 $("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
   if(MWD.edit){                                       // sculpt the wall: toggle cells on/off
     const rc=el.dataset.rc.split(",").map(Number);
@@ -5887,7 +5983,8 @@ $("#mwRowPlus").onclick=()=>{MWD.rows=Math.min(6,MWD.rows+1); mwSaveGrid(); mwDa
 $("#mwColMinus").onclick=()=>{MWD.cols=Math.max(1,MWD.cols-1); mwSaveGrid(); mwDashRender();};
 $("#mwColPlus").onclick=()=>{MWD.cols=Math.min(12,MWD.cols+1); mwSaveGrid(); mwDashRender();};
 $("#mwFireBtn").onclick=()=>{ if(MWD.sel==="wp")triggerWinProbWall();
-  else if(MWD.sel==="td")triggerTdWall(); else triggerBallCross(); };
+  else if(MWD.sel==="td")triggerTdWall();
+  else if(MWD.sel==="tf")triggerTfWall(); else triggerBallCross(); };
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
 $("#dashMulti").onclick=()=>startMultiScreen();
 $("#dashSingle").onclick=()=>{ if(LEAGUE==="multi")setLeague("mlb"); };
