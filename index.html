@@ -1671,6 +1671,14 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
   background:rgba(255,255,255,.04);color:#fff;font-weight:900;letter-spacing:1px}
 .mwd-card.sel{border-color:var(--gold,#e8c34a);background:rgba(232,195,74,.12);
   box-shadow:0 0 14px rgba(232,195,74,.25)}
+.mwd-opts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.mwd-ol{font-size:10px;letter-spacing:2px;color:var(--dim);font-weight:900;margin-left:6px}
+.mwd-ol:first-child{margin-left:0}
+.mwd-opt{border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:6px 12px;cursor:pointer;
+  color:#fff;font-weight:800;font-size:12px;background:rgba(255,255,255,.03)}
+.mwd-opt.sel{border-color:var(--gold,#e8c34a);color:var(--gold,#e8c34a);background:rgba(232,195,74,.08)}
+#mwSpd{width:150px;accent-color:var(--gold,#e8c34a);margin-left:4px}
+.mwd-spdv{color:var(--gold,#e8c34a);font-weight:900;font-size:12px;min-width:44px}
 .mwd-fire{width:100%}
 #mwOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
   background:
@@ -2700,6 +2708,7 @@ body.tvmode .scorewrap{justify-content:center}
       <div class="mwd-sec">
         <div class="mwd-h">CONTENT</div>
         <div class="mwd-content" id="mwContent"></div>
+        <div class="mwd-opts" id="mwOpts"></div>
         <button class="hrbtn mwd-fire" id="mwFireBtn">🔥 FIRE ON WALL</button>
       </div>
     </div>
@@ -5268,8 +5277,9 @@ function mwBuildPanels(){
   let cum=0; rects.forEach(p=>{p.off=cum; cum+=p.w;});   // wall offset of each panel
   MW.panels=rects;
   const sh=Math.min(...rects.map(p=>p.h)),          // shared metrics off the SHORTEST screen
-        total=rects.reduce((a,p)=>a+p.w,0);
-  MW.geom={sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),total,m:Math.round(sh*.12)};
+        total=rects.reduce((a,p)=>a+p.w,0),
+        fl=Math.round(sh*.16), size=Math.round(sh*.11);
+  MW.geom={sh,size,fl,arc:Math.round((sh*.81-fl-size)/.54),total,m:Math.round(sh*.12)};
   mwPanelDom();
 }
 function mwBotOff(g,p){ // how far this panel's bottom edge sits ABOVE the wall floor (grid rows)
@@ -5322,9 +5332,17 @@ function mwArcY(t){ // bounce height 0..~.54 in units of geom.sh; contacts at .1
 function mwSquashAmt(t){let m=0;
   for(const c of[.125,.375,.625,.875]){const d=Math.abs(t-c); if(d<.02)m=Math.max(m,1-d/.02);}
   return m;}
+function mwBallY(move,t,g){ // ball height above the wall floor, px, per movement type
+  if(t<0||t>1)return 0;
+  if(move==="glide")return Math.max(0,(g.wallH||g.sh)*.5-g.fl);          // straight beam across mid-wall
+  if(move==="lob"){const a=Math.max(0,(g.wallH||g.sh)*.81-g.fl-g.size);  // one giant arc, peak ~81% up
+    return a*4*t*(1-t);}
+  return mwArcY(t)*(g.arc||g.sh);                                        // bounce (default)
+}
 function mwRender(){
   // wall-clock driven (Date.now) so LINKED windows on the same PC render the same frame
-  const g=MW.geom, D=8000, t=Math.min((Date.now()-MW.t0)/D,1);
+  const g=MW.geom, D=MW.dur||8000, t=Math.min((Date.now()-MW.t0)/D,1);
+  const move=MW.move||"bounce";
   const lags=[0,.00875,.0175,.02625];               // main + 3 trail ghosts (70/140/210ms of 8s)
   const wallXAt=f=>-g.m+(g.total+2*g.m)*f;
   let acc=0;
@@ -5335,14 +5353,14 @@ function mwRender(){
     d.balls.forEach((node,bi)=>{
       const tg=t-lags[bi];
       if(tg<0){node.style.transform="translate(-99999px,0)";return;}
-      const lx=wallXAt(tg)-off, y=mwArcY(tg)*g.sh;
+      const lx=wallXAt(tg)-off, y=mwBallY(move,tg,g);
       let s="";
-      if(bi===0){const q=mwSquashAmt(tg); if(q>0)s=` scale(${(1+.24*q).toFixed(3)},${(1-.28*q).toFixed(3)})`;}
+      if(bi===0&&move==="bounce"){const q=mwSquashAmt(tg); if(q>0)s=` scale(${(1+.24*q).toFixed(3)},${(1-.28*q).toFixed(3)})`;}
       node.style.transform=`translate(${(lx-g.size/2).toFixed(1)}px,${(-(g.fl+y-bo)).toFixed(1)}px)`+s;
     });
-    const lx=wallXAt(t)-off, y=mwArcY(t)*g.sh,
-          k=Math.max(.3,1-(y/(.5*g.sh))*.65),
-          op=Math.max(.1,.55-(y/(.5*g.sh))*.45);
+    const lx=wallXAt(t)-off, y=mwBallY(move,t,g),
+          k=Math.max(.3,1-(y/(.5*(g.arc||g.sh)))*.65),
+          op=Math.max(.1,.55-(y/(.5*(g.arc||g.sh)))*.45);
     d.shadow.style.transform=`translate(${(lx-g.size*.6).toFixed(1)}px,0) scale(${k.toFixed(3)})`;
     d.shadow.style.opacity=op.toFixed(2);
     acc+=p.w;
@@ -5361,17 +5379,19 @@ function mwRender(){
   if(t<1)MW.raf=requestAnimationFrame(mwRender); else MW.raf=0;
 }
 function mwShowCross(T0){
-  MW.hits=[.125,.375,.625,.875].map(f=>({t:f,wx:-MW.geom.m+(MW.geom.total+2*MW.geom.m)*f,done:false}));
+  MW.hits=(MW.move==="bounce"||!MW.move)                     // impact rings only when it bounces
+    ?[.125,.375,.625,.875].map(f=>({t:f,wx:-MW.geom.m+(MW.geom.total+2*MW.geom.m)*f,done:false})):[];
   mwOvEl.classList.remove("cal");
   mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
   cancelAnimationFrame(MW.raf); MW.t0=T0; MW.raf=requestAnimationFrame(mwRender);
   clearTimeout(triggerBallCross._t);
-  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+8600);
+  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+(MW.dur||8000)+600);
 }
 function triggerBallCross(){
   if(takeoverBusy())return;
-  if(mwFireWall("cross"))return;                     // wall fire whenever any screens are linked
+  if(mwFireWall("cross",{move:MWD.move,dur:mwBallDur()}))return;   // wall fire when screens are linked
   mwPlaying=true; hideWalkup(); houseWipe();
+  MW.move=MWD.move; MW.dur=mwBallDur();
   mwBuildPanels();                                   // re-map from the window's CURRENT position
   mwShowCross(Date.now());
 }
@@ -5424,7 +5444,8 @@ function mwFireWall(msgType,extra){                  // true = handled as a wall
   const T0=Date.now()+350,
         msg=Object.assign({type:msgType,t0:T0,members,grid:{rows:MWD.rows,cols:MWD.cols,cells:mwCells()}},extra||{});
   try{MWL.ch.postMessage(msg);}catch(e){}
-  if(msgType==="cross")mwStartLinked(T0,members,msg.grid); else mwStartWpLinked(T0,members,msg.seed,msg.grid);
+  if(msgType==="cross")mwStartLinked(T0,members,msg.grid,msg.move,msg.dur);
+  else mwStartWpLinked(T0,members,msg.seed,msg.grid,msg.dur);
   return true;                                       // unjoined dashboard: broadcast only, stays a control surface
 }
 function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min member size); null = no slot
@@ -5435,16 +5456,19 @@ function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min mem
         cells=(grid&&grid.cells&&grid.cells.length)?grid.cells:Array.from({length:cols},(_,c)=>[0,c]);
   const pos=cells[MWL.idx-1]; if(!pos)return null;   // screen n = nth occupied cell (reading order)
   const cellW=Math.min(...members.map(x=>x.w)), cellH=Math.min(...members.map(x=>x.h)), sh=cellH;
-  return {geom:{sh,size:Math.round(sh*.11),fl:Math.round(sh*.16),
-                total:cols*cellW,wallH:rows*cellH,m:Math.round(sh*.12)},
+  const wallH=rows*cellH, fl=Math.round(sh*.16), size=Math.round(sh*.11);
+  return {geom:{sh,size,fl,
+                arc:Math.round((wallH*.81-fl-size)/.54),   // bounce amplitude FILLS the wall (peak ~81% up)
+                total:cols*cellW,wallH,m:Math.round(sh*.12)},
           panel:{x:0,y:0,w:Math.min(innerWidth,cellW),h:Math.min(innerHeight,cellH),
                  off:pos[1]*cellW,offY:pos[0]*cellH,label:"SCREEN "+MWL.idx}};
 }
-function mwStartLinked(T0,members,grid){
+function mwStartLinked(T0,members,grid,move,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
   skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
   MW.geom=gg.geom; MW.panels=[gg.panel];
+  MW.move=move||"bounce"; MW.dur=dur||8000;
   mwPanelDom();
   MW.live=true;
   mwShowCross(T0);
@@ -5545,16 +5569,21 @@ function wpcDraw(u,T){
 function mwWpDom(){
   const g=MW.geom, barX=g.m, barW=g.total-2*g.m, barH=Math.round(g.sh*.13),
         wallH=g.wallH||g.sh, rowsN=Math.max(1,Math.round(wallH/g.sh)),
-        // center the bar within a real row (odd: middle row; even: the row just below the seam)
-        cFb=(rowsN%2)?wallH*.5:((rowsN/2)-.5)*g.sh,
-        barB=Math.round(cFb-barH/2), labB=barB+barH+Math.round(g.sh*.025),
-        labF=Math.round(g.sh*.06), midF=Math.round(g.sh*.028);
+        // PERCENTAGES ON TOP, BAR ON BOTTOM: bar centers in the bottom row (lower third on
+        // a single row); the big % labels own the top row (upper band on a single row)
+        barB=rowsN>1?Math.round(g.sh*.5-barH/2):Math.round(wallH*.35-barH/2),
+        topC=rowsN>1?(wallH-g.sh*.5):Math.round(wallH*.72),   // label band center, from wall bottom
+        // fonts capped by WALL WIDTH so the two % labels can never meet in the middle
+        labF=Math.round(Math.min(rowsN>1?g.sh*.34:g.sh*.10, g.total*.055)),
+        midF=Math.round(Math.min(rowsN>1?g.sh*.07:g.sh*.035, g.total*.03)),
+        labB=Math.round(topC-labF*.55),
+        midB=Math.round(topC+labF*.55+midF*.4);               // WIN PROBABILITY title above the numbers
   mwPanelBox.innerHTML=MW.panels.map(r=>
     `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
        <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
          <div class="wpw-lab a" style="left:${barX}px;bottom:${labB}px;font-size:${labF}px">${MW.wp.an} 50%</div>
          <div class="wpw-lab h" style="right:${g.m}px;bottom:${labB}px;font-size:${labF}px">50% ${MW.wp.hn}</div>
-         <div class="wpw-mid" style="left:50%;bottom:${labB+Math.round(labF*1.45)}px;font-size:${midF}px">WIN PROBABILITY</div>
+         <div class="wpw-mid" style="left:50%;bottom:${midB}px;font-size:${midF}px">WIN PROBABILITY</div>
          <div class="wpw-bar" style="left:${barX}px;bottom:${barB}px;width:${barW}px;height:${barH}px">
            <div class="wpw-away" style="width:50%"></div><div class="wpw-home"></div>
          </div>
@@ -5575,7 +5604,7 @@ function wpwSplitAt(t,kfIn){ // eased tug-of-war through the seeded keyframes
   return kf[kf.length-1].v;
 }
 function wpwRender(){
-  const D=10500, el=Date.now()-MW.t0, t=Math.max(0,Math.min(el/D,1));
+  const D=MW.dur||10500, el=Date.now()-MW.t0, t=Math.max(0,Math.min(el/D,1));
   const split=wpwSplitAt(t), a=Math.round(split), T=Math.max(0,el)/1000; // shared storm clock
   MW.dom.forEach(d=>{ if(!d.wp)return;
     d.wp.away.style.width=split+"%";
@@ -5597,21 +5626,23 @@ function mwShowWp(T0,seed){
   mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
   cancelAnimationFrame(MW.raf); MW.t0=T0; MW.raf=requestAnimationFrame(wpwRender);
   clearTimeout(triggerBallCross._t);
-  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+11100);
+  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+(MW.dur||10500)+600);
 }
 function triggerWinProbWall(){
   if(takeoverBusy())return;
   const seed=Date.now()&0x7fffffff;
-  if(mwFireWall("wp",{seed}))return;                 // wall fire whenever any screens are linked
+  if(mwFireWall("wp",{seed,dur:mwWpDur()}))return;   // wall fire whenever any screens are linked
   mwPlaying=true; hideWalkup(); houseWipe();
+  MW.dur=mwWpDur();
   mwBuildPanels();                                   // panel rects + geom (offs assigned)
   mwShowWp(Date.now(),seed);
 }
-function mwStartWpLinked(T0,members,seed,grid){
+function mwStartWpLinked(T0,members,seed,grid,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
   skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
   MW.geom=gg.geom; MW.panels=[gg.panel];
+  MW.dur=dur||10500;
   MW.live=true;
   mwShowWp(T0,seed);
 }
@@ -5623,7 +5654,13 @@ const MWD={rows:Math.min(6,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-
   cells:(()=>{try{const j=JSON.parse(localStorage.getItem("hrcam-wall-cells"));
     if(Array.isArray(j)&&j.length)return j;}catch(e){} return null;})(),
   edit:false, sel:localStorage.getItem("hrcam-wall-sel")||"wp",
+  move:localStorage.getItem("hrcam-wall-move")||"bounce",
+  spd:(()=>{const v=parseFloat(localStorage.getItem("hrcam-wall-spd"));   // speed factor: 1 = normal, 2 = 2× faster
+    if(v>0)return Math.min(3,Math.max(.3,v));
+    return {slow:.6,normal:1,fast:1.7}[localStorage.getItem("hrcam-wall-speed")]||1;})(),
   tick:0, praf:0, pu:null, pT0:0, pcyc:-1, pseed:7, pkf:null};
+function mwBallDur(){return Math.round(8000/(MWD.spd||1));}
+function mwWpDur(){return Math.round(10500/(MWD.spd||1));}
 if(!MWD.cells)MWD.cells=Array.from({length:MWD.cols},(_,c)=>[0,c]);   // default: one full row
 function mwCells(){ // occupied cells inside the canvas, reading order; self-heals to ≥1
   MWD.cells=MWD.cells.filter(p=>p[0]<MWD.rows&&p[1]<MWD.cols);
@@ -5653,6 +5690,25 @@ function mwDashRender(){
   $("#mwTiles").innerHTML=tiles.join("");
   $("#mwContent").innerHTML=MW_CONTENT.map(c=>
     `<div class="mwd-card${MWD.sel===c.id?" sel":""}" data-c="${c.id}">${c.name}</div>`).join("");
+  const opts=[];
+  if(MWD.sel==="ball"){
+    opts.push('<span class="mwd-ol">MOVEMENT</span>');
+    [["bounce","🏀 Bounce"],["glide","➡️ Glide"],["lob","🌈 Lob"]].forEach(p=>
+      opts.push(`<div class="mwd-opt${MWD.move===p[0]?" sel":""}" data-o="move" data-v="${p[0]}">${p[1]}</div>`));
+  }
+  opts.push('<span class="mwd-ol">SPEED</span>');
+  [[.6,"🐢 Slow"],[1,"▶ Normal"],[1.7,"⚡ Fast"]].forEach(p=>
+    opts.push(`<div class="mwd-opt${Math.abs(MWD.spd-p[0])<.01?" sel":""}" data-o="spd" data-v="${p[0]}">${p[1]}</div>`));
+  opts.push(`<input type="range" id="mwSpd" min="0.3" max="3" step="0.05" value="${MWD.spd}">`
+    +`<span class="mwd-spdv" id="mwSpdV">${MWD.spd.toFixed(2)}×</span>`);
+  $("#mwOpts").innerHTML=opts.join("");
+  const sl=$("#mwSpd");
+  if(sl)sl.oninput=()=>{MWD.spd=parseFloat(sl.value);                 // free dial — any speed at all
+    localStorage.setItem("hrcam-wall-spd",MWD.spd);
+    $("#mwSpdV").textContent=MWD.spd.toFixed(2)+"×";
+    document.querySelectorAll('.mwd-opt[data-o="spd"]').forEach(el=>
+      el.classList.toggle("sel",Math.abs(MWD.spd-parseFloat(el.dataset.v))<.01));
+    MWD.pT0=performance.now(); MWD.pcyc=-1;};
 }
 function mwDashStop(){ clearInterval(MWD.tick); MWD.tick=0; mwPrevStop(); }
 /* output preview: loops the selected content on a mini wall, reseeded every cycle */
@@ -5669,7 +5725,7 @@ function mwPrevFrame(ts){
   const dpr=Math.min(2,window.devicePixelRatio||1), W=Math.round(w*dpr), H=Math.round(h*dpr);
   if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
   const ctx=cv.getContext("2d");
-  const D=MWD.sel==="wp"?10500:8000, CYC=D+1400;      // play, hold, loop with a fresh seed
+  const D=(MWD.sel==="wp"?10500:8000)/(MWD.spd||1), CYC=D+1400;  // speed-scaled; play, hold, loop
   const cyc=Math.floor((ts-MWD.pT0)/CYC);
   if(cyc!==MWD.pcyc){MWD.pcyc=cyc; MWD.pseed=(MWD.pseed+9973)|0; mwPrevSeedKf(); MWD.pu=null;}
   const t=Math.min(((ts-MWD.pT0)%CYC)/D,1);
@@ -5697,8 +5753,9 @@ function mwPrevFrame(ts){
 }
 function mwPrevWp(ctx,W,H,t,dpr,ts){
   const split=wpwSplitAt(t,MWD.pkf), a=Math.round(split);
-  const rowH=H/MWD.rows, cFb=(MWD.rows%2)?H*.5:((MWD.rows/2)-.5)*rowH;   // mirror the real bar's row placement
-  const m=Math.round(W*.035), barW=W-2*m, barH=Math.round(rowH*.40), barY=Math.round(H-cFb-barH/2);
+  const rowH=H/MWD.rows;                                // mirror the wall: % on top, bar on bottom
+  const m=Math.round(W*.035), barW=W-2*m, barH=Math.round(rowH*.40),
+        barY=MWD.rows>1?Math.round(H-rowH*.5-barH/2):Math.round(H*.65-barH/2);
   const aw=Math.max(4,Math.round(barW*split/100));
   if(!MWD.pu)MWD.pu=[wpcUnit(document.createElement("div"),"cyan",3),
                      wpcUnit(document.createElement("div"),"orange",11)];
@@ -5710,16 +5767,21 @@ function mwPrevWp(ctx,W,H,t,dpr,ts){
   ctx.drawImage(MWD.pu[1].c,m+aw,barY,barW-aw,barH);
   ctx.shadowColor="#ffe9b0"; ctx.shadowBlur=8*dpr; ctx.fillStyle="#fff";
   ctx.fillRect(m+aw-1.5*dpr,barY-2,3*dpr,barH+4); ctx.shadowBlur=0;
-  const f=Math.max(10,Math.round(H*.17));
-  ctx.font="900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textBaseline="bottom";
+  const f=Math.max(10,Math.round(Math.min(MWD.rows>1?rowH*.5:H*.22,W*.055))),
+        labY=Math.round((MWD.rows>1?rowH*.5:H*.28)+f*.4);   // % numbers centered in the TOP band
+  ctx.font="900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textBaseline="alphabetic";
   ctx.fillStyle="#4dd7f0"; ctx.textAlign="left";
-  ctx.fillText(((G.away&&G.away.abbr)||"AWAY")+" "+a+"%",m,barY-4*dpr);
+  ctx.fillText(((G.away&&G.away.abbr)||"AWAY")+" "+a+"%",m,labY);
   ctx.fillStyle="#ff8a55"; ctx.textAlign="right";
-  ctx.fillText((100-a)+"% "+((G.home&&G.home.abbr)||"HOME"),W-m,barY-4*dpr);
+  ctx.fillText((100-a)+"% "+((G.home&&G.home.abbr)||"HOME"),W-m,labY);
 }
 function mwPrevBall(ctx,W,H,t){
-  const rowH=H/MWD.rows;                              // bounce scale tracks one screen-row, floor at the wall bottom
-  const m=W*.05, floor=H-rowH*.15, x=-m+(W+2*m)*t, y=mwArcY(t)*(rowH*.52), r=Math.max(5,rowH*.09);
+  const rowH=H/MWD.rows, fl=rowH*.15, r=Math.max(5,rowH*.09);
+  const m=W*.05, floor=H-fl, x=-m+(W+2*m)*t;
+  let y;                                              // mirror the wall's movement types, filling the FULL wall
+  if(MWD.move==="glide")y=Math.max(0,H*.5-fl);
+  else if(MWD.move==="lob")y=Math.max(0,H*.81-fl-r*2)*4*t*(1-t);
+  else y=mwArcY(t)*((H*.81-fl-r*2)/.54);
   ctx.strokeStyle="rgba(255,205,130,.5)"; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(0,floor); ctx.lineTo(W,floor); ctx.stroke();
   const cy=floor-y-r;
@@ -5739,6 +5801,10 @@ $("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
   const n=+el.dataset.n||0; if(!n)return;
   if(MWL.idx===n)mwLeave(); else mwJoin(n);};
 $("#mwEditBtn").onclick=()=>{MWD.edit=!MWD.edit; mwDashRender();};
+$("#mwOpts").onclick=e=>{const el=e.target.closest(".mwd-opt"); if(!el)return;
+  if(el.dataset.o==="spd"){MWD.spd=parseFloat(el.dataset.v);localStorage.setItem("hrcam-wall-spd",MWD.spd);}
+  else{MWD[el.dataset.o]=el.dataset.v;localStorage.setItem("hrcam-wall-"+el.dataset.o,el.dataset.v);}
+  MWD.pT0=performance.now(); MWD.pcyc=-1; mwDashRender();};
 $("#mwContent").onclick=e=>{const c=e.target.closest(".mwd-card"); if(!c)return;
   MWD.sel=c.dataset.c; localStorage.setItem("hrcam-wall-sel",MWD.sel);
   MWD.pT0=performance.now(); MWD.pcyc=-1; mwDashRender();};
