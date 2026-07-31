@@ -1665,6 +1665,10 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
   box-shadow:0 0 12px rgba(60,200,120,.25)}
 .mwd-tile.me{border-style:solid;border-color:var(--gold,#e8c34a);background:rgba(232,195,74,.12);
   box-shadow:0 0 12px rgba(232,195,74,.3)}
+.mwd-tile[draggable="true"]{cursor:grab}
+.mwd-tile.dragging{opacity:.4;cursor:grabbing}
+.mwd-tile.dropok{border-style:solid;border-color:var(--gold,#e8c34a);
+  background:rgba(232,195,74,.18);box-shadow:0 0 16px rgba(232,195,74,.35);opacity:1}
 .mwd-tile.off{opacity:.45;border-style:dotted;cursor:pointer}
 .mwd-tile.off:hover{opacity:.8;border-color:rgba(232,195,74,.55)}
 .mwd-tile.off.edit{opacity:.75;border-color:rgba(232,195,74,.5)}
@@ -2718,7 +2722,7 @@ body.tvmode .scorewrap{justify-content:center}
         </div>
       </div>
       <div class="mwd-sec">
-        <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · tap an empty ＋ square to put a screen there, ⬛ Fill All fills the grid, ✏️ Edit to remove · numbers run left→right, top→bottom · tap a numbered screen to make THIS window that screen</span></div>
+        <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · DRAG a screen to move it (drop it on another screen to swap them) · tap an empty ＋ square to add a screen, ⬛ Fill All fills the grid, ✏️ Edit to remove · tap a numbered screen to make THIS window that screen</span></div>
         <div class="mwd-lay">
           <div class="mwd-grid">
             <span class="mwd-cnt">ROWS <b id="mwRowNum">1</b></span>
@@ -5898,7 +5902,7 @@ const MWD={rows:Math.min(6,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-
   cols:Math.min(12,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-cols"))||parseInt(localStorage.getItem("hrcam-wall-count"))||4)),
   cells:(()=>{try{const j=JSON.parse(localStorage.getItem("hrcam-wall-cells"));
     if(Array.isArray(j)&&j.length)return j;}catch(e){} return null;})(),
-  edit:false, sel:localStorage.getItem("hrcam-wall-sel")||"wp",
+  edit:false, drag:0, sel:localStorage.getItem("hrcam-wall-sel")||"wp",
   move:localStorage.getItem("hrcam-wall-move")||"bounce",
   spd:(()=>{const v=parseFloat(localStorage.getItem("hrcam-wall-spd"));   // speed factor: 1 = normal, 2 = 2× faster
     if(v>0)return Math.min(3,Math.max(.3,v));
@@ -5913,10 +5917,11 @@ if(!localStorage.getItem("hrcam-wall-v2")){   // older builds grew the grid but 
   try{localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));
       localStorage.setItem("hrcam-wall-v2","1");}catch(e){}
 }
-function mwCells(){ // occupied cells inside the canvas, reading order; self-heals to ≥1
-  MWD.cells=MWD.cells.filter(p=>p[0]<MWD.rows&&p[1]<MWD.cols);
+/* cells[n-1] = the [row,col] SCREEN n lives in. Order = screen numbering (NOT reading order),
+   so dragging a tile MOVES that screen on the wall instead of renumbering the TVs. */
+function mwCells(){
+  MWD.cells=MWD.cells.filter(p=>Array.isArray(p)&&p[0]<MWD.rows&&p[1]<MWD.cols);
   if(!MWD.cells.length)MWD.cells=[[0,0]];
-  MWD.cells.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
   return MWD.cells;
 }
 function mwCount(){return mwCells().length;}
@@ -5950,7 +5955,7 @@ function mwDashRender(){
     if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>＋</b><small>ADD SCREEN</small></div>`);continue;}
     const me=(MWL.idx===n), rr=MWL.roster[n], live=me||(rr&&now-rr.ts<9000);
     const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?(rr.net?"🌐 ":"")+rr.w+"×"+rr.h:"WAITING"));
-    tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
+    tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" draggable="true" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
   }
   $("#mwTiles").innerHTML=tiles.join("");
   $("#mwContent").innerHTML=MW_CONTENT.map(c=>
@@ -6109,6 +6114,27 @@ $("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
     mwSaveGrid(); mwDashRender(); return;
   }
   if(MWL.idx===n)mwLeave(); else mwJoin(n);};
+/* drag a screen tile to MOVE it to an empty square, or drop it on another screen to SWAP the
+   two — the device keeps its number, only its place on the wall changes */
+(function mwDrag(){ const box=$("#mwTiles"); if(!box)return;
+  const clear=()=>box.querySelectorAll(".dragging,.dropok").forEach(x=>x.classList.remove("dragging","dropok"));
+  box.addEventListener("dragstart",e=>{const el=e.target.closest(".mwd-tile[data-n]"); if(!el){e.preventDefault();return;}
+    MWD.drag=+el.dataset.n; el.classList.add("dragging");
+    try{e.dataTransfer.setData("text/plain",el.dataset.n); e.dataTransfer.effectAllowed="move";}catch(err){}});
+  box.addEventListener("dragover",e=>{ if(!MWD.drag)return;
+    const el=e.target.closest(".mwd-tile"); if(!el)return;
+    e.preventDefault(); try{e.dataTransfer.dropEffect="move";}catch(err){}
+    box.querySelectorAll(".dropok").forEach(x=>{if(x!==el)x.classList.remove("dropok")});
+    el.classList.add("dropok");});
+  box.addEventListener("drop",e=>{ if(!MWD.drag)return;
+    const el=e.target.closest(".mwd-tile"); if(!el)return;
+    e.preventDefault();
+    const src=MWD.drag-1, tgtN=+el.dataset.n||0;
+    if(tgtN){ const t=tgtN-1, tmp=MWD.cells[t]; MWD.cells[t]=MWD.cells[src]; MWD.cells[src]=tmp; }  // swap
+    else MWD.cells[src]=el.dataset.rc.split(",").map(Number);                                      // move
+    MWD.drag=0; clear(); mwSaveGrid(); mwDashRender();});
+  box.addEventListener("dragend",()=>{MWD.drag=0; clear();});
+})();
 $("#mwEditBtn").onclick=()=>{MWD.edit=!MWD.edit; mwDashRender();};
 $("#mwFillBtn").onclick=()=>{                          // occupy every square in the canvas
   for(let r=0;r<MWD.rows;r++)mwFillRow(r);
