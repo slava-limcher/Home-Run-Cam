@@ -5723,9 +5723,10 @@ function mwTfEnv(f){ // pop-hold-fade envelope within one beat (f: 0..1)
   if(f<.75)return {a:1, s:1};
   return {a:Math.max(0,1-(f-.75)/.25), s:1};
 }
-function mwTfWord(n,phase,many){ // which word this screen shows this beat (checkerboard, swapping)
-  if(!many)return phase===0?"t":"f";
-  return ((n+phase)%2===1)?"t":"f";
+function mwTfWord(n,phase,many){ // fixed homes: odd screens = TEXAS, even = FIGHT!; a word is
+  const w=phase===0?"t":"f";     // visible ONLY during its own beat — never both at once
+  if(!many)return w;             // a solo screen voices both words itself
+  return ((n%2===1)?"t":"f")===w?w:null;   // not this screen's turn -> stays dark
 }
 function mwTfRender(){
   const D=MW.dur||8400, el=Date.now()-MW.t0, t=Math.max(0,el);
@@ -5734,11 +5735,11 @@ function mwTfRender(){
   MW.dom.forEach(d=>{ if(!d.tf)return;
     const mine=mwTfWord(d.n,phase,many);
     d.tf.forEach(w=>{
-      const active=w.dataset.w===mine;
+      const active=mine!==null&&w.dataset.w===mine;
       w.style.opacity=active?e.a.toFixed(3):"0";
       w.style.transform=`translate(-50%,-50%) scale(${active?e.s.toFixed(3):1})`;
     });
-    if(d.tfg)d.tfg.style.opacity=(e.a*.55).toFixed(3);
+    if(d.tfg)d.tfg.style.opacity=mine!==null?(e.a*.55).toFixed(3):"0";
   });
   if(el<D)MW.raf=requestAnimationFrame(mwTfRender); else MW.raf=0;
 }
@@ -5945,7 +5946,8 @@ function mwPrevTf(ctx,W,H,t){
   ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
   ctx.textAlign="center"; ctx.textBaseline="middle";
   cells.forEach((cell,i)=>{
-    const w=mwTfWord(i+1,phase,many), word=w==="t"?"TEXAS":"FIGHT!";
+    const w=mwTfWord(i+1,phase,many); if(w===null)return;   // not this screen's beat
+    const word=w==="t"?"TEXAS":"FIGHT!";
     const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
     ctx.save(); ctx.globalAlpha=e.a;
     ctx.translate(cx,cy); ctx.scale(e.s,e.s);
