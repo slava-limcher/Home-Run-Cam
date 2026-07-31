@@ -1688,6 +1688,32 @@ body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
 #mwOverlay.show .mw-hit.h3{animation:mwHit .7s ease-out 5s forwards}
 #mwOverlay.show .mw-hit.h4{animation:mwHit .7s ease-out 7s forwards}
 @keyframes mwHit{0%{opacity:.9;transform:translate(-50%,50%) scale(.2)}100%{opacity:0;transform:translate(-50%,50%) scale(1.5)}}
+/* -- v2 CALIBRATED PANELS: 🔍 Analyze Screens maps each physical display (Window Management
+   API) to a .mw-panel clipped to that screen's slice of the window; the ball is rendered
+   per-panel by a JS rAF loop — floor sits at EACH SCREEN'S OWN BOTTOM, dead desktop gaps
+   between screens are skipped, and nothing draws past any screen's edge. The CSS whole-window
+   crossing above stays as the uncalibrated fallback (hidden once .paneled). -- */
+#mwOverlay.paneled .mw-floor,#mwOverlay.paneled .mw-run,#mwOverlay.paneled .mw-shadowrun,#mwOverlay.paneled .mw-hit{display:none}
+#mwPanels{position:absolute;inset:0}
+.mw-panel{position:absolute;overflow:hidden}
+.mw-pfloor{position:absolute;left:0;right:0;bottom:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 70%);
+  border-top:2px solid rgba(255,205,130,.35);box-shadow:0 -18px 60px rgba(255,160,50,.08)}
+.mw-pball{position:absolute;left:0;bottom:0;border-radius:50%;will-change:transform;
+  background:radial-gradient(circle at 32% 28%,#fff 0%,#ffe9c2 26%,#f2a53a 58%,#7c3f0e 100%);
+  box-shadow:0 0 44px rgba(255,175,70,.9),0 0 140px rgba(255,150,40,.45)}
+.mw-pball.gh{box-shadow:none;filter:blur(3px)}
+.mw-pball.g1{opacity:.4}.mw-pball.g2{opacity:.24}.mw-pball.g3{opacity:.13}
+.mw-pshadow{position:absolute;left:0;border-radius:50%;will-change:transform;
+  background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent 70%)}
+.mw-pring{position:absolute;border-radius:50%;border:3px solid rgba(255,200,120,.8);
+  pointer-events:none;animation:mwHit .7s ease-out forwards}
+.mw-plabel{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);text-align:center;
+  opacity:0;transition:opacity .3s;font-weight:900;color:#e8eef4;letter-spacing:2px}
+.mw-plabel b{display:block;font-size:clamp(30px,4.5vw,84px)}
+.mw-plabel span{display:block;color:#93a3b8;letter-spacing:4px;font-size:clamp(12px,1.4vw,20px);margin-top:6px}
+#mwOverlay.cal .mw-plabel{opacity:1}
+#mwOverlay.cal .mw-panel{outline:3px dashed rgba(255,205,130,.5);outline-offset:-3px}
 /* ---- NHL PERIOD SIREN (coded): rotating amber beacon sweeps the dark rink, siren rings pulse,
         horn-blast shake, END OF n slams in, period-tally pips light up ---- */
 #psOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -2583,6 +2609,7 @@ body.tvmode .scorewrap{justify-content:center}
       </span>
       <span id="multiBtns">
         <button class="hrbtn" id="mwBallBtn">⚪ Ball Cross</button>
+        <button class="ghostbtn" id="mwScanBtn">🔍 Analyze Screens</button>
       </span>
     </div>
     <div class="hint" id="boardHint"></div>
@@ -3155,6 +3182,7 @@ body.tvmode .scorewrap{justify-content:center}
   <div class="mw-run mw-ghost g2"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
   <div class="mw-run mw-ghost g1"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
   <div class="mw-run mw-main"><div class="mw-bounce"><div class="mw-ball"></div></div></div>
+  <div id="mwPanels"></div>
 </div>
 <!-- NHL FACE-OFF: user's stare-down film — two silhouettes over the dot, the puck drops, they clash -->
 <div id="foOverlay">
@@ -5110,25 +5138,136 @@ async function fetchBatter(id,oppId){
 $("#demoBtn").onclick=()=>({nfl:startDemoNFL,nba:startDemoNBA,nhl:startDemoNHL}[LEAGUE]||startDemo)();
 $("#backBtn").onclick=showSetup;
 /* ---- MULTI-SCREEN WALL: one PC stretched across the TV row = one canvas, perfect sync.
-        The tab opens the wall stage (scoreboard hidden); BALL CROSS bounces a comet ball
-        across the full window width — on a 4-wide wall that's one floor hit per screen. ---- */
+        v2 CALIBRATION: 🔍 Analyze Screens (Window Management API, needs one permission click)
+        maps each physical display to a clipped .mw-panel; Ball Cross renders per-panel via
+        rAF — floor at each screen's own bottom, desktop gaps between screens skipped, nothing
+        drawn past a screen's edge. No permission / one screen → whole window = one panel. ---- */
 let mwPlaying=false;
-const mwOvEl=$("#mwOverlay");
+const mwOvEl=$("#mwOverlay"), mwPanelBox=$("#mwPanels");
+const MW={details:null,panels:[],dom:[],geom:null,hits:[],raf:0,t0:0};
 function startMultiScreen(){
   MODE="demo"; stopAll(); applyLeagueClass("multi");
   $("#mlbBtns").classList.add("hidden"); $("#nflBtns").classList.add("hidden");
   $("#statusTxt").textContent="MULTI-SCREEN"; $("#liveDot").style.display="none";
-  $("#boardHint").textContent="One PC, one window: stretch this browser across the whole TV row (extended desktop), press F11 for fullscreen, then fire an animation — it travels every screen as one canvas.";
+  $("#boardHint").textContent="One PC, one window: stretch this browser across the whole TV row (extended desktop), tap 🔍 Analyze Screens once so the wall knows where each display sits, then fire an animation.";
   showBoard();
+}
+function mwWinRect(){ // this window's CONTENT rect on the desktop, in the browser's scaled coords
+  const bw=(window.outerWidth-window.innerWidth)/2;
+  return {x:window.screenX+bw, y:window.screenY+(window.outerHeight-window.innerHeight)-bw,
+          w:window.innerWidth, h:window.innerHeight};
+}
+function mwBuildPanels(){
+  const win=mwWinRect(); let rects=[];
+  if(MW.details){
+    for(const s of MW.details.screens){
+      const x1=Math.max(s.left,win.x), y1=Math.max(s.top,win.y),
+            x2=Math.min(s.left+s.width,win.x+win.w), y2=Math.min(s.top+s.height,win.y+win.h);
+      if(x2-x1>40&&y2-y1>40)rects.push({x:x1-win.x,y:y1-win.y,w:x2-x1,h:y2-y1});
+    }
+    rects.sort((a,b)=>a.x-b.x);
+  }
+  if(!rects.length)rects=[{x:0,y:0,w:win.w,h:win.h}];
+  MW.panels=rects;
+  const sh=Math.min(...rects.map(p=>p.h)),          // shared metrics off the SHORTEST screen
+        size=Math.round(sh*.11), fl=Math.round(sh*.16),
+        total=rects.reduce((a,p)=>a+p.w,0), m=Math.round(sh*.12);
+  MW.geom={sh,size,fl,total,m};
+  const hidden="transform:translate(-99999px,0)";
+  mwPanelBox.innerHTML=rects.map((r,i)=>
+    `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
+       <div class="mw-pfloor" style="height:${fl}px"></div>
+       <div class="mw-pshadow" style="width:${Math.round(size*1.2)}px;height:${Math.max(10,Math.round(sh*.026))}px;bottom:${fl-8}px;${hidden}"></div>
+       <div class="mw-pball gh g3" style="width:${size}px;height:${size}px;${hidden}"></div>
+       <div class="mw-pball gh g2" style="width:${size}px;height:${size}px;${hidden}"></div>
+       <div class="mw-pball gh g1" style="width:${size}px;height:${size}px;${hidden}"></div>
+       <div class="mw-pball mn" style="width:${size}px;height:${size}px;${hidden}"></div>
+       <div class="mw-plabel"><b>SCREEN ${i+1}</b><span>${r.w} × ${r.h}</span></div>
+     </div>`).join("");
+  MW.dom=rects.map((r,i)=>{const el=mwPanelBox.children[i];
+    return {balls:[el.querySelector(".mn"),el.querySelector(".g1"),el.querySelector(".g2"),el.querySelector(".g3")],
+            shadow:el.querySelector(".mw-pshadow")};});
+  mwOvEl.classList.add("paneled");
+}
+async function mwAnalyzeScreens(){
+  if(takeoverBusy())return;
+  let msg="";
+  try{
+    if("getScreenDetails" in window){ MW.details=await window.getScreenDetails(); }
+    else msg="Screen-detail API not available in this browser — treating the window as one screen. ";
+  }catch(e){ MW.details=null; msg="Screen permission declined — treating the window as one screen. "; }
+  if(takeoverBusy())return;
+  mwBuildPanels();
+  const n=MW.panels.length;
+  $("#boardHint").textContent=msg+(MW.details
+    ? `${n} screen${n>1?"s":""} mapped — `+MW.panels.map((p,i)=>`#${i+1} ${p.w}×${p.h}`).join(" · ")+` — floors align to each screen's bottom; gaps between screens are skipped.`
+    : "Whole window = one screen. Stretch the window across the displays and re-analyze.");
+  mwPlaying=true; hideWalkup();
+  mwOvEl.classList.add("cal");
+  mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
+  clearTimeout(mwAnalyzeScreens._t); mwAnalyzeScreens._t=setTimeout(endBallCross,3000);
+}
+function mwArcY(t){ // bounce height 0..~.54 in units of geom.sh; contacts at .125/.375/.625/.875
+  if(t<0||t>1)return 0;
+  const C=[.125,.375,.625,.875];
+  if(t<=C[0]){const q=.5+(t/C[0])*.5; return .54*4*q*(1-q);}
+  if(t>=C[3]){const q=((t-C[3])/.125)*.5; return .54*4*q*(1-q);}
+  const k=Math.floor((t-C[0])/.25), q=(t-(C[0]+k*.25))/.25;
+  return .46*4*q*(1-q);
+}
+function mwSquashAmt(t){let m=0;
+  for(const c of[.125,.375,.625,.875]){const d=Math.abs(t-c); if(d<.02)m=Math.max(m,1-d/.02);}
+  return m;}
+function mwRender(ts){
+  const g=MW.geom, D=8000, t=Math.min((ts-MW.t0)/D,1);
+  const lags=[0,.00875,.0175,.02625];               // main + 3 trail ghosts (70/140/210ms of 8s)
+  const wallXAt=f=>-g.m+(g.total+2*g.m)*f;
+  let acc=0;
+  MW.panels.forEach((p,i)=>{
+    const d=MW.dom[i]; if(!d)return;
+    d.balls.forEach((node,bi)=>{
+      const tg=t-lags[bi];
+      if(tg<0){node.style.transform="translate(-99999px,0)";return;}
+      const lx=wallXAt(tg)-acc, y=mwArcY(tg)*g.sh;
+      let s="";
+      if(bi===0){const q=mwSquashAmt(tg); if(q>0)s=` scale(${(1+.24*q).toFixed(3)},${(1-.28*q).toFixed(3)})`;}
+      node.style.transform=`translate(${(lx-g.size/2).toFixed(1)}px,${(-(g.fl+y)).toFixed(1)}px)`+s;
+    });
+    const lx=wallXAt(t)-acc, y=mwArcY(t)*g.sh,
+          k=Math.max(.3,1-(y/(.5*g.sh))*.65),
+          op=Math.max(.1,.55-(y/(.5*g.sh))*.45);
+    d.shadow.style.transform=`translate(${(lx-g.size*.6).toFixed(1)}px,0) scale(${k.toFixed(3)})`;
+    d.shadow.style.opacity=op.toFixed(2);
+    acc+=p.w;
+  });
+  for(const h of MW.hits){
+    if(!h.done&&t>=h.t){h.done=true;
+      let a=0;
+      for(let i=0;i<MW.panels.length;i++){const p=MW.panels[i];
+        if(h.wx>=a&&h.wx<a+p.w){
+          const r=document.createElement("div"); r.className="mw-pring";
+          r.style.cssText=`left:${Math.round(h.wx-a)}px;bottom:${g.fl}px;width:${Math.round(g.sh*.32)}px;height:${Math.round(g.sh*.10)}px`;
+          mwPanelBox.children[i].appendChild(r); setTimeout(()=>r.remove(),800); break;}
+        a+=p.w;}
+    }
+  }
+  if(t<1)MW.raf=requestAnimationFrame(mwRender); else MW.raf=0;
 }
 function triggerBallCross(){
   if(takeoverBusy())return; mwPlaying=true; hideWalkup(); houseWipe();
+  mwBuildPanels();                                   // re-map from the window's CURRENT position
+  mwOvEl.classList.remove("cal");
+  MW.hits=[.125,.375,.625,.875].map(f=>({t:f,wx:-MW.geom.m+(MW.geom.total+2*MW.geom.m)*f,done:false}));
   mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
+  cancelAnimationFrame(MW.raf); MW.t0=performance.now(); MW.raf=requestAnimationFrame(mwRender);
   clearTimeout(triggerBallCross._t); triggerBallCross._t=setTimeout(endBallCross,8600);
 }
 function endBallCross(){ if(mwOvEl.classList.contains("show"))houseWipe();
-  clearTimeout(triggerBallCross._t); mwOvEl.classList.remove("show"); mwPlaying=false; }
+  clearTimeout(triggerBallCross._t); clearTimeout(mwAnalyzeScreens._t);
+  cancelAnimationFrame(MW.raf); MW.raf=0;
+  mwOvEl.classList.remove("show"); mwOvEl.classList.remove("cal"); mwPlaying=false; }
 $("#mwBallBtn").onclick=()=>triggerBallCross();
+$("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
 $("#lgMULTI").onclick=()=>startMultiScreen();
 $("#lgMLB").onclick=()=>setLeague("mlb");
 $("#lgNFL").onclick=()=>setLeague("nfl");
