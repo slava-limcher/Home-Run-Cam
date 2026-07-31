@@ -1648,6 +1648,11 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
   background:rgba(255,255,255,.06);color:#fff;font-size:18px;font-weight:900;cursor:pointer}
 .mwd-cnt{font-weight:900;color:#fff;letter-spacing:1px;font-size:12px}
 .mwd-cnt b{font-size:18px;color:var(--gold,#e8c34a)}
+.mwd-net{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mwd-net .mwd-cnt b{letter-spacing:3px}
+.mwd-netst{font-weight:900;font-size:11px;letter-spacing:1.5px;color:var(--dim)}
+.mwd-netst.on{color:#5ddc8c}
+.mwd-netst.bad{color:#ff8a55}
 .mwd-grid{display:flex;align-items:center;gap:6px}
 .mwd-x{color:var(--dim);font-weight:900;padding:0 4px}
 .mwd-tiles{flex:1;display:grid;gap:6px;min-width:220px;grid-template-columns:repeat(var(--mwCols,4),1fr)}
@@ -1759,6 +1764,7 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 #mwOverlay.paneled .mw-floor,#mwOverlay.paneled .mw-run,#mwOverlay.paneled .mw-shadowrun,#mwOverlay.paneled .mw-hit{display:none}
 #mwPanels{position:absolute;inset:0}
 .mw-panel{position:absolute;overflow:hidden}
+.mw-scale{position:absolute;left:0;bottom:0;transform-origin:left bottom}
 .mw-pfloor{position:absolute;left:0;right:0;bottom:0;
   background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 70%);
   border-top:2px solid rgba(255,205,130,.35);box-shadow:0 -18px 60px rgba(255,160,50,.08)}
@@ -2701,6 +2707,16 @@ body.tvmode .scorewrap{justify-content:center}
       </span>
     </div>
     <div id="mwDash">
+      <div class="mwd-sec">
+        <div class="mwd-h">CONNECT <span class="mwd-sub">— one PC over HDMI works offline · go online to drive TVs on OTHER devices (own stick/laptop/phone) over the internet: same ROOM code = same wall</span></div>
+        <div class="mwd-net">
+          <button class="ghostbtn" id="mwNetBtn">🌐 Go Online</button>
+          <span class="mwd-cnt">ROOM <b id="mwRoom">----</b></span>
+          <button class="mwd-step" id="mwRoomNew" title="new room code">⟳</button>
+          <button class="ghostbtn" id="mwLinkBtn">🔗 Copy TV Link</button>
+          <span class="mwd-netst" id="mwNetSt">offline</span>
+        </div>
+      </div>
       <div class="mwd-sec">
         <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · tap an empty ＋ square to put a screen there, ⬛ Fill All fills the grid, ✏️ Edit to remove · numbers run left→right, top→bottom · tap a numbered screen to make THIS window that screen</span></div>
         <div class="mwd-lay">
@@ -5270,6 +5286,9 @@ function startMultiScreen(){
   $("#boardHint").textContent="LAYOUT: set the screen count, open this page on each TV (WALL-LAUNCH.bat pre-joins them) and its tile lights up. OUTPUT: live preview of the wall. CONTENT: pick an animation, then 🔥 FIRE.";
   showBoard();
   mwEnsureCh();                                       // listen for screen heartbeats even if unjoined
+  mwnCode();                                          // show the room code (connect stays opt-in)
+  if(mwLinked())mwBroadcast({type:"who"});            // ask live screens to report in right away
+  if(!MWN.on&&localStorage.getItem("hrcam-wall-net")==="1")mwnGo(true);   // reconnect last session
   mwDashRender();
   clearInterval(MWD.tick);
   MWD.tick=setInterval(()=>{if(document.body.classList.contains("multi"))mwDashRender();},3000);
@@ -5291,30 +5310,37 @@ function mwBuildPanels(){
     rects.sort((a,b)=>a.x-b.x);
   }
   if(!rects.length)rects=[{x:0,y:0,w:win.w,h:win.h}];
-  let cum=0; rects.forEach((p,i)=>{p.off=cum; cum+=p.w; p.row=0; p.col=i;});   // wall offset + grid slot
+  let cum=0; rects.forEach((p,i)=>{p.off=cum; cum+=p.w; p.row=0; p.col=i;   // wall offset + grid slot
+    p.pw=p.w; p.ph=p.h; p.sx=1; p.sy=1;});          // one window: content coords ARE screen coords
   MW.panels=rects;
   const sh=Math.min(...rects.map(p=>p.h)),          // shared metrics off the SHORTEST screen
         total=rects.reduce((a,p)=>a+p.w,0),
         fl=Math.round(sh*.16), size=Math.round(sh*.11);
-  MW.geom={sh,size,fl,arc:Math.round((sh*.81-fl-size)/.54),total,m:Math.round(sh*.12)};
+  MW.geom={sh,size,fl,rows:1,cellW:total,cellH:sh,arc:Math.round((sh*.81-fl-size)/.54),total,m:Math.round(sh*.12)};
   mwPanelDom();
 }
 function mwBotOff(g,p){ // how far this panel's bottom edge sits ABOVE the wall floor (grid rows)
   return g.wallH?Math.max(0,g.wallH-((p.offY||0)+p.h)):0;
 }
+/* every panel = the PHYSICAL screen, holding a .mw-scale box in LOGICAL wall units that is
+   scaled to fill it — so any resolution/aspect shows exactly its share of the wall */
+function mwPanelOpen(p){
+  return `<div class="mw-panel" style="left:${p.x}px;top:${p.y}px;width:${p.pw||p.w}px;height:${p.ph||p.h}px">`
+    +`<div class="mw-scale" style="width:${p.w}px;height:${p.h}px;transform:scale(${(p.sx||1).toFixed(5)},${(p.sy||1).toFixed(5)})">`;
+}
+const MW_CLOSE="</div></div>";
 function mwPanelDom(){ // panel DOM from MW.panels + MW.geom (per-panel label optional)
   const g=MW.geom, hidden="transform:translate(-99999px,0)";
   mwPanelBox.innerHTML=MW.panels.map((r,i)=>{
-    const bo=mwBotOff(g,r); return (
-    `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="mw-pfloor" style="height:${g.fl}px;bottom:${-bo}px"></div>
+    const bo=mwBotOff(g,r); return (mwPanelOpen(r)+
+    `  <div class="mw-pfloor" style="height:${g.fl}px;bottom:${-bo}px"></div>
        <div class="mw-pshadow" style="width:${Math.round(g.size*1.2)}px;height:${Math.max(10,Math.round(g.sh*.026))}px;bottom:${g.fl-8-bo}px;${hidden}"></div>
        <div class="mw-pball gh g3" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball gh g2" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball gh g1" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
        <div class="mw-pball mn" style="width:${g.size}px;height:${g.size}px;${hidden}"></div>
-       <div class="mw-plabel"><b>${r.label||("SCREEN "+(i+1))}</b><span>${r.w} × ${r.h}</span></div>
-     </div>`);}).join("");
+       <div class="mw-plabel"><b>${r.label||("SCREEN "+(i+1))}</b><span>${r.pw||r.w} × ${r.ph||r.h}</span></div>`
+    +MW_CLOSE);}).join("");
   MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
     return {balls:[el.querySelector(".mn"),el.querySelector(".g1"),el.querySelector(".g2"),el.querySelector(".g3")],
             shadow:el.querySelector(".mw-pshadow")};});
@@ -5415,7 +5441,7 @@ function triggerBallCross(){
 function endBallCross(){ if(mwOvEl.classList.contains("show"))houseWipe();
   clearTimeout(triggerBallCross._t); clearTimeout(mwAnalyzeScreens._t);
   cancelAnimationFrame(MW.raf); MW.raf=0;
-  if(MW.live){ MW.live=false; if(MWL.ch&&MWL.idx){try{MWL.ch.postMessage({type:"stop"});}catch(e){}} }
+  if(MW.live){ MW.live=false; if(mwLinked()&&MWL.idx)mwBroadcast({type:"stop"}); }
   mwOvEl.classList.remove("show"); mwOvEl.classList.remove("cal"); mwPlaying=false; }
 /* -- LINKED WINDOWS: each display runs its OWN fullscreen window of this page; windows in the
       same browser sync over BroadcastChannel. Same PC = same clock, so a shared Date.now()
@@ -5431,9 +5457,73 @@ function mwGrowTo(n){ if(mwCount()>=n)return;        // occupy empty cells (read
   }
   mwSaveGrid();
 }
+/* ---- INTERNET MODE: the same wall across DIFFERENT devices/networks, no HDMI, no server of
+        our own — Supabase Realtime *broadcast* (ephemeral; no table, no RLS). Every device opens
+        the deployed page with the same ROOM code and they drive each other.
+        TIMING: local windows (BroadcastChannel, one clock) keep using the absolute t0 =
+        frame-tight. Remote screens can't trust each other's clocks, so network fires carry a
+        LEAD and each screen starts `lead` ms after the message LANDS — the broadcast fans out
+        from the server at once, so screens agree to within their own delivery jitter (tens of
+        ms), no clock sync needed. Messages carry a mid so a device on both transports acts once. */
+const SBW={url:"https://yfatjubmmnykwopnuoyk.supabase.co",
+           key:"sb_publishable_KcWaVrtqXLfIt80bHliCCw_V9kLdvVV"};   // same project as trivia/bingo
+const MWN={on:false,room:"",sb:null,ch:null,status:"off",pingT:0,rtt:0,bcOff:false,
+  id:Math.random().toString(36).slice(2,8),seen:new Set()};
+function mwMid(){return MWN.id+"-"+(mwMid._n=(mwMid._n||0)+1);}
+function mwSeen(mid){ if(!mid)return false;            // same message over both transports -> once
+  if(MWN.seen.has(mid))return true;
+  MWN.seen.add(mid); if(MWN.seen.size>400)MWN.seen=new Set([...MWN.seen].slice(-200));
+  return false; }
+function mwnCode(save){ // ?room= wins, else the saved code, else a fresh one
+  const q=new URLSearchParams(location.search).get("room")
+        ||new URLSearchParams((location.hash||"").replace(/^#/,"")).get("room");
+  let c=((q||localStorage.getItem("hrcam-wall-room")||"")+"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
+  if(!c||save==="new"){const A="ACDEFGHJKLMNPQRTUVWXY349";c="";for(let i=0;i<4;i++)c+=A[Math.floor(Math.random()*A.length)];}
+  MWN.room=c; localStorage.setItem("hrcam-wall-room",c); return c;
+}
+function mwnSdk(){ return new Promise((res,rej)=>{
+  if(window.supabase&&window.supabase.createClient)return res();
+  const s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=()=>res(); s.onerror=()=>rej(new Error("sdk"));
+  document.head.appendChild(s); }); }
+async function mwnGo(on){
+  if(!on){ mwnDrop(); localStorage.setItem("hrcam-wall-net","0"); return; }
+  localStorage.setItem("hrcam-wall-net","1");
+  mwnCode(); MWN.status="connecting"; mwDashRender();
+  try{ await mwnSdk(); }
+  catch(e){ MWN.status="no internet"; MWN.on=false; mwDashRender(); return; }
+  try{
+    if(!MWN.sb)MWN.sb=window.supabase.createClient(SBW.url,SBW.key);
+    if(MWN.ch){try{MWN.sb.removeChannel(MWN.ch);}catch(e){} MWN.ch=null;}
+    MWN.ch=MWN.sb.channel("hrcam-wall-"+MWN.room,{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"m"},p=>mwOnMsg({data:p.payload}))
+      .subscribe(st=>{
+        MWN.on=(st==="SUBSCRIBED");
+        MWN.status=MWN.on?"online":(st==="CHANNEL_ERROR"||st==="TIMED_OUT")?"connection failed":"connecting";
+        if(MWN.on){ mwBroadcast({type:"who"}); mwBeat(true); mwnPing(); }
+        mwDashRender(); });
+  }catch(e){ MWN.status="connection failed"; MWN.on=false; mwDashRender(); }
+}
+function mwnDrop(){ MWN.on=false; MWN.status="off"; MWN.rtt=0;
+  clearInterval(MWN.pingT); MWN.pingT=0;
+  if(MWN.ch&&MWN.sb){try{MWN.sb.removeChannel(MWN.ch);}catch(e){}}
+  MWN.ch=null; mwDashRender(); }
+function mwnSend(msg){ if(!MWN.on||!MWN.ch)return;
+  try{MWN.ch.send({type:"broadcast",event:"m",payload:Object.assign({},msg,{net:1})});}catch(e){} }
+function mwnPing(){ clearInterval(MWN.pingT);
+  const p=()=>{ if(MWN.on)mwnSend({type:"ping",from:MWN.id,tc:Date.now(),mid:mwMid()}); };
+  MWN.pingT=setInterval(p,6000); p(); }
+function mwBroadcast(msg){ msg.mid=msg.mid||mwMid(); msg.from=msg.from||MWN.id;
+  if(!MWN.bcOff&&mwEnsureCh()){try{MWL.ch.postMessage(msg);}catch(e){}}
+  mwnSend(msg); }
+function mwLinked(){ return !!(MWL.ch||MWN.on); }     // any transport that can reach other screens
+function mwTvLink(n){ const b=location.origin+location.pathname.replace(/(index|play)\.html$/,"");
+  return b+"?room="+MWN.room+(n?"&wallscreen="+n:""); }
 function mwEnsureCh(){ if(!MWL.ch&&("BroadcastChannel" in window)){ MWL.ch=new BroadcastChannel("hrcam_wall"); MWL.ch.onmessage=mwOnMsg; } return !!MWL.ch; }
 function mwJoin(n){
-  if(!mwEnsureCh()){ $("#boardHint").textContent="This browser can't link windows (no BroadcastChannel) — use 🔍 Analyze Screens with one stretched window instead."; return; }
+  mwEnsureCh();
+  if(!mwLinked()){ $("#boardHint").textContent="No link available — tap 🌐 Go Online to drive screens over the internet, or use 🔍 Analyze Screens with one stretched window."; return; }
   MWL.idx=n;                                         // re-tapping a different tile = switch roles
   clearInterval(MWL.beatT); MWL.beatT=setInterval(mwBeat,3000); mwBeat(true);
   $("#statusTxt").textContent="WALL SCREEN "+n;
@@ -5447,8 +5537,8 @@ function mwLeave(){
   mwDashRender();
   if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
 }
-function mwBeat(hello){ if(!MWL.ch||!MWL.idx)return;
-  try{MWL.ch.postMessage({type:hello===true?"hello":"beat",idx:MWL.idx,w:innerWidth,h:innerHeight});}catch(e){} }
+function mwBeat(hello){ if(!mwLinked()||!MWL.idx)return;
+  mwBroadcast({type:hello===true?"hello":"beat",idx:MWL.idx,w:innerWidth,h:innerHeight}); }
 function mwMembers(){                                // fresh roster (self if joined + <9s heartbeats), wall order
   const now=Date.now(), list=MWL.idx?[{idx:MWL.idx,w:innerWidth,h:innerHeight}]:[];
   for(const k in MWL.roster){ const r=MWL.roster[k];
@@ -5456,11 +5546,14 @@ function mwMembers(){                                // fresh roster (self if jo
   return list.sort((a,b)=>a.idx-b.idx);
 }
 function mwFireWall(msgType,extra){                  // true = handled as a wall fire (screens are linked)
-  if(!mwEnsureCh())return false;
+  mwEnsureCh();
+  if(!mwLinked())return false;
   const members=mwMembers(); if(!members.length)return false;
-  const T0=Date.now()+350,
-        msg=Object.assign({type:msgType,t0:T0,members,grid:{rows:MWD.rows,cols:MWD.cols,cells:mwCells()}},extra||{});
-  try{MWL.ch.postMessage(msg);}catch(e){}
+  const lead=MWN.on?1000:350,                        // internet needs headroom for delivery jitter
+        T0=Date.now()+lead,
+        msg=Object.assign({type:msgType,t0:T0,lead,members,
+          grid:{rows:MWD.rows,cols:MWD.cols,cells:mwCells()}},extra||{});
+  mwBroadcast(msg);
   if(msgType==="cross")mwStartLinked(T0,members,msg.grid,msg.move,msg.dur);
   else if(msgType==="wp")mwStartWpLinked(T0,members,msg.seed,msg.grid,msg.dur);
   else if(msgType==="td")mwStartTdLinked(T0,members,msg.grid,msg.dur);
@@ -5474,12 +5567,16 @@ function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min mem
         rows=Math.max(1,(grid&&grid.rows)||1),
         cells=(grid&&grid.cells&&grid.cells.length)?grid.cells:Array.from({length:cols},(_,c)=>[0,c]);
   const pos=cells[MWL.idx-1]; if(!pos)return null;   // screen n = nth occupied cell (reading order)
-  const cellW=Math.min(...members.map(x=>x.w)), cellH=Math.min(...members.map(x=>x.h)), sh=cellH;
+  // LOGICAL cell = the biggest screen on the wall; every screen then SCALES its slice to fill its
+  // own viewport (panel.sx/sy), so mixed resolutions all show the same share of the wall.
+  const cellW=Math.max(...members.map(x=>x.w)), cellH=Math.max(...members.map(x=>x.h)), sh=cellH;
   const wallH=rows*cellH, fl=Math.round(sh*.16), size=Math.round(sh*.11);
-  return {geom:{sh,size,fl,
+  return {geom:{sh,size,fl,cellW,cellH,rows,
                 arc:Math.round((wallH*.81-fl-size)/.54),   // bounce amplitude FILLS the wall (peak ~81% up)
                 total:cols*cellW,wallH,m:Math.round(sh*.12)},
-          panel:{x:0,y:0,w:Math.min(innerWidth,cellW),h:Math.min(innerHeight,cellH),
+          panel:{x:0,y:0,w:cellW,h:cellH,                  // content coords = LOGICAL cell
+                 pw:innerWidth,ph:innerHeight,             // the physical screen it renders on
+                 sx:innerWidth/cellW,sy:innerHeight/cellH,
                  off:pos[1]*cellW,offY:pos[0]*cellH,row:pos[0],col:pos[1],label:"SCREEN "+MWL.idx}};
 }
 function mwStartLinked(T0,members,grid,move,dur){
@@ -5493,15 +5590,24 @@ function mwStartLinked(T0,members,grid,move,dur){
   mwShowCross(T0);
 }
 function mwOnMsg(e){ const d=e.data||{};
+  if(d.from&&d.from===MWN.id)return;                 // never act on our own broadcast
+  if(mwSeen(d.mid))return;                           // already handled via the other transport
+  // remote clocks can't be trusted: a network fire starts `lead` ms after it LANDS here
+  const T0=d.net?(Date.now()+(d.lead||1000)):d.t0;
+  if(d.type==="who"){ mwBeat(); return; }             // operator arrived -> announce ourselves now
+  if(d.type==="ping"){ mwnSend({type:"pong",to:d.from,tc:d.tc,mid:mwMid()}); return; }
+  if(d.type==="pong"){ if(d.to===MWN.id){const r=Date.now()-d.tc;
+      MWN.rtt=MWN.rtt?Math.min(MWN.rtt,r):r; if(document.body.classList.contains("multi"))mwDashRender();}
+    return; }
   if((d.type==="hello"||d.type==="beat")&&d.idx){
-    if(d.idx!==MWL.idx)MWL.roster[d.idx]={w:d.w,h:d.h,ts:Date.now()};
+    if(d.idx!==MWL.idx)MWL.roster[d.idx]={w:d.w,h:d.h,ts:Date.now(),net:d.net?1:0};
     if(d.type==="hello")mwBeat();                    // answer newcomers so they learn the roster fast
     mwGrowTo(d.idx);                                 // a higher screen appeared -> grow the layout
     if(document.body.classList.contains("multi"))mwDashRender();
-  }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(d.t0,d.members,d.grid,d.move,d.dur); }
-  else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(d.t0,d.members,d.seed,d.grid,d.dur); }
-  else if(d.type==="td"&&MWL.idx){ mwStartTdLinked(d.t0,d.members,d.grid,d.dur); }
-  else if(d.type==="tf"&&MWL.idx){ mwStartTfLinked(d.t0,d.members,d.grid,d.dur); }
+  }else if(d.type==="cross"&&MWL.idx){ mwStartLinked(T0,d.members,d.grid,d.move,d.dur); }
+  else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(T0,d.members,d.seed,d.grid,d.dur); }
+  else if(d.type==="td"&&MWL.idx){ mwStartTdLinked(T0,d.members,d.grid,d.dur); }
+  else if(d.type==="tf"&&MWL.idx){ mwStartTfLinked(T0,d.members,d.grid,d.dur); }
   else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
 }
 /* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR engine, ported 1:1 from mlb-betting.
@@ -5599,17 +5705,15 @@ function mwWpDom(){
         midF=Math.round(Math.min(rowsN>1?g.sh*.07:g.sh*.035, g.total*.03)),
         labB=Math.round(topC-labF*.55),
         midB=Math.round(topC+labF*.55+midF*.4);               // WIN PROBABILITY title above the numbers
-  mwPanelBox.innerHTML=MW.panels.map(r=>
-    `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
+  mwPanelBox.innerHTML=MW.panels.map(r=>mwPanelOpen(r)+
+    `  <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
          <div class="wpw-lab a" style="left:${barX}px;bottom:${labB}px;font-size:${labF}px">${MW.wp.an} 50%</div>
          <div class="wpw-lab h" style="right:${g.m}px;bottom:${labB}px;font-size:${labF}px">50% ${MW.wp.hn}</div>
          <div class="wpw-mid" style="left:50%;bottom:${midB}px;font-size:${midF}px">WIN PROBABILITY</div>
          <div class="wpw-bar" style="left:${barX}px;bottom:${barB}px;width:${barW}px;height:${barH}px">
            <div class="wpw-away" style="width:50%"></div><div class="wpw-home"></div>
          </div>
-       </div>
-     </div>`).join("");
+       </div>`+MW_CLOSE).join("");
   MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
     const away=el.querySelector(".wpw-away"), home=el.querySelector(".wpw-home");
     return {wp:{away,
@@ -5658,20 +5762,20 @@ function triggerWinProbWall(){
   mwBuildPanels();                                   // panel rects + geom (offs assigned)
   mwShowWp(Date.now(),seed);
 }
-/* -- TOUCHDOWN WALL RIDE: giant chrome "TOUCHDOWN!" (silver gradient + dark rim) slides
-      right-to-left across the ENTIRE wall — letters sized to the wall height, so on
-      multi-row layouts they span every row. Same shared-clock sync as the other moments. -- */
+/* -- TOUCHDOWN WALL RIDE: chrome "TOUCHDOWN!" (silver gradient + dark rim) rides the wall
+      ROW BY ROW — letters sized to ONE row (never split across a seam), crossing the top row,
+      then re-entering at the right of the next row, and so on. Each panel clips to its own
+      cell, so a word riding row 0 simply isn't visible on row 1's screens. -- */
 function mwTdDom(){
   const g=MW.geom, wallH=g.wallH||g.sh,
-        f=Math.round(wallH*.55),
-        stroke=Math.max(2,Math.round(f*.012)),       // rim thickness scales with the letters
-        tdB=Math.round((wallH-f*1.08)/2);
-  mwPanelBox.innerHTML=MW.panels.map(r=>
-    `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="mw-tdwrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
-         <div class="mw-td" style="bottom:${tdB}px;font-size:${f}px;-webkit-text-stroke:${stroke}px rgba(8,12,20,.85);transform:translateX(${g.total+g.m}px)">TOUCHDOWN!</div>
-       </div>
-     </div>`).join("");
+        rowsN=Math.max(1,g.rows||Math.round(wallH/g.sh)),
+        f=Math.round(g.sh*.55),                      // ONE ROW tall
+        stroke=Math.max(2,Math.round(f*.012));       // rim thickness scales with the letters
+  MW.tdF=f; MW.tdRows=rowsN;
+  mwPanelBox.innerHTML=MW.panels.map(r=>mwPanelOpen(r)+
+    `  <div class="mw-tdwrap" style="left:${-(r.off||0)}px;bottom:${-mwBotOff(g,r)}px;width:${g.total}px">
+         <div class="mw-td" style="bottom:0;font-size:${f}px;-webkit-text-stroke:${stroke}px rgba(8,12,20,.85);transform:translate(${g.total+g.m}px,0)">TOUCHDOWN!</div>
+       </div>`+MW_CLOSE).join("");
   MW.dom=MW.panels.map((r,i)=>({td:mwPanelBox.children[i].querySelector(".mw-td")}));
   const w=MW.dom[0]&&MW.dom[0].td?MW.dom[0].td.offsetWidth:0;
   MW.tdW=(w&&w>10)?w:Math.round(f*6.1);              // measured width; estimate when layout is suspended
@@ -5679,8 +5783,12 @@ function mwTdDom(){
 }
 function mwTdRender(){
   const g=MW.geom, D=MW.dur||7500, el=Date.now()-MW.t0, t=Math.max(0,Math.min(el/D,1));
-  const x=(g.total+g.m)-(g.total+MW.tdW+2*g.m)*t;    // enter at the right edge, exit fully left
-  MW.dom.forEach(d=>{ if(d.td)d.td.style.transform=`translateX(${x.toFixed(1)}px)`; });
+  const rows=MW.tdRows||1, f=MW.tdF||Math.round(g.sh*.55);
+  const legF=Math.min(t*rows,rows), leg=Math.min(rows-1,Math.floor(legF)), tl=legF-leg;
+  const x=(g.total+g.m)-(g.total+MW.tdW+2*g.m)*tl;   // enter right, exit left — once per row
+  const cy=(g.wallH||g.sh)-(leg+.5)*g.sh;            // center of THIS row, from the wall floor
+  const up=Math.round(cy-f*.54);
+  MW.dom.forEach(d=>{ if(d.td)d.td.style.transform=`translate(${x.toFixed(1)}px,${-up}px)`; });
   if(el<D)MW.raf=requestAnimationFrame(mwTdRender); else MW.raf=0;
 }
 function mwShowTd(T0){
@@ -5713,11 +5821,11 @@ function mwStartTdLinked(T0,members,grid,dur){
       remaining screens. Only ONE word is ever on the wall. 3 cycles; solo screen voices both. -- */
 function mwTfDom(){
   mwPanelBox.innerHTML=MW.panels.map(r=>{
-    const fs=Math.round(r.h*.34), st=Math.max(2,Math.round(fs*.014));
-    return `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
-       <div class="mw-tfglow"></div>
-       ${["t","f"].map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")}
-     </div>`;}).join("");
+    const fs=Math.round(Math.min(r.h*.34,r.w*.20)), st=Math.max(2,Math.round(fs*.014));
+    return mwPanelOpen(r)
+     +`<div class="mw-tfglow"></div>`
+     +["t","f"].map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")
+     +MW_CLOSE;}).join("");
   MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
     return {n:(MWL.idx||i+1), r:p.row||0, c:(p.col!=null?p.col:i),
             tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
@@ -5816,20 +5924,32 @@ function mwSaveGrid(){mwCells();  // crop cells to the canvas before persisting
   localStorage.setItem("hrcam-wall-rows",MWD.rows);localStorage.setItem("hrcam-wall-cols",MWD.cols);
   localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));}
 const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"},{id:"td",name:"🏈 Touchdown"},{id:"tf",name:"🤘 Texas Fight"}];
-function mwTdDur(){return Math.round(7500/(MWD.spd||1));}
+function mwTdDur(){return Math.round(5500*Math.max(1,MWD.rows)/(MWD.spd||1));}  // one crossing per row
 function mwTfDur(){return Math.round(8400/(MWD.spd||1));}   // 3 full TEXAS→FIGHT! cycles
+function mwSelDur(){return MWD.sel==="wp"?mwWpDur():MWD.sel==="td"?mwTdDur():MWD.sel==="tf"?mwTfDur():mwBallDur();}
 function mwDashRender(){
   if(!$("#mwRowNum"))return;
   $("#mwRowNum").textContent=MWD.rows; $("#mwColNum").textContent=MWD.cols;
   $("#mwTiles").style.setProperty("--mwCols",MWD.cols);
   $("#mwPrev").style.height=(MWD.rows>1?Math.min(320,110*MWD.rows):120)+"px";
   $("#mwEditBtn").classList.toggle("on",MWD.edit);
+  if($("#mwRoom")){                                   // CONNECT row: room code + link status
+    $("#mwRoom").textContent=MWN.room||localStorage.getItem("hrcam-wall-room")||"----";
+    $("#mwNetBtn").textContent=MWN.on?"🌐 Go Offline":"🌐 Go Online";
+    $("#mwNetBtn").classList.toggle("on",MWN.on);
+    const remote=Object.keys(MWL.roster).filter(k=>MWL.roster[k].net&&Date.now()-MWL.roster[k].ts<9000).length;
+    const st=$("#mwNetSt");
+    st.textContent=MWN.on
+      ?`online · ${remote} remote screen${remote===1?"":"s"}${MWN.rtt?" · ~"+MWN.rtt+"ms":""}`
+      :(MWN.status==="off"?"offline (same-PC only)":MWN.status);
+    st.className="mwd-netst"+(MWN.on?" on":(/fail|no internet/.test(MWN.status)?" bad":""));
+  }
   const cells=mwCells(), now=Date.now(), tiles=[];
   for(let r=0;r<MWD.rows;r++)for(let c=0;c<MWD.cols;c++){
     const n=cells.findIndex(p=>p[0]===r&&p[1]===c)+1;
     if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>＋</b><small>ADD SCREEN</small></div>`);continue;}
     const me=(MWL.idx===n), rr=MWL.roster[n], live=me||(rr&&now-rr.ts<9000);
-    const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?rr.w+"×"+rr.h:"WAITING"));
+    const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?(rr.net?"🌐 ":"")+rr.w+"×"+rr.h:"WAITING"));
     tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
   }
   $("#mwTiles").innerHTML=tiles.join("");
@@ -5870,7 +5990,7 @@ function mwPrevFrame(ts){
   const dpr=Math.min(2,window.devicePixelRatio||1), W=Math.round(w*dpr), H=Math.round(h*dpr);
   if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
   const ctx=cv.getContext("2d");
-  const D=(MWD.sel==="wp"?10500:MWD.sel==="td"?7500:MWD.sel==="tf"?8400:8000)/(MWD.spd||1), CYC=D+1400;  // speed-scaled; play, hold, loop
+  const D=mwSelDur(), CYC=D+1400;                      // same duration the wall will use; then loop
   const cyc=Math.floor((ts-MWD.pT0)/CYC);
   if(cyc!==MWD.pcyc){MWD.pcyc=cyc; MWD.pseed=(MWD.pseed+9973)|0; mwPrevSeedKf(); MWD.pu=null;}
   const t=Math.min(((ts-MWD.pT0)%CYC)/D,1);
@@ -5939,10 +6059,11 @@ function mwPrevBall(ctx,W,H,t){
   ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,cy,r,0,7); ctx.fill(); ctx.shadowBlur=0;
 }
 function mwPrevTd(ctx,W,H,t){
-  const f=Math.max(12,Math.round(H*.5));
+  const rowH=H/MWD.rows, f=Math.max(12,Math.round(rowH*.5));   // ONE row tall, rides row by row
   ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
   const tw=ctx.measureText("TOUCHDOWN!").width, m=W*.03;
-  const x=(W+m)-(W+tw+2*m)*t, y=H/2+f*.36;
+  const legF=Math.min(t*MWD.rows,MWD.rows), leg=Math.min(MWD.rows-1,Math.floor(legF)), tl=legF-leg;
+  const x=(W+m)-(W+tw+2*m)*tl, y=leg*rowH+rowH/2+f*.36;
   const grad=ctx.createLinearGradient(0,y-f,0,y);
   grad.addColorStop(0,"#ffffff"); grad.addColorStop(.45,"#c3cfdc");
   grad.addColorStop(.6,"#8e9aa8"); grad.addColorStop(.78,"#e8eff6"); grad.addColorStop(1,"#7c8896");
@@ -6013,6 +6134,13 @@ $("#mwFireBtn").onclick=()=>{ if(MWD.sel==="wp")triggerWinProbWall();
   else if(MWD.sel==="td")triggerTdWall();
   else if(MWD.sel==="tf")triggerTfWall(); else triggerBallCross(); };
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
+$("#mwNetBtn").onclick=()=>mwnGo(!MWN.on);
+$("#mwRoomNew").onclick=()=>{mwnCode("new"); if(MWN.on)mwnGo(true); else mwDashRender();};
+$("#mwLinkBtn").onclick=async e=>{ mwnCode(); const link=mwTvLink();
+  try{await navigator.clipboard.writeText(link);}catch(err){}
+  const b=e.currentTarget, t=b.textContent; b.textContent="✅ "+link;
+  clearTimeout(b._t); b._t=setTimeout(()=>{b.textContent=t;},4000);
+  $("#boardHint").textContent="Open that link on each TV (any device, any network), then tap the screen number it should be. Same ROOM code = same wall.";};
 $("#dashMulti").onclick=()=>startMultiScreen();
 $("#dashSingle").onclick=()=>{ if(LEAGUE==="multi")setLeague("mlb"); };
 $("#lgMLB").onclick=()=>setLeague("mlb");
@@ -6815,8 +6943,14 @@ async function startReel(){
     else { applyLeagueClass("mlb"); startDemo(); }
     return;
   }
-  const ws=q.get("wallscreen")||new URLSearchParams((location.hash||"").replace(/^#/,"")).get("wallscreen");
-  if(ws){ startMultiScreen(); mwJoin(parseInt(ws,10)||1); return; }  // pre-linked wall window (fullscreen needs one click/F11)
+  const hp=new URLSearchParams((location.hash||"").replace(/^#/,""));
+  const ws=q.get("wallscreen")||hp.get("wallscreen"), rm=q.get("room")||hp.get("room");
+  if(ws||rm){                                        // a wall screen / an operator joining a room
+    startMultiScreen();
+    if(rm||localStorage.getItem("hrcam-wall-net")==="1")mwnGo(true);
+    if(ws)setTimeout(()=>mwJoin(parseInt(ws,10)||1),400);   // let the channel come up first
+    return;
+  }
   loadSchedule();
 })();
 
