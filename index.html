@@ -1660,8 +1660,9 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
   box-shadow:0 0 12px rgba(60,200,120,.25)}
 .mwd-tile.me{border-style:solid;border-color:var(--gold,#e8c34a);background:rgba(232,195,74,.12);
   box-shadow:0 0 12px rgba(232,195,74,.3)}
-.mwd-tile.off{opacity:.4;border-style:dotted;cursor:default}
-.mwd-tile.off.edit{cursor:pointer;opacity:.75;border-color:rgba(232,195,74,.5)}
+.mwd-tile.off{opacity:.45;border-style:dotted;cursor:pointer}
+.mwd-tile.off:hover{opacity:.8;border-color:rgba(232,195,74,.55)}
+.mwd-tile.off.edit{opacity:.75;border-color:rgba(232,195,74,.5)}
 .mwd-tile.edit{cursor:pointer}
 .mwd-lay .ghostbtn.on{border-color:var(--gold,#e8c34a);color:var(--gold,#e8c34a);
   box-shadow:0 0 12px rgba(232,195,74,.25)}
@@ -2701,7 +2702,7 @@ body.tvmode .scorewrap{justify-content:center}
     </div>
     <div id="mwDash">
       <div class="mwd-sec">
-        <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · ✏️ Edit, then click cells to add/remove screens · numbers run left→right, top→bottom · tap a screen to make THIS window that screen</span></div>
+        <div class="mwd-h">LAYOUT <span class="mwd-sub">— ANY shape (row, 2×2, 3-over-1, L…) · tap an empty ＋ square to put a screen there, ⬛ Fill All fills the grid, ✏️ Edit to remove · numbers run left→right, top→bottom · tap a numbered screen to make THIS window that screen</span></div>
         <div class="mwd-lay">
           <div class="mwd-grid">
             <span class="mwd-cnt">ROWS <b id="mwRowNum">1</b></span>
@@ -2709,6 +2710,8 @@ body.tvmode .scorewrap{justify-content:center}
             <span class="mwd-x">×</span>
             <span class="mwd-cnt">COLS <b id="mwColNum">4</b></span>
             <button class="mwd-step" id="mwColMinus">−</button><button class="mwd-step" id="mwColPlus">+</button>
+            <button class="ghostbtn" id="mwFillBtn">⬛ Fill All</button>
+            <button class="ghostbtn" id="mwClearBtn">▫️ Clear</button>
             <button class="ghostbtn" id="mwEditBtn">✏️ Edit Layout</button>
           </div>
           <div class="mwd-tiles" id="mwTiles"></div>
@@ -5796,6 +5799,12 @@ const MWD={rows:Math.min(6,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-
 function mwBallDur(){return Math.round(8000/(MWD.spd||1));}
 function mwWpDur(){return Math.round(10500/(MWD.spd||1));}
 if(!MWD.cells)MWD.cells=Array.from({length:MWD.cols},(_,c)=>[0,c]);   // default: one full row
+if(!localStorage.getItem("hrcam-wall-v2")){   // older builds grew the grid but left the new
+  for(let r=0;r<MWD.rows;r++)for(let c=0;c<MWD.cols;c++)   // rows/cols EMPTY -> fill the canvas once
+    if(!MWD.cells.some(p=>p[0]===r&&p[1]===c))MWD.cells.push([r,c]);
+  try{localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));
+      localStorage.setItem("hrcam-wall-v2","1");}catch(e){}
+}
 function mwCells(){ // occupied cells inside the canvas, reading order; self-heals to ≥1
   MWD.cells=MWD.cells.filter(p=>p[0]<MWD.rows&&p[1]<MWD.cols);
   if(!MWD.cells.length)MWD.cells=[[0,0]];
@@ -5818,7 +5827,7 @@ function mwDashRender(){
   const cells=mwCells(), now=Date.now(), tiles=[];
   for(let r=0;r<MWD.rows;r++)for(let c=0;c<MWD.cols;c++){
     const n=cells.findIndex(p=>p[0]===r&&p[1]===c)+1;
-    if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>${MWD.edit?"＋":"·"}</b><small>${MWD.edit?"ADD":"NO SCREEN"}</small></div>`);continue;}
+    if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>＋</b><small>ADD SCREEN</small></div>`);continue;}
     const me=(MWL.idx===n), rr=MWL.roster[n], live=me||(rr&&now-rr.ts<9000);
     const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?rr.w+"×"+rr.h:"WAITING"));
     tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
@@ -5973,9 +5982,18 @@ $("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
     else MWD.cells.push(rc);
     mwSaveGrid(); mwDashRender(); return;
   }
-  const n=+el.dataset.n||0; if(!n)return;
+  const n=+el.dataset.n||0;
+  if(!n){                                             // empty square -> tap to put a screen there
+    MWD.cells.push(el.dataset.rc.split(",").map(Number));
+    mwSaveGrid(); mwDashRender(); return;
+  }
   if(MWL.idx===n)mwLeave(); else mwJoin(n);};
 $("#mwEditBtn").onclick=()=>{MWD.edit=!MWD.edit; mwDashRender();};
+$("#mwFillBtn").onclick=()=>{                          // occupy every square in the canvas
+  for(let r=0;r<MWD.rows;r++)mwFillRow(r);
+  mwSaveGrid(); mwDashRender();};
+$("#mwClearBtn").onclick=()=>{                         // back to a single screen to sculpt from scratch
+  MWD.cells=[[0,0]]; mwSaveGrid(); mwDashRender();};
 $("#mwOpts").onclick=e=>{const el=e.target.closest(".mwd-opt"); if(!el)return;
   if(el.dataset.o==="spd"){MWD.spd=parseFloat(el.dataset.v);localStorage.setItem("hrcam-wall-spd",MWD.spd);}
   else{MWD[el.dataset.o]=el.dataset.v;localStorage.setItem("hrcam-wall-"+el.dataset.o,el.dataset.v);}
@@ -5983,10 +6001,14 @@ $("#mwOpts").onclick=e=>{const el=e.target.closest(".mwd-opt"); if(!el)return;
 $("#mwContent").onclick=e=>{const c=e.target.closest(".mwd-card"); if(!c)return;
   MWD.sel=c.dataset.c; localStorage.setItem("hrcam-wall-sel",MWD.sel);
   MWD.pT0=performance.now(); MWD.pcyc=-1; mwDashRender();};
+/* growing the grid PUTS SCREENS in the new row/column (a new row = a row of TVs); use
+   ✏️ Edit Layout to carve cells back out for odd shapes like 3-over-1 */
+function mwFillRow(r){for(let c=0;c<MWD.cols;c++)if(!MWD.cells.some(p=>p[0]===r&&p[1]===c))MWD.cells.push([r,c]);}
+function mwFillCol(c){for(let r=0;r<MWD.rows;r++)if(!MWD.cells.some(p=>p[0]===r&&p[1]===c))MWD.cells.push([r,c]);}
 $("#mwRowMinus").onclick=()=>{MWD.rows=Math.max(1,MWD.rows-1); mwSaveGrid(); mwDashRender();};
-$("#mwRowPlus").onclick=()=>{MWD.rows=Math.min(6,MWD.rows+1); mwSaveGrid(); mwDashRender();};
+$("#mwRowPlus").onclick=()=>{if(MWD.rows<6){MWD.rows++; mwFillRow(MWD.rows-1);} mwSaveGrid(); mwDashRender();};
 $("#mwColMinus").onclick=()=>{MWD.cols=Math.max(1,MWD.cols-1); mwSaveGrid(); mwDashRender();};
-$("#mwColPlus").onclick=()=>{MWD.cols=Math.min(12,MWD.cols+1); mwSaveGrid(); mwDashRender();};
+$("#mwColPlus").onclick=()=>{if(MWD.cols<12){MWD.cols++; mwFillCol(MWD.cols-1);} mwSaveGrid(); mwDashRender();};
 $("#mwFireBtn").onclick=()=>{ if(MWD.sel==="wp")triggerWinProbWall();
   else if(MWD.sel==="td")triggerTdWall();
   else if(MWD.sel==="tf")triggerTfWall(); else triggerBallCross(); };
