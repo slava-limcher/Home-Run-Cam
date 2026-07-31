@@ -1715,41 +1715,30 @@ body.multi .scoreboard,body.multi .linescore,body.multi .amb{display:none}
 #mwOverlay.cal .mw-plabel{opacity:1}
 #mwOverlay.cal .mw-panel{outline:3px dashed rgba(255,205,130,.5);outline-offset:-3px}
 #multiBtns .ghostbtn.on{border-color:var(--gold,#e8c34a);color:var(--gold,#e8c34a);box-shadow:0 0 14px rgba(232,195,74,.25)}
-/* -- WIN PROBABILITY WALL: the BarBoards Live Odds electric plasma bar, ported wall-wide.
-      One giant tug-of-war bar spans every screen (per-panel wall-width wrapper, clipped);
-      cyan away fill vs orange home fill wrestle to the final split, % labels count live,
-      seeded Catmull-Rom lightning renders IDENTICALLY in every linked window. -- */
+/* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR, ported 1:1 wall-wide.
+      Real look = user's lightning-strip artwork halves (wpbar-l/r.png, sliced at the hot
+      seam) as the base, the procedural canvas storm engine (5 noise-driven bolts per side,
+      triple-stroked additive, flowing toward the seam) drawn live on top, and the pulsing
+      white-hot seam line riding the split. Fixed bolt seeds + shared clock = every linked
+      window renders identical lightning. -- */
 .wpw-wrap{position:absolute;height:0}
-.wpw-bar{position:absolute;display:flex;isolation:isolate;border-radius:18px;overflow:hidden;
-  border:3px solid rgba(175,228,255,.6);background:#050d16;
-  box-shadow:0 0 60px rgba(45,180,255,.5),0 0 40px rgba(255,120,50,.3),inset 0 0 40px rgba(0,0,0,.55)}
-.wpw-away{position:relative;z-index:0;background:linear-gradient(90deg,#0a3a52 0%,#1591b7 30%,#2bd0f5 62%,#4decff 92%,#cdf6ff 100%);
-  box-shadow:0 0 34px rgba(77,236,255,.65),inset 0 0 24px rgba(0,0,0,.25)}
-.wpw-home{position:relative;z-index:0;flex:1;background:linear-gradient(270deg,#7e2a14 0%,#e25937 30%,#f56a38 62%,#fc834e 92%,#ffd0a0 100%);
-  box-shadow:0 0 34px rgba(252,131,78,.6),inset 0 0 24px rgba(0,0,0,.25)}
-.wpw-seam{position:absolute;top:0;bottom:0;left:50%;width:4%;transform:translateX(-50%);z-index:3;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(215,242,255,.3),rgba(170,220,255,.12) 45%,transparent 75%);
-  mix-blend-mode:screen;filter:blur(1px);animation:wpwSeam 2.6s ease-in-out infinite}
-@keyframes wpwSeam{0%,100%{opacity:.45;transform:translateX(-50%) scaleY(.9)}50%{opacity:.8;transform:translateX(-50%) scaleY(1.1)}}
-.wpw-bar::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.1) 50%,transparent 60%);
-  background-size:240% 100%;mix-blend-mode:screen;animation:wpwShine 4.2s linear infinite}
-@keyframes wpwShine{0%{background-position:240% 0}100%{background-position:-240% 0}}
-.wpw-bolt{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;mix-blend-mode:screen}
-.wpw-bolt path{fill:none;stroke-linecap:round;stroke-linejoin:round}
-.wpw-bolt .core{stroke:#bfeeff;stroke-width:1.5;opacity:.3;filter:drop-shadow(0 0 6px #4decff);animation:wpwCore 2.4s ease-in-out infinite}
-@keyframes wpwCore{0%,100%{opacity:.2}50%{opacity:.4}}
-.wpw-bolt .tendril{stroke:#eafcff;stroke-width:2.1;opacity:0;animation:wpwFlick 1.5s steps(1,end) infinite}
-.wpw-bolt .b1{filter:drop-shadow(0 0 7px #46d6ff) drop-shadow(0 0 3px #fff)}
-.wpw-bolt .b2{filter:drop-shadow(0 0 7px #6fe0ff) drop-shadow(0 0 3px #fff);animation-delay:.32s}
-.wpw-bolt .b3{filter:drop-shadow(0 0 7px #ffd17a) drop-shadow(0 0 3px #fff);animation-delay:.6s;animation-duration:1.7s}
-.wpw-bolt .b4{filter:drop-shadow(0 0 7px #ff8a3a) drop-shadow(0 0 3px #fff);animation-delay:.9s;animation-duration:1.8s}
-.wpw-bolt .b5{stroke-width:1.6;filter:drop-shadow(0 0 6px #ff7a2f);animation-delay:1.15s;animation-duration:1.3s}
-@keyframes wpwFlick{0%,100%{opacity:0}3%{opacity:1}7%{opacity:.18}11%{opacity:.92}16%{opacity:.3}20%{opacity:0}55%{opacity:0}58%{opacity:.7}61%{opacity:0}}
+.wpw-bar{position:absolute;display:flex;isolation:isolate;border-radius:16px;overflow:hidden;
+  border:2px solid rgba(160,215,245,.45);background:#050d16;
+  box-shadow:0 0 24px rgba(40,170,230,.35),0 0 20px rgba(230,110,50,.22),inset 0 0 20px rgba(0,0,0,.5)}
+.wpw-away{position:relative;overflow:hidden;background:url(wpbar-l.png) right center/100% 100% no-repeat}
+.wpw-home{position:relative;overflow:hidden;flex:1;background:url(wpbar-r.png) left center/100% 100% no-repeat}
+.wpw-bar canvas.wpc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* the white-hot seam line at the live split (pulse straight from the app) */
+.wpw-away::after{content:"";position:absolute;top:0;bottom:0;right:0;width:6px;border-radius:3px;
+  background:linear-gradient(#fff6d8,#ffffff,#ffedaa);
+  box-shadow:0 0 8px #fff,0 0 18px rgba(255,238,180,.9),0 0 30px rgba(150,230,255,.55);
+  animation:wpwSeamHot 1.5s ease-in-out infinite;z-index:2}
+@keyframes wpwSeamHot{0%,100%{opacity:.8}
+  50%{opacity:1;box-shadow:0 0 11px #fff,0 0 28px rgba(255,244,205,1),0 0 42px rgba(170,240,255,.7)}}
 .wpw-lab{position:absolute;font-weight:900;letter-spacing:2px;white-space:nowrap}
-.wpw-lab.a{color:#4dd7f0;text-shadow:0 0 14px rgba(70,210,255,.5)}
-.wpw-lab.h{color:#ff8a55;text-shadow:0 0 14px rgba(255,130,80,.5)}
-.wpw-mid{position:absolute;transform:translateX(-50%);color:#e8eef4;font-weight:900;letter-spacing:6px;opacity:.85;white-space:nowrap}
+.wpw-lab.a{color:#4dd7f0;text-shadow:0 0 10px rgba(70,210,255,.4)}
+.wpw-lab.h{color:#ff8a55;text-shadow:0 0 10px rgba(255,130,80,.4)}
+.wpw-mid{position:absolute;transform:translateX(-50%);color:#8fb3cc;font-weight:900;letter-spacing:6px;opacity:.9;white-space:nowrap}
 /* ---- NHL PERIOD SIREN (coded): rotating amber beacon sweeps the dark rink, siren rings pulse,
         horn-blast shake, END OF n slams in, period-tally pips light up ---- */
 #psOverlay{position:fixed;inset:0;z-index:45;display:none;opacity:0;transition:opacity .35s;overflow:hidden;
@@ -5372,29 +5361,93 @@ function mwOnMsg(e){ const d=e.data||{};
   else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(d.t0,d.members,d.seed); }
   else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
 }
-/* -- WIN PROBABILITY WALL: the Live Odds plasma bar, wall-wide. All randomness (final split,
-      tug swings, lightning geometry) derives from ONE seed shared in the fire message, so
-      every linked window computes the exact same frames off the shared clock. -- */
+/* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR engine, ported 1:1 from mlb-betting.
+      Procedural canvas lightning: 5 value-noise bolts per side (3 core + 2 wisps), each
+      stroked 3× additively (wide halo → mid → hot core) with alpha ramping toward the seam,
+      over the exact sampled background ramp + sheen + seam bloom. Bolt seeds are FIXED
+      (away=3, home=11, same as the app) and time = shared wall clock, so every linked
+      window draws identical lightning. Tug randomness still comes from the broadcast seed. -- */
 function mwRng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-const WPW={spec:[[.18,9],[.50,7],[.40,6],[.58,8],[.34,5],[.64,9]]}; // [amplitude,segments]: core + 5 tendrils
-function wpwD(i,ph,rng){ // smooth Catmull-Rom lightning path in the 1000×60 bolt viewBox
-  const W=1000,H=60,MID=30,a=WPW.spec[i][0],s=WPW.spec[i][1],pts=[];
-  for(let k=0;k<=s;k++){const x=k/s*W,edge=(k===0||k===s)?0:1;
-    pts.push([x,MID+edge*(Math.sin(k*0.85+ph)*0.66+(rng()-0.5)*0.14)*H*a]);}
-  let d="M"+pts[0][0].toFixed(1)+","+pts[0][1].toFixed(1);
-  for(let k=0;k<pts.length-1;k++){const p0=pts[k-1]||pts[k],p1=pts[k],p2=pts[k+1],p3=pts[k+2]||p2;
-    d+="C"+(p1[0]+(p2[0]-p0[0])/6).toFixed(1)+","+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)
-      +" "+(p2[0]-(p3[0]-p1[0])/6).toFixed(1)+","+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)
-      +" "+p2[0].toFixed(1)+","+p2[1].toFixed(1);}
-  return d;
+const WPC={ /* colors sampled from the user's storm video, far-end -> seam-end */
+  cyan:{ seamRight:true, flow:1,
+    bg:["#162740","#24405d","#33597d","#476f8f","#54839d"],
+    core:[[84,114,140],[158,227,253]], halo:[[52,71,94],[113,176,203]], hot:"158,227,253" },
+  orange:{ seamRight:false, flow:-1,
+    bg:["#a75b48","#a65e47","#9f6247","#94583f","#834732"],
+    core:[[182,131,101],[253,224,149]], halo:[[156,101,73],[219,140,97]], hot:"253,224,149" }
+};
+function wpcNoise(seed){
+  function rnd(i){const x=Math.sin(i*127.1+seed*311.7)*43758.5453;return x-Math.floor(x);}
+  return function(u){const i=Math.floor(u),f=u-i,a=rnd(i),b=rnd(i+1),s=f*f*(3-2*f);return a+(b-a)*s;};
+}
+function wpcUnit(host,key,seed){
+  const c=document.createElement("canvas"); c.className="wpc"; host.appendChild(c);
+  const bolts=[];
+  for(let i=0;i<5;i++)bolts.push({
+    n1:wpcNoise(seed+i*7.3), n2:wpcNoise(seed+i*13.7+5), nf:wpcNoise(seed+i*3.1+9),
+    wisp:i>=3, ph:i*2.399, spd:42+26*((i*0.37)%1),
+    f1:0.005+0.0022*((i*0.61)%1), f2:0.016+0.007*((i*0.83)%1)});
+  return {c,ctx:c.getContext("2d"),cfg:WPC[key],bolts,host};
+}
+function wpcRamp(a,b,s,alpha){return "rgba("+Math.round(a[0]+(b[0]-a[0])*s)+","+Math.round(a[1]+(b[1]-a[1])*s)+","+Math.round(a[2]+(b[2]-a[2])*s)+","+alpha+")";}
+function wpcGrad(ctx,W,seamRight,colA,colB,aFar,aSeam){
+  const g=seamRight?ctx.createLinearGradient(0,0,W,0):ctx.createLinearGradient(W,0,0,0);
+  g.addColorStop(0,wpcRamp(colA,colB,0,aFar));
+  g.addColorStop(0.55,wpcRamp(colA,colB,0.55,aFar+(aSeam-aFar)*0.55));
+  g.addColorStop(1,wpcRamp(colA,colB,1,aSeam));
+  return g;
+}
+function wpcDraw(u,T){
+  const cfg=u.cfg, ctx=u.ctx, w=u.host.clientWidth, h=u.host.clientHeight;
+  if(w<2||h<2)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1), W=Math.round(w*dpr), H=Math.round(h*dpr);
+  if(u.c.width!==W||u.c.height!==H){u.c.width=W;u.c.height=H;}
+  ctx.globalCompositeOperation="source-over";
+  let g=ctx.createLinearGradient(0,0,W,0);
+  const stops=cfg.seamRight?cfg.bg:cfg.bg.slice().reverse();
+  for(let i=0;i<stops.length;i++)g.addColorStop(i/(stops.length-1),stops[i]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const vg=ctx.createLinearGradient(0,0,0,H);
+  vg.addColorStop(0,"rgba(255,255,255,0.10)"); vg.addColorStop(0.20,"rgba(255,255,255,0)");
+  vg.addColorStop(0.84,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,0.30)");
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  const sw=Math.max(12*dpr,W*0.06);
+  const sg=ctx.createLinearGradient(cfg.seamRight?W-sw:sw,0,cfg.seamRight?W:0,0);
+  sg.addColorStop(0,"rgba("+cfg.hot+",0)"); sg.addColorStop(1,"rgba("+cfg.hot+",0.5)");
+  ctx.fillStyle=sg; ctx.fillRect(cfg.seamRight?W-sw:0,0,sw,H);
+  ctx.globalCompositeOperation="lighter";
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  const mid=H/2, amp=H*0.40;
+  for(let b=0;b<u.bolts.length;b++){
+    const bo=u.bolts[b];
+    const inten=(0.72+0.28*bo.nf(T*0.8+b*3))*(bo.wisp?0.55:1);
+    const step=Math.max(6*dpr,W/130), pts=[];
+    for(let x=0;x<=W+step;x+=step){
+      const uu=x/dpr, drift=cfg.flow*T*bo.spd;
+      const n1=(bo.n1(uu*bo.f1-drift*bo.f1)-0.5)*2;
+      const n2=(bo.n2(uu*bo.f2-drift*bo.f2*1.6+40)-0.5)*2;
+      const wave=Math.sin(uu*0.045+cfg.flow*T*1.5+bo.ph);
+      let off=amp*(0.58*n1+0.28*n2*(bo.wisp?1.5:1)+0.14*wave);
+      if(off>amp)off=amp; if(off<-amp)off=-amp;
+      pts.push([x,mid+off]);
+    }
+    const path=()=>{ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+      for(let k=1;k<pts.length-1;k++){const mx=(pts[k][0]+pts[k+1][0])/2,my=(pts[k][1]+pts[k+1][1])/2;
+        ctx.quadraticCurveTo(pts[k][0],pts[k][1],mx,my);}
+      ctx.stroke();};
+    const lw=Math.max(1.1*dpr,H*0.05)*(bo.wisp?0.7:1);
+    ctx.strokeStyle=wpcGrad(ctx,W,cfg.seamRight,cfg.halo[0],cfg.halo[1],0.04*inten,0.15*inten);
+    ctx.lineWidth=lw*6; path();
+    ctx.strokeStyle=wpcGrad(ctx,W,cfg.seamRight,cfg.halo[0],cfg.halo[1],0.08*inten,0.3*inten);
+    ctx.lineWidth=lw*2.6; path();
+    ctx.strokeStyle=wpcGrad(ctx,W,cfg.seamRight,cfg.core[0],cfg.core[1],0.3*inten,0.95*inten);
+    ctx.lineWidth=lw; path();
+  }
 }
 function mwWpDom(){
   const g=MW.geom, barX=g.m, barW=g.total-2*g.m, barH=Math.round(g.sh*.13),
         barB=Math.round(g.sh*.44), labB=barB+barH+Math.round(g.sh*.025),
         labF=Math.round(g.sh*.06), midF=Math.round(g.sh*.028);
-  const svg='<svg class="wpw-bolt" viewBox="0 0 1000 60" preserveAspectRatio="none">'
-    +'<path class="core"/><g class="bolts">'
-    +["b1","b2","b3","b4","b5"].map(c=>'<path class="tendril '+c+'"/>').join("")+'</g></svg>';
   mwPanelBox.innerHTML=MW.panels.map(r=>
     `<div class="mw-panel" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px">
        <div class="wpw-wrap" style="left:${-(r.off||0)}px;bottom:0;width:${g.total}px">
@@ -5403,14 +5456,14 @@ function mwWpDom(){
          <div class="wpw-mid" style="left:50%;bottom:${labB+Math.round(labF*1.45)}px;font-size:${midF}px">WIN PROBABILITY</div>
          <div class="wpw-bar" style="left:${barX}px;bottom:${barB}px;width:${barW}px;height:${barH}px">
            <div class="wpw-away" style="width:50%"></div><div class="wpw-home"></div>
-           <div class="wpw-seam"></div>${svg}
          </div>
        </div>
      </div>`).join("");
   MW.dom=MW.panels.map((r,i)=>{const el=mwPanelBox.children[i];
-    return {wp:{away:el.querySelector(".wpw-away"),seam:el.querySelector(".wpw-seam"),
+    const away=el.querySelector(".wpw-away"), home=el.querySelector(".wpw-home");
+    return {wp:{away,
                 aLab:el.querySelector(".wpw-lab.a"),hLab:el.querySelector(".wpw-lab.h"),
-                paths:[el.querySelector(".core")].concat([...el.querySelectorAll(".tendril")])}};});
+                units:[wpcUnit(away,"cyan",3),wpcUnit(home,"orange",11)]}};});  // app's fixed TV seeds
   mwOvEl.classList.add("paneled");
 }
 function wpwSplitAt(t){ // eased tug-of-war through the seeded keyframes
@@ -5422,22 +5475,18 @@ function wpwSplitAt(t){ // eased tug-of-war through the seeded keyframes
 }
 function wpwRender(){
   const D=10500, el=Date.now()-MW.t0, t=Math.max(0,Math.min(el/D,1));
-  const split=wpwSplitAt(t), a=Math.round(split);
-  const step=Math.floor(Math.max(0,el)/90);         // lightning re-shapes every 90ms, seeded per step
-  if(step!==MW.wp.step){MW.wp.step=step;const ph=1+step*0.55,rng=mwRng(MW.wp.seed+step);
-    MW.wp.ds=WPW.spec.map((_,i)=>wpwD(i,ph+i*2.1,rng));}
+  const split=wpwSplitAt(t), a=Math.round(split), T=Math.max(0,el)/1000; // shared storm clock
   MW.dom.forEach(d=>{ if(!d.wp)return;
     d.wp.away.style.width=split+"%";
-    d.wp.seam.style.left=split+"%";
     d.wp.aLab.textContent=MW.wp.an+" "+a+"%";
     d.wp.hLab.textContent=(100-a)+"% "+MW.wp.hn;
-    for(let i=0;i<d.wp.paths.length;i++)d.wp.paths[i].setAttribute("d",MW.wp.ds[i]);
+    for(const u of d.wp.units)wpcDraw(u,T);
   });
   if(el<D)MW.raf=requestAnimationFrame(wpwRender); else MW.raf=0;
 }
 function mwShowWp(T0,seed){
   const rng=mwRng(seed), fin=Math.round(30+rng()*40);
-  MW.wp={seed,step:-1,ds:null,
+  MW.wp={seed,
     an:(G.away&&G.away.abbr)||"AWAY", hn:(G.home&&G.home.abbr)||"HOME",
     kf:[{t:0,v:50},{t:.06,v:50},{t:.24,v:Math.round(50+(rng()-.5)*44)},
         {t:.46,v:Math.round(50+(rng()-.5)*56)},{t:.66,v:Math.round(50+(rng()-.5)*44)},
