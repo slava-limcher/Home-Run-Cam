@@ -1697,7 +1697,10 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 /* ===== SPEC CUE LIBRARY (barboards-spec.md §9) — wall cues on the shared canvas =====
    Shared primitives so every cue is a few lines: a colour field, a centred word, a sub, a
    card, a meter, an edge tint, a run-across word in wall coords, a flash. */
+.cq-scene{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
 .cq-field{position:absolute;inset:0;opacity:0}
+/* on a scene, base backdrops become SCRIMS so the picture reads through them */
+.cq-field.scrim{background:linear-gradient(180deg,rgba(4,8,16,.55),rgba(2,5,10,.75))!important}
 /* depth: every field gets a vignette so flat colour never reads as a flat slab */
 .cq-vig{position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(115% 105% at 50% 42%,transparent 38%,rgba(2,4,8,.55) 100%)}
@@ -1744,8 +1747,9 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 /* THE HOLD (§9.2, T2, tense only): wall desaturates, one hairline contracts toward each
    screen's OWN centre deliberately out of step, then either a 500ms flash + flood (stop)
    or the lines simply dissolve and the picture comes back (convert). */
-.mwh-veil{position:absolute;inset:0;background:#05070c;opacity:0;
-  backdrop-filter:grayscale(1) saturate(.15) brightness(.55)}
+/* the Hold DESATURATES the picture rather than blacking it out (§9.2) */
+.mwh-veil{position:absolute;inset:0;background:rgba(5,7,12,.72);opacity:0;
+  backdrop-filter:grayscale(1) saturate(.12) brightness(.5)}
 .mwh-line{position:absolute;left:50%;top:50%;height:2px;width:100%;transform:translate(-50%,-50%);
   background:linear-gradient(90deg,transparent,rgba(232,238,244,.95) 18%,#fff 50%,rgba(232,238,244,.95) 82%,transparent);
   box-shadow:0 0 10px rgba(190,220,255,.5)}
@@ -6035,7 +6039,7 @@ function mwStartCueLinked(T0,members,grid,d){
 }
 /* ---- THE HOLD (§9.2) — the spec's showpiece. Tense register only: subtractive by design.
         Per-receiver stagger means it needs NO cross-screen frame lock. ---- */
-MW_CUE.hold={name:"🤫 The Hold", tier:"T2 · tense only",
+MW_CUE.hold={name:"🤫 The Hold", tier:"T2 · tense only", scene:"field",
   dur:()=>(MWD.hold==="convert"?7000:8000),
   opts:[{k:"hold",v:"stop",label:"→ Stop (loud)"},{k:"hold",v:"convert",label:"→ Convert (silent)"}],
   pick:()=>MWD.hold||"stop",
@@ -6166,7 +6170,7 @@ MW_CUE.look={name:"👉 Look Left", tier:"T3 · cross-game promote", dur:8500,
   }};
 /* ---- TOUCHDOWN TEXAS (§9.3, T3, 8.0s): TOUCHDOWN runs the canvas → TEXAS → flash →
         burnt orange racing out from the feature wall to both corners ---- */
-MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000,
+MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000, scene:"field",
   dom(){
     const g=MW.geom, f=Math.round(g.sh*.5), tf=Math.round(g.sh*.62);
     mwPanelBox.innerHTML=MW.panels.map(p=>mwPanelOpen(p)
@@ -6289,11 +6293,14 @@ function cqIn(t,a,d){return t<=a?0:Math.min(1,(t-a)/(d||0.04));}
 function cqOut(t,b,d){return t<b?1:Math.max(0,1-(t-b)/(d||0.04));}
 function cqBand(t,a,b,fi,fo){return Math.max(0,Math.min(cqIn(t,a,fi),cqOut(t,b,fo)));}
 function cqDom(html,refs){
-  mwPanelBox.innerHTML=MW.panels.map((p,i)=>mwPanelOpen(p)+html(p,i)+MW_CLOSE).join("");
+  const scene=(MW_CUE[MW.cue]||{}).scene;              // opt-in drawn backdrop
+  mwPanelBox.innerHTML=MW.panels.map((p,i)=>mwPanelOpen(p)
+    +(scene?`<canvas class="cq-scene"></canvas>`:"")+html(p,i)+MW_CLOSE).join("");
   MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i],
-    o={p,el,i,n:(MWL.idx||i+1),r:p.row||0,c:(p.col!=null?p.col:i)};
+    o={p,el,i,n:(MWL.idx||i+1),r:p.row||0,c:(p.col!=null?p.col:i),scene:el.querySelector(".cq-scene")};
     for(const k in (refs||{}))o[k]=el.querySelector(refs[k]);
     return o;});
+  if(scene)cqScenePaint();
   mwOvEl.classList.add("paneled");
 }
 function cqSet(el,op,tr){ if(!el)return; el.style.opacity=(op||0).toFixed(3); if(tr)el.style.transform=tr; }
@@ -6331,6 +6338,105 @@ function cqRowRide(t,textW,fs){
   const legF=Math.min(Math.max(0,t)*rows,rows), leg=Math.min(rows-1,Math.floor(legF)), tl=legF-leg;
   const cy=(g.wallH||g.sh)-(leg+.5)*g.sh;
   return {x:(g.total+g.m)-(g.total+textW+2*g.m)*tl, up:Math.round(cy-fs*.54), leg, tl, rows};
+}
+/* ============ SCENE LAYER — an actual PICTURE behind the cues, not a lit-up colour field.
+   One wall-wide image is drawn ONCE to an offscreen master (§2.3 canvas primitive, §11.2
+   turf/mow/endzone/score-bug), then each screen blits its own slice. Static, so it costs
+   nothing per frame; cues animate scrims, words and light on top of it. ============ */
+const CQ_SCN={}, CQ_SCENE={};
+CQ_SCENE.field=(c,W,H)=>{
+  const hz=H*.36, bot=H, mid=W/2;
+  const yAt=u=>hz+(bot-hz)*Math.pow(u,1.5);          // depth easing: lines bunch at the horizon
+  const px=(fx,u)=>mid+(fx-mid)*(.62+.38*u);          // verticals converge toward the horizon
+  let g=c.createLinearGradient(0,0,0,hz);
+  g.addColorStop(0,"#04070f"); g.addColorStop(1,"#0e2038");
+  c.fillStyle=g; c.fillRect(0,0,W,hz);
+  for(let i=0;i<7;i++){                               // light rigs + bloom
+    const x=W*(.07+.145*i), y=hz*.20, r=H*.20;
+    const rg=c.createRadialGradient(x,y,2,x,y,r);
+    rg.addColorStop(0,"rgba(200,228,255,.40)"); rg.addColorStop(1,"rgba(200,228,255,0)");
+    c.fillStyle=rg; c.fillRect(x-r,y-r,r*2,r*2);
+    c.fillStyle="rgba(232,246,255,.92)"; c.fillRect(x-W*.005,y-H*.010,W*.010,H*.020);
+  }
+  const cb0=hz*.50;                                   // crowd bowl, procedural speckle
+  g=c.createLinearGradient(0,cb0,0,hz); g.addColorStop(0,"#0a1526"); g.addColorStop(1,"#1a2f49");
+  c.fillStyle=g; c.fillRect(0,cb0,W,hz-cb0);
+  let s=20260803; const rnd=()=>{s=(s*1664525+1013904223)>>>0; return s/4294967296;};
+  const dots=Math.min(26000,Math.round(W*(hz-cb0)/900));
+  for(let i=0;i<dots;i++){ const x=rnd()*W, y=cb0+rnd()*(hz-cb0), a=(.05+rnd()*.30).toFixed(2);
+    c.fillStyle="rgba("+(140+rnd()*100|0)+","+(160+rnd()*80|0)+","+(195+rnd()*60|0)+","+a+")";
+    const r=Math.max(1,H*.0035*(.5+rnd())); c.fillRect(x,y,r,r); }
+  c.fillStyle="rgba(6,12,22,.9)"; c.fillRect(0,hz-H*.012,W,H*.012);   // wall under the stands
+  g=c.createLinearGradient(0,hz,0,bot);               // turf
+  g.addColorStop(0,"#123f22"); g.addColorStop(.45,"#17552d"); g.addColorStop(1,"#0d3a1d");
+  c.fillStyle=g; c.beginPath();
+  c.moveTo(px(0,0),yAt(0)); c.lineTo(px(W,0),yAt(0)); c.lineTo(px(W,1),bot); c.lineTo(px(0,1),bot);
+  c.closePath(); c.fill();
+  for(let k=0;k<14;k++){ if(k%2)continue;             // mow bands (§11.2)
+    const u0=k/14,u1=(k+1)/14;
+    c.fillStyle="rgba(255,255,255,.030)"; c.beginPath();
+    c.moveTo(px(0,u0),yAt(u0)); c.lineTo(px(W,u0),yAt(u0));
+    c.lineTo(px(W,u1),yAt(u1)); c.lineTo(px(0,u1),yAt(u1)); c.closePath(); c.fill(); }
+  const EZ=.13;                                       // far end zone
+  c.fillStyle="rgba(150,30,20,.55)"; c.beginPath();
+  c.moveTo(px(0,0),yAt(0)); c.lineTo(px(W,0),yAt(0));
+  c.lineTo(px(W,EZ),yAt(EZ)); c.lineTo(px(0,EZ),yAt(EZ)); c.closePath(); c.fill();
+  c.lineCap="butt";
+  for(let n=0;n<=20;n++){                             // yard lines every 5 yds
+    const fx=W*(.045+.91*(n/20)), lw=Math.max(1,W*.0011)*(n%2?1:1.7);
+    c.strokeStyle=n%2?"rgba(226,240,255,.32)":"rgba(232,244,255,.62)"; c.lineWidth=lw;
+    c.beginPath(); c.moveTo(px(fx,EZ),yAt(EZ)); c.lineTo(px(fx,1),bot); c.stroke();
+  }
+  c.strokeStyle="rgba(232,244,255,.75)"; c.lineWidth=Math.max(1,W*.0016);  // goal line + sideline
+  c.beginPath(); c.moveTo(px(0,EZ),yAt(EZ)); c.lineTo(px(W,EZ),yAt(EZ)); c.stroke();
+  const uh=.62;                                       // hash marks
+  c.strokeStyle="rgba(226,240,255,.30)"; c.lineWidth=Math.max(1,W*.0008);
+  for(let n=0;n<=40;n++){ const fx=W*(.045+.91*(n/40));
+    c.beginPath(); c.moveTo(px(fx,uh),yAt(uh)); c.lineTo(px(fx,uh+.03),yAt(uh+.03)); c.stroke(); }
+  const nf=Math.round((bot-hz)*.16);                  // yard numbers
+  c.font="900 "+nf+"px "+CQ_FONT; c.textAlign="center"; c.textBaseline="middle";
+  c.fillStyle="rgba(232,244,255,.34)";
+  ["10","20","30","40","50","40","30","20","10"].forEach((t,i)=>{
+    const fx=W*(.09+.82*(i/8)), u=.72;
+    c.save(); c.translate(px(fx,u),yAt(u)); c.scale(1,.55); c.fillText(t,0,0); c.restore(); });
+  g=c.createLinearGradient(0,bot-H*.10,0,bot);        // near-side shadow
+  g.addColorStop(0,"rgba(2,6,12,0)"); g.addColorStop(1,"rgba(2,6,12,.55)");
+  c.fillStyle=g; c.fillRect(0,bot-H*.10,W,H*.10);
+};
+CQ_SCENE.arena=(c,W,H)=>{                             // dark bowl for house/ambient/commerce cues
+  let g=c.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,"#050a14"); g.addColorStop(.55,"#0a1424"); g.addColorStop(1,"#04070e");
+  c.fillStyle=g; c.fillRect(0,0,W,H);
+  for(let i=0;i<5;i++){ const x=W*(.1+.2*i), y=H*.12, r=H*.55;
+    const rg=c.createRadialGradient(x,y,2,x,y,r);
+    rg.addColorStop(0,"rgba(90,160,230,.16)"); rg.addColorStop(1,"rgba(90,160,230,0)");
+    c.fillStyle=rg; c.fillRect(x-r,y-r,r*2,r*2); }
+  let s=7778; const rnd=()=>{s=(s*1664525+1013904223)>>>0; return s/4294967296;};
+  const dots=Math.min(20000,Math.round(W*H/2200));
+  for(let i=0;i<dots;i++){ const x=rnd()*W, y=H*.18+rnd()*H*.52;
+    c.fillStyle="rgba("+(120+rnd()*90|0)+","+(150+rnd()*70|0)+","+(190+rnd()*60|0)+","+(.04+rnd()*.16).toFixed(2)+")";
+    const r=Math.max(1,H*.004*(.4+rnd())); c.fillRect(x,y,r,r); }
+  g=c.createLinearGradient(0,H*.72,0,H);
+  g.addColorStop(0,"rgba(20,40,70,.35)"); g.addColorStop(1,"rgba(2,5,10,.85)");
+  c.fillStyle=g; c.fillRect(0,H*.72,W,H*.28);
+};
+function cqSceneMaster(kind,total,wallH){
+  const key=kind+"|"+Math.round(total)+"x"+Math.round(wallH);
+  if(CQ_SCN[key])return CQ_SCN[key];
+  const cap=4096, k=Math.min(1,cap/Math.max(1,total));
+  const W=Math.max(360,Math.round(total*k)), H=Math.max(200,Math.round(wallH*k));
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  (CQ_SCENE[kind]||CQ_SCENE.arena)(cv.getContext("2d"),W,H);
+  const out={cv,k}; CQ_SCN[key]=out; return out;
+}
+function cqScenePaint(){                              // blit each screen's slice of the picture
+  const g=MW.geom, kind=(MW_CUE[MW.cue]||{}).scene; if(!kind)return;
+  const m=cqSceneMaster(kind,g.total,g.wallH||g.sh);
+  MW.dom.forEach(d=>{ const cv=d.scene; if(!cv)return;
+    const p=d.p, pw=Math.min(1920,Math.round(p.w)), ph=Math.round(pw*p.h/Math.max(1,p.w));
+    cv.width=pw; cv.height=ph;
+    const sx=(p.off||0)*m.k, sy=(p.offY||0)*m.k, sw=p.w*m.k, sh2=p.h*m.k;
+    cv.getContext("2d").drawImage(m.cv,sx,sy,sw,sh2,0,0,pw,ph); });
 }
 /* generic OUTPUT preview: a cue supplies pv(t,seat,cell,n) -> {bg,flash,word,wf,color,bar} */
 function cqPrev(ctx,W,H,t){
@@ -6465,8 +6571,8 @@ MW_CUE.flip={name:"⇄ Flip", tier:"T2 · lead change", dur:4000,
   pv(t,i,cell,n){const e=t<.55?(t/.55):1,k=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2, b=(0.62-0.24*k)*n;
     return {bg:(cell[1]+1)<=b?"rgba(13,58,92,.92)":"rgba(90,16,32,.92)",
       word:t>.52?"28 — 31":null,wf:cqBand(t,.52,.92,.06,.08),color:"#fff"};}};
-MW_CUE.clock={name:"⏱ Clock", tier:"T2 · tense only", dur:4600,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:#070a10"></div>`
+MW_CUE.clock={name:"⏱ Clock", tier:"T2 · tense only", dur:4600, scene:"field",
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:rgba(7,10,16,.84)"></div>`
       +`<div class="cq-word" style="font-size:${cqFs(p,.30,4)}px;font-style:normal;color:#c9d6e4;text-shadow:none;letter-spacing:.06em">2:00</div>`
       +`<div class="cq-sub" style="font-size:${Math.round(p.h*.05)}px">TWO MINUTE WARNING</div>`,
       {field:".cq-field",word:".cq-word",sub:".cq-sub"}); },
@@ -6475,8 +6581,8 @@ MW_CUE.clock={name:"⏱ Clock", tier:"T2 · tense only", dur:4600,
       cqSet(d.word,cqBand(t,.10,.86,.08,.10)); cqSet(d.sub,cqBand(t,.20,.86,.08,.10)); }); },
   pv(t){return {bg:"rgba(7,10,16,"+(0.86*cqBand(t,0,.88,.1,.1)).toFixed(2)+")",
     word:"2:00",wf:cqBand(t,.1,.86,.08,.1),color:"#c9d6e4"};}};
-MW_CUE.third={name:"3️⃣ Third Down Stand", tier:"T2 · feature", dur:9000,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0e1c30,#070f1c)"></div>`
+MW_CUE.third={name:"3️⃣ Third Down Stand", tier:"T2 · feature", dur:9000, scene:"field",
+  dom(){ cqDom(p=>`<div class="cq-field scrim"></div>`
       +`<div class="cq-word wA" style="font-size:${cqFs(p,.26,5)}px">THIRD</div>`
       +`<div class="cq-word wB" style="font-size:${cqFs(p,.26,4)}px">DOWN</div>`
       +`<div class="cq-word wC" style="font-size:${cqFs(p,.30,4)}px;color:#ffd76a">SACK</div>`
@@ -6502,7 +6608,7 @@ MW_CUE.third={name:"3️⃣ Third Down Stand", tier:"T2 · feature", dur:9000,
     if(t<.80)return {bg:"rgba(14,28,48,.95)",bar:(t-.45)/.33,word:"GET LOUD",wf:.9,color:"#cfe0f0"};
     return {bg:"rgba(14,28,48,.95)",word:"SACK",wf:cqBand(t,.82,.96,.03,.05),color:"#ffd76a",
       flash:cqBand(t,.80,.83,.01,.03)*.9};}};
-MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500,
+MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500, scene:"field",
   dom(){ cqDom(p=>`<div class="mwh-veil"></div><div class="mwh-line"></div><div class="mwh-flood"></div>`
       +`<div class="cq-word wT" style="font-size:${cqFs(p,.20,11)}px">4TH & GOAL</div>`
       +`<div class="mwh-word" style="font-size:${cqFs(p,.24,6)}px">HELD</div><div class="cq-flash"></div>`,
@@ -6522,8 +6628,8 @@ MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500,
     return {bg:"rgba(9,30,60,.8)",word:"HELD",wf:cqIn(t,.645,.06)*cqOut(t,.94,.06),
       flash:cqBand(t,.61,.645,.008,.035)*.95};}};
 /* ---------- T3 · takeover (whole room, audio claimed, ≥8min refractory) ---------- */
-MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 50%,#2ea8ff,#0d4f8f 55%,#062036)"></div>`
+MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500, scene:"field",
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 50%,rgba(46,168,255,.78),rgba(13,79,143,.72) 55%,rgba(6,32,54,.8))"></div>`
       +`<div class="cq-vig"></div><div class="cq-flash"></div>`
       +`<div class="cq-word chrome" style="font-size:${cqFit(p,"TOUCHDOWN",.24,.86)}px">TOUCHDOWN</div>`,
       {field:".cq-field",flash:".cq-flash",word:".cq-word"}); },
@@ -6535,8 +6641,8 @@ MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500,
   pv(t,i,cell){const tgt=mwLookTarget(),dist=Math.abs(cell[1]-tgt[1])/Math.max(1,(MWD.cols-1)||1),a=dist*.22;
     return {bg:"rgba(20,120,220,"+(0.85*cqBand(t,a+.03,.93,.07,.07)).toFixed(2)+")",
       flash:cqBand(t,a,a+.05,.01,.04)*.9,word:"TOUCHDOWN",wf:cqBand(t,.32,.92,.05,.07)};}};
-MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 40%,#f6e3a1,#c9a24a 30%,#7a5a12 60%,#2a1d05)"></div>`
+MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500, scene:"field",
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 40%,rgba(246,227,161,.72),rgba(201,162,74,.68) 30%,rgba(122,90,18,.72) 60%,rgba(42,29,5,.85))"></div>`
       +`<div class="cq-vig"></div>`
       +`<div class="cq-word gold" style="font-size:${cqFit(p,"WIN",.30,.7)}px">WIN</div>`
       +cqCardHTML(p,"FINAL",((G.away&&G.away.abbr)||"AWAY")+" 28 — 31 "+((G.home&&G.home.abbr)||"HOME")),
@@ -6547,9 +6653,9 @@ MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500,
       cqSet(d.card,cqBand(t,.50,.94,.06,.07),"translate(-50%,-50%) scale(1)"); }); },
   pv(t){return {bg:"rgba(160,120,30,"+(0.8*cqBand(t,0,.94,.06,.07)).toFixed(2)+")",
     word:t<.48?"WIN":"28 — 31",wf:t<.48?cqBand(t,.06,.46,.05,.07):cqBand(t,.5,.94,.06,.07),color:"#fff8e1"};}};
-MW_CUE.finall={name:"▪ Final — Loss", tier:"T3 · adverse", dur:7500,
+MW_CUE.finall={name:"▪ Final — Loss", tier:"T3 · adverse", dur:7500, scene:"field",
   dom(){ const sc=((G.away&&G.away.abbr)||"AWAY")+" 31 — 28 "+((G.home&&G.home.abbr)||"HOME");
-    cqDom(p=>`<div class="cq-field" style="background:#0a0d12"></div>`
+    cqDom(p=>`<div class="cq-field" style="background:rgba(6,9,14,.86)"></div>`
       +cqCardHTML(p,"FINAL",sc,null,"c1")
       +cqCardHTML(p,"STILL HERE","NEXT KICKOFF 7:30","BOARD PAYOUT AT THE BAR","c2"),
       {field:".cq-field",c1:".c1",ln:".c1 u",c2:".c2"}); },
@@ -6603,8 +6709,8 @@ MW_CUE.slate={name:"📋 The Slate", tier:"T3 · takeover", dur:9500,
       wf:cqBand(t,.02,.60,.04,.05),color:"#9fd9f2"};
     const rows=MWD.rows, legF=Math.min(((t-.58)/.34)*rows,rows), leg=Math.min(rows-1,Math.floor(legF));
     return {bg:"rgba(13,26,46,.95)"};}};
-MW_CUE.pregame={name:"🚀 Pregame Show", tier:"T3 · takeover", dur:19000,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0a1428,#070f1c)"></div>`
+MW_CUE.pregame={name:"🚀 Pregame Show", tier:"T3 · takeover", dur:19000, scene:"field",
+  dom(){ cqDom(p=>`<div class="cq-field scrim"></div>`
       +`<div class="cq-field fT" style="background:linear-gradient(180deg,#d0640a,#8f4100);z-index:1"></div>`
       +`<div class="cq-field fO" style="background:linear-gradient(180deg,#a6192e,#6b0f1d);z-index:1"></div>`
       +`<div class="cq-vig"></div>`
