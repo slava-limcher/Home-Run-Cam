@@ -6330,8 +6330,9 @@ MW_CUE.board={name:"▦ Board", tier:"T0 · ambient", dur:10000,
       +CQ_SLATE.slice(0,5).map(s=>`<div class="cq-row"><span>${s[0]} @ ${s[1]}</span><s>${s[2]}</s></div>`).join("")
       +`</div>`, {field:".cq-field",rows:".cq-rows"});
     MW.dom.forEach(d=>{d.rowEls=[...d.el.querySelectorAll(".cq-row")];}); },
-  render(t){ MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.90,.06,.08));
-    cqSet(d.rows,1); d.rowEls.forEach((r,k)=>cqSet(r,cqBand(t,.04+k*.05,.90,.05,.08))); }); },
+  render(t){ const a=cqBand(t,0,.90,.06,.08);
+    MW.dom.forEach(d=>{ cqSet(d.field,a); cqSet(d.rows,a);
+      d.rowEls.forEach((r,k)=>cqSet(r,cqBand(t,.04+k*.05,.90,.05,.08))); }); },
   pv(t){return {bg:"rgba(10,18,32,.94)",word:"BOARD",wf:cqBand(t,.05,.92,.08,.06),color:"#9fd9f2"};}};
 MW_CUE.tomorrow={name:"🗓 Tomorrow's Board", tier:"T0 · ambient", dur:4500,
   dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0c1728,#070f1c)"></div>`
