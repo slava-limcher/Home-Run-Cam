@@ -1698,6 +1698,18 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
    Shared primitives so every cue is a few lines: a colour field, a centred word, a sub, a
    card, a meter, an edge tint, a run-across word in wall coords, a flash. */
 .cq-field{position:absolute;inset:0;opacity:0}
+/* depth: every field gets a vignette so flat colour never reads as a flat slab */
+.cq-vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(115% 105% at 50% 42%,transparent 38%,rgba(2,4,8,.55) 100%)}
+/* chrome type for celebratory words — same metal recipe as the wall's TOUCHDOWN ride */
+.cq-word.chrome{color:transparent;-webkit-text-stroke:0;
+  background:linear-gradient(180deg,#ffffff 0%,#eef3f8 26%,#c3cfdc 46%,#8e9aa8 58%,#e8eff6 72%,#7c8896 100%);
+  -webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 5px 0 rgba(15,20,30,.8)) drop-shadow(0 16px 34px rgba(0,0,0,.6))}
+.cq-word.gold{color:transparent;
+  background:linear-gradient(180deg,#fff8e1 0%,#f3d784 34%,#c9a24a 56%,#fff3c9 74%,#9c7526 100%);
+  -webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 5px 0 rgba(28,20,4,.75)) drop-shadow(0 16px 34px rgba(0,0,0,.55))}
 .cq-word{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0;white-space:nowrap;
   font-weight:900;font-style:italic;letter-spacing:.02em;color:#fff;text-align:center;
   text-shadow:0 8px 30px rgba(0,0,0,.6)}
@@ -6158,7 +6170,7 @@ MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000,
       +`<div class="mw-tdwrap" style="left:${-(p.off||0)}px;bottom:${-mwBotOff(g,p)}px;width:${g.total}px">
           <div class="mwx-word" style="font-size:${f}px;transform:translate(${g.total}px,${-Math.round((g.wallH||g.sh)/2-f*.54)}px)">TOUCHDOWN</div>
         </div>`
-      +`<div class="mwx-tex" style="font-size:${tf}px">TEXAS</div>`
+      +`<div class="mwx-tex" style="font-size:${cqFit(p,"TEXAS",.60,.80)}px">TEXAS</div>`
       +`<div class="mwx-flash"></div>`
       +MW_CLOSE).join("");
     MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
@@ -6282,6 +6294,29 @@ function cqDom(html,refs){
 }
 function cqSet(el,op,tr){ if(!el)return; el.style.opacity=(op||0).toFixed(3); if(tr)el.style.transform=tr; }
 function cqFs(p,frac,len){return Math.round(Math.min(p.h*frac,(p.w*.88)/Math.max(1,(len||5)*.56)));}
+/* MEASURE the string instead of guessing its width — clipped text was the single worst defect */
+const CQ_FONT="'Segoe UI',system-ui,-apple-system,Arial,sans-serif";
+const _cqm=document.createElement("canvas").getContext("2d");
+function cqFit(p,txt,hFrac,wFrac,style){
+  let s=Math.max(10,Math.round(p.h*hFrac));
+  const maxW=p.w*(wFrac||.86);
+  _cqm.font=(style||"italic 900")+" "+s+"px "+CQ_FONT;
+  const w=_cqm.measureText(String(txt||"")).width*1.05;   // pad for letter-spacing + italic slant
+  if(w>maxW)s=Math.max(9,Math.floor(s*maxW/w));
+  return s;
+}
+function cqFitAll(p,arr,hFrac,wFrac,style){                // fit the LONGEST of several strings
+  return Math.min.apply(null,arr.map(x=>cqFit(p,x,hFrac,wFrac,style)));
+}
+/* a card that always fits: sized off its longest line (kicker .34em, main 1em, note .24em) */
+function cqCardHTML(p,kick,main,note,cls){
+  const s=Math.min(cqFit(p,main,.13,.80),Math.round(cqFit(p,kick||"",.13,.72)/.34),
+                   note?Math.round(cqFit(p,note,.13,.68)/.24):9999);
+  return `<div class="cq-card ${cls||""}" style="font-size:${Math.max(11,s)}px">`
+    +(kick?`<i style="font-size:.34em">${kick}</i>`:"")
+    +(main?`<u>${main}</u>`:"")
+    +(note?`<i style="font-size:.24em;color:#8fa6b8">${note}</i>`:"")+`</div>`;
+}
 function cqSeat(d){const cells=mwCellsOf(),k=cells.findIndex(p=>p[0]===d.r&&p[1]===d.c);return k<0?d.i:k;}
 function cqN(){return Math.max(1,mwCellsOf().length);}
 function cqWrap(p,inner){return `<div class="mw-tdwrap" style="left:${-(p.off||0)}px;bottom:${-mwBotOff(MW.geom,p)}px;width:${MW.geom.total}px;height:0">${inner}</div>`;}
@@ -6485,8 +6520,8 @@ MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500,
 /* ---------- T3 · takeover (whole room, audio claimed, ≥8min refractory) ---------- */
 MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500,
   dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 50%,#2ea8ff,#0d4f8f 55%,#062036)"></div>`
-      +`<div class="cq-flash"></div>`
-      +`<div class="cq-word" style="font-size:${cqFs(p,.22,9)}px">TOUCHDOWN</div>`,
+      +`<div class="cq-vig"></div><div class="cq-flash"></div>`
+      +`<div class="cq-word chrome" style="font-size:${cqFit(p,"TOUCHDOWN",.24,.86)}px">TOUCHDOWN</div>`,
       {field:".cq-field",flash:".cq-flash",word:".cq-word"}); },
   render(t){ const tgt=mwLookTarget(), cols=Math.max(1,mwGridRC().cols);
     MW.dom.forEach(d=>{ const dist=Math.abs((d.c||0)-tgt[1])/Math.max(1,cols-1||1), a=dist*.22;
@@ -6498,9 +6533,10 @@ MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500,
       flash:cqBand(t,a,a+.05,.01,.04)*.9,word:"TOUCHDOWN",wf:cqBand(t,.32,.92,.05,.07)};}};
 MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500,
   dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 40%,#f6e3a1,#c9a24a 30%,#7a5a12 60%,#2a1d05)"></div>`
-      +`<div class="cq-word" style="font-size:${cqFs(p,.28,3)}px;color:#fff8e1">WIN</div>`
-      +`<div class="cq-card" style="font-size:${cqFs(p,.13,12)}px"><i style="font-size:.32em">FINAL</i><u class="ln"></u></div>`,
-      {field:".cq-field",word:".cq-word",card:".cq-card",ln:".ln"}); },
+      +`<div class="cq-vig"></div>`
+      +`<div class="cq-word gold" style="font-size:${cqFit(p,"WIN",.30,.7)}px">WIN</div>`
+      +cqCardHTML(p,"FINAL",((G.away&&G.away.abbr)||"AWAY")+" 28 — 31 "+((G.home&&G.home.abbr)||"HOME")),
+      {field:".cq-field",word:".cq-word",card:".cq-card",ln:".cq-card u"}); },
   render(t){ MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.94,.06,.07)*.92);
       cqSet(d.word,cqBand(t,.06,.46,.05,.07),`translate(-50%,-50%) scale(${(.9+.1*cqIn(t,.06,.06)).toFixed(3)})`);
       d.ln.textContent=((G.away&&G.away.abbr)||"AWAY")+" 28 — 31 "+((G.home&&G.home.abbr)||"HOME");
@@ -6508,10 +6544,11 @@ MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500,
   pv(t){return {bg:"rgba(160,120,30,"+(0.8*cqBand(t,0,.94,.06,.07)).toFixed(2)+")",
     word:t<.48?"WIN":"28 — 31",wf:t<.48?cqBand(t,.06,.46,.05,.07):cqBand(t,.5,.94,.06,.07),color:"#fff8e1"};}};
 MW_CUE.finall={name:"▪ Final — Loss", tier:"T3 · adverse", dur:7500,
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:#0a0d12"></div>`
-      +`<div class="cq-card c1" style="font-size:${cqFs(p,.13,12)}px;border-color:rgba(255,255,255,.14);box-shadow:none"><i style="font-size:.32em">FINAL</i><span class="ln"></span></div>`
-      +`<div class="cq-card c2" style="font-size:${cqFs(p,.11,16)}px;border-color:rgba(255,255,255,.14);box-shadow:none"><i style="font-size:.34em">STILL HERE</i><u>NEXT KICKOFF 7:30 · BOARD PAYOUT AT THE BAR</u></div>`,
-      {field:".cq-field",c1:".c1",ln:".ln",c2:".c2"}); },
+  dom(){ const sc=((G.away&&G.away.abbr)||"AWAY")+" 31 — 28 "+((G.home&&G.home.abbr)||"HOME");
+    cqDom(p=>`<div class="cq-field" style="background:#0a0d12"></div>`
+      +cqCardHTML(p,"FINAL",sc,null,"c1")
+      +cqCardHTML(p,"STILL HERE","NEXT KICKOFF 7:30","BOARD PAYOUT AT THE BAR","c2"),
+      {field:".cq-field",c1:".c1",ln:".c1 u",c2:".c2"}); },
   render(t){ MW.dom.forEach(d=>{                       // no flash, no colour: state it and give a reason to stay
       cqSet(d.field,cqBand(t,0,.95,.06,.06));
       d.ln.textContent=((G.away&&G.away.abbr)||"AWAY")+" 31 — 28 "+((G.home&&G.home.abbr)||"HOME");
@@ -6566,7 +6603,8 @@ MW_CUE.pregame={name:"🚀 Pregame Show", tier:"T3 · takeover", dur:19000,
   dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0a1428,#070f1c)"></div>`
       +`<div class="cq-field fT" style="background:linear-gradient(180deg,#d0640a,#8f4100);z-index:1"></div>`
       +`<div class="cq-field fO" style="background:linear-gradient(180deg,#a6192e,#6b0f1d);z-index:1"></div>`
-      +`<div class="cq-word" style="font-size:${cqFs(p,.30,9)}px">8</div>`
+      +`<div class="cq-vig"></div>`
+      +`<div class="cq-word" style="font-size:${cqFitAll(p,["BARBOARDS","OKLAHOMA","SATURDAY","WELCOME","KICKOFF"],.30,.84)}px">8</div>`
       +`<div class="cq-flash"></div>`,
       {field:".cq-field",fT:".fT",fO:".fO",word:".cq-word",flash:".cq-flash"}); },
   render(t){ const seat=0;
