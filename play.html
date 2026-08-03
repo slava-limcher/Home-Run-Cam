@@ -1698,6 +1698,7 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
    Shared primitives so every cue is a few lines: a colour field, a centred word, a sub, a
    card, a meter, an edge tint, a run-across word in wall coords, a flash. */
 .cq-scene{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.cq-wave{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none}
 .cq-field{position:absolute;inset:0;opacity:0}
 /* on a scene, base backdrops become SCRIMS so the picture reads through them */
 .cq-field.scrim{background:linear-gradient(180deg,rgba(4,8,16,.55),rgba(2,5,10,.75))!important}
@@ -6676,19 +6677,86 @@ MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500,
     return {bg:"rgba(9,30,60,.8)",word:"HELD",wf:cqIn(t,.645,.06)*cqOut(t,.94,.06),
       flash:cqBand(t,.61,.645,.008,.035)*.95};}};
 /* ---------- T3 · takeover (whole room, audio claimed, ≥8min refractory) ---------- */
+/* ---- FLOOD (§9.1, T3): an ACTUAL WAVE. A crest travels the wall left→right with a steep
+        face, whitecap foam and spray thrown off the top; the water level rises behind it until
+        the whole wall is flooded, then TOUCHDOWN surfaces out of the water. The whole shape is
+        a pure function of (wall-x, t) so every screen draws its slice of the same wave. ---- */
+const CQ_WAVE={travel:.62, maxLev:.46, crest:.085, rise:.17, peak:.42, lead:.09};
+function cqWaveFront(t,W){                            // eased crest position in wall coords
+  const tr=Math.min(1,Math.max(0,t)/CQ_WAVE.travel), e=tr<.5?2*tr*tr:1-Math.pow(-2*tr+2,2)/2;
+  return -W*CQ_WAVE.crest*1.6+(W*(1+CQ_WAVE.crest*2.2))*e;
+}
+function cqWaveLevel(X,t,W,front){                    // water height at wall-x, as a fraction
+  const s=Math.max(0,Math.min(1,(front-X)/(W*CQ_WAVE.rise)));
+  const base=CQ_WAVE.maxLev*s*s*(3-2*s);              // smoothstep rise, settles to maxLev behind
+  const d=(X-(front-W*CQ_WAVE.lead))/(W*CQ_WAVE.crest);
+  const peak=CQ_WAVE.peak*Math.exp(-d*d*2.6);         // the CREST — the highest point, just behind
+  const rip=base>.03?(.013*Math.sin(X*.0032-t*11)+.008*Math.sin(X*.0091+t*7.5)):0;
+  return Math.max(0,Math.min(1.06,base+peak+rip));    // steep face ahead, crest, swell behind
+}
+function cqWavePaint(ctx,pw,ph,p,g,t){
+  const W=g.total, WH=g.wallH||g.sh, front=cqWaveFront(t,W);
+  const sx=pw/Math.max(1,p.w), off=p.off||0, offY=p.offY||0, k=ph/Math.max(1,p.h);
+  ctx.clearRect(0,0,pw,ph);
+  const yOf=X=>((WH-cqWaveLevel(X,t,W,front)*WH)-offY)*k;
+  const pts=[]; for(let x=-4;x<=pw+4;x+=3)pts.push([x,yOf(off+x/sx)]);
+  ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.lineTo(pw+4,ph+4); ctx.lineTo(-4,ph+4); ctx.closePath();
+  let gr=ctx.createLinearGradient(0,Math.min.apply(null,pts.map(q=>q[1])),0,ph);
+  gr.addColorStop(0,"rgba(150,236,255,.95)"); gr.addColorStop(.14,"rgba(60,180,240,.92)");
+  gr.addColorStop(.55,"rgba(18,96,168,.90)"); gr.addColorStop(1,"rgba(5,38,72,.94)");
+  ctx.fillStyle=gr; ctx.fill();
+  ctx.save(); ctx.clip();                             // caustic streaks inside the body
+  for(let n=0;n<7;n++){ const yy=ph-(n+1)*ph*.055+Math.sin(t*4+n)*ph*.006;
+    ctx.fillStyle="rgba(180,240,255,"+(.05+.03*Math.sin(t*3+n)).toFixed(3)+")";
+    ctx.fillRect(-4,yy,pw+8,Math.max(1,ph*.006)); }
+  ctx.restore();
+  ctx.lineJoin="round"; ctx.lineCap="round";          // whitecap foam on the surface
+  ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.strokeStyle="rgba(255,255,255,.28)"; ctx.lineWidth=Math.max(2,ph*.030); ctx.stroke();
+  ctx.strokeStyle="rgba(240,252,255,.92)"; ctx.lineWidth=Math.max(1,ph*.011); ctx.stroke();
+  for(let n=0;n<40;n++){                              // foam bubbles riding the surface
+    const X=off+((n*137.5+t*260)%(p.w+80))-40, x=(X-off)*sx;
+    if(x<-6||x>pw+6)continue;
+    const lv=cqWaveLevel(X,t,W,front); if(lv<.03)continue;
+    const y=yOf(X)+Math.sin(n*2.3+t*6)*ph*.012, r=Math.max(1,ph*.008*(.5+.5*Math.sin(n*1.7)));
+    ctx.fillStyle="rgba(255,255,255,"+(.18+.30*Math.abs(Math.sin(n*.9+t*4))).toFixed(2)+")";
+    ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); }
+  for(let n=0;n<30;n++){                              // spray thrown off the crest
+    const q=((t*2.1+n*.317)%1), lane=(n%2?1:-1);
+    const X=front+(W*CQ_WAVE.crest)*(-.25+.55*(n/30))+q*W*.018*lane;
+    const x=(X-off)*sx; if(x<-10||x>pw+10)continue;
+    const base=yOf(X), arc=Math.sin(Math.PI*q)*ph*.20;
+    const r=Math.max(1,ph*.009*(1-q)); if(r<=0)continue;
+    ctx.fillStyle="rgba(233,250,255,"+((1-q)*.75).toFixed(2)+")";
+    ctx.beginPath(); ctx.arc(x,base-arc,r,0,7); ctx.fill(); }
+}
 MW_CUE.flood={name:"🌊 Flood", tier:"T3 · takeover", dur:6500, scene:"field",
-  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 50%,rgba(46,168,255,.78),rgba(13,79,143,.72) 55%,rgba(6,32,54,.8))"></div>`
-      +`<div class="cq-vig"></div><div class="cq-flash"></div>`
+  dom(){ cqDom(p=>`<canvas class="cq-wave"></canvas><div class="cq-flash"></div>`
       +`<div class="cq-word chrome" style="font-size:${cqFit(p,"TOUCHDOWN",.24,.86)}px">TOUCHDOWN</div>`,
-      {field:".cq-field",flash:".cq-flash",word:".cq-word"}); },
-  render(t){ const tgt=mwLookTarget(), cols=Math.max(1,mwGridRC().cols);
-    MW.dom.forEach(d=>{ const dist=Math.abs((d.c||0)-tgt[1])/Math.max(1,cols-1||1), a=dist*.22;
-      cqSet(d.flash,cqBand(t,a,a+.05,.01,.04)*.9);     // flash leads the colour on each screen
-      cqSet(d.field,cqBand(t,a+.03,.93,.07,.07)*.95);
-      cqSet(d.word,cqBand(t,.32,.92,.05,.07),`translate(-50%,-50%) scale(${(.9+.1*cqIn(t,.32,.06)).toFixed(3)})`); }); },
-  pv(t,i,cell){const tgt=mwLookTarget(),dist=Math.abs(cell[1]-tgt[1])/Math.max(1,(MWD.cols-1)||1),a=dist*.22;
-    return {bg:"rgba(20,120,220,"+(0.85*cqBand(t,a+.03,.93,.07,.07)).toFixed(2)+")",
-      flash:cqBand(t,a,a+.05,.01,.04)*.9,word:"TOUCHDOWN",wf:cqBand(t,.32,.92,.05,.07)};}};
+      {wave:".cq-wave",flash:".cq-flash",word:".cq-word"});
+    MW.dom.forEach(d=>{ const cv=d.wave, p=d.p||MW.panels[0];
+      cv.width=Math.min(1500,Math.max(240,Math.round(p.w)));
+      cv.height=Math.max(120,Math.round(cv.width*p.h/Math.max(1,p.w))); }); },
+  render(t){ const g=MW.geom, W=g.total, front=cqWaveFront(t,W);
+    MW.dom.forEach(d=>{ const p=d.p||MW.panels[0];
+      if(d.wave)cqWavePaint(d.wave.getContext("2d"),d.wave.width,d.wave.height,p,g,t);
+      const mid=(p.off||0)+p.w/2, near=1-Math.min(1,Math.abs(front-mid)/(p.w*.45));
+      cqSet(d.flash,Math.max(0,near)*.5*cqOut(t,CQ_WAVE.travel,.12));   // crest breaking past
+      const rise=cqIn(t,.55,.09)*cqOut(t,.93,.06);                       // word surfaces
+      cqSet(d.word,rise,`translate(-50%,calc(-50% + ${((1-rise)*26).toFixed(1)}%)) scale(${(.94+.06*rise).toFixed(3)})`); }); },
+  prev(ctx,W,H,t){
+    const m=cqSceneMaster("field",MWD.cols*1920,MWD.rows*1080);
+    ctx.drawImage(m.cv,0,0,m.cv.width,m.cv.height,0,0,W,H);
+    cqWavePaint(ctx,W,H,{w:W,h:H,off:0,offY:0},{total:W,wallH:H,sh:H/MWD.rows},t);
+    const rise=cqIn(t,.55,.09)*cqOut(t,.93,.06);
+    if(rise>.02){const f=Math.max(10,Math.round(Math.min(H*.22,(W*.86)/(9*.56))));
+      ctx.font="italic 900 "+f+"px "+CQ_FONT; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.globalAlpha=rise; ctx.fillStyle="#eef4fa";
+      ctx.fillText("TOUCHDOWN",W/2,H/2+(1-rise)*H*.10); ctx.globalAlpha=1;}
+  }};
 MW_CUE.finalw={name:"🏆 Final — Win", tier:"T3 · takeover", dur:6500, scene:"field",
   dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 40%,rgba(246,227,161,.72),rgba(201,162,74,.68) 30%,rgba(122,90,18,.72) 60%,rgba(42,29,5,.85))"></div>`
       +`<div class="cq-vig"></div>`
