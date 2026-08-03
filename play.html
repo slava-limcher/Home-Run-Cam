@@ -2831,6 +2831,10 @@ body.tvmode .scorewrap{justify-content:center}
         <div class="mwd-h">CONTENT</div>
         <div class="mwd-content" id="mwContent"></div>
         <div class="mwd-opts" id="mwOpts"></div>
+        <div class="mwd-net" style="margin-bottom:10px">
+          <button class="ghostbtn" id="mwReelBtn">▶ Watch All (preview reel)</button>
+          <span class="mwd-netst" id="mwReelSt"></span>
+        </div>
         <button class="hrbtn mwd-fire" id="mwFireBtn">🔥 FIRE ON WALL</button>
       </div>
     </div>
@@ -7006,6 +7010,20 @@ $("#mwFireBtn").onclick=()=>{ if(MW_CUE[MWD.sel])mwFireCue(MWD.sel);
   else if(MWD.sel==="td")triggerTdWall();
   else if(MWD.sel==="tf")triggerTfWall(); else triggerBallCross(); };
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
+/* ▶ Watch All: step the OUTPUT preview through every cue so the whole library can be judged
+   in one sitting (each cue gets one full play plus a beat, then the next) */
+$("#mwReelBtn").onclick=()=>{
+  if(MWD.reel){ clearTimeout(MWD.reel); MWD.reel=0; $("#mwReelSt").textContent="";
+    $("#mwReelBtn").classList.remove("on"); return; }
+  $("#mwReelBtn").classList.add("on");
+  const ids=MW_CONTENT.map(c=>c.id); let k=Math.max(0,ids.indexOf(MWD.sel));
+  const step=()=>{ MWD.sel=ids[k%ids.length];
+    const c=MW_CONTENT.find(x=>x.id===MWD.sel);
+    $("#mwReelSt").textContent=(k%ids.length+1)+"/"+ids.length+" · "+c.name+(c.tier?"  ("+c.tier+")":"");
+    MWD.pT0=performance.now(); MWD.pcyc=-1; mwDashRender();
+    $("#mwReelBtn").classList.add("on");
+    k++; MWD.reel=setTimeout(step,mwSelDur()+900); };
+  step();};
 $("#mwNetBtn").onclick=()=>mwnGo(!MWN.on);
 $("#mwRoomNew").onclick=()=>{mwnCode("new"); if(MWN.on)mwnGo(true); else mwDashRender();};
 $("#mwLinkBtn").onclick=async e=>{ mwnCode();
