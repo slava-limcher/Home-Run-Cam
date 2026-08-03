@@ -1690,11 +1690,46 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 #mwSpd{width:150px;accent-color:var(--gold,#e8c34a);margin-left:4px}
 .mwd-spdv{color:var(--gold,#e8c34a);font-weight:900;font-size:12px;min-width:44px}
 .mwd-fire{width:100%}
+/* ===== SPEC CUE LIBRARY (barboards-spec.md §9) — wall cues on the shared canvas ===== */
+/* THE HOLD (§9.2, T2, tense only): wall desaturates, one hairline contracts toward each
+   screen's OWN centre deliberately out of step, then either a 500ms flash + flood (stop)
+   or the lines simply dissolve and the picture comes back (convert). */
+.mwh-veil{position:absolute;inset:0;background:#05070c;opacity:0;
+  backdrop-filter:grayscale(1) saturate(.15) brightness(.55)}
+.mwh-line{position:absolute;left:50%;top:50%;height:2px;width:100%;transform:translate(-50%,-50%);
+  background:linear-gradient(90deg,transparent,rgba(232,238,244,.95) 18%,#fff 50%,rgba(232,238,244,.95) 82%,transparent);
+  box-shadow:0 0 10px rgba(190,220,255,.5)}
+.mwh-flash{position:absolute;inset:0;background:#fff;opacity:0}
+.mwh-word{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0;
+  font-weight:900;font-style:italic;letter-spacing:.04em;color:#fff;white-space:nowrap;
+  text-shadow:0 0 50px rgba(120,200,255,.7),0 10px 30px rgba(0,0,0,.6)}
+.mwh-flood{position:absolute;inset:0;opacity:0;
+  background:radial-gradient(120% 120% at 50% 50%,rgba(90,190,255,.55),rgba(20,60,120,.25) 60%,transparent 80%)}
+/* LOOK LEFT · cross-game promote (§9.4): every dead screen becomes an arrow pointing at the
+   screens carrying the play — those are never taken — then the scoreline, then the replay card. */
+.mwl-arrow{position:absolute;left:50%;top:50%;opacity:0;
+  background:linear-gradient(90deg,#ffbe4d,#fff 60%,#ffe9bf);
+  clip-path:polygon(0 32%,58% 32%,58% 2%,100% 50%,58% 98%,58% 68%,0 68%);
+  filter:drop-shadow(0 0 26px rgba(255,180,70,.55))}
+.mwl-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0;text-align:center;
+  font-weight:900;color:#fff;white-space:nowrap;letter-spacing:.02em}
+.mwl-card small{display:block;color:#9fd9f2;letter-spacing:6px;font-weight:900}
+/* TOUCHDOWN TEXAS (§9.3): TOUCHDOWN runs the canvas → TEXAS → flash → burnt orange racing
+   out from the feature wall to both corners. */
+.mwx-word{position:absolute;left:0;bottom:0;white-space:nowrap;font-weight:900;font-style:italic;
+  letter-spacing:.02em;color:#fff;text-shadow:0 6px 0 rgba(10,14,22,.75),0 16px 40px rgba(0,0,0,.6)}
+.mwx-tex{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);opacity:0;
+  white-space:nowrap;font-weight:900;font-style:italic;color:#bf5700;
+  text-shadow:0 0 60px rgba(191,87,0,.7),0 10px 30px rgba(0,0,0,.55)}
+.mwx-flash{position:absolute;inset:0;background:#fff;opacity:0}
+.mwx-wash{position:absolute;inset:0;opacity:0;background:#bf5700}
 /* TEXAS FIGHT chant wall: burnt-orange/white words alternate across the screens */
 .mw-tf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;
   font-weight:900;font-style:italic;letter-spacing:.04em;opacity:0;will-change:transform,opacity}
 .mw-tf.t{color:#bf5700;text-shadow:0 0 60px rgba(191,87,0,.6),0 10px 30px rgba(0,0,0,.55)}
 .mw-tf.f{color:#ffffff;text-shadow:0 0 60px rgba(191,87,0,.65),0 10px 30px rgba(0,0,0,.55)}
+.mw-tf.o{color:#ffffff;text-shadow:0 8px 26px rgba(0,0,0,.6)}
+.mw-tfbright{position:absolute;inset:0;background:linear-gradient(180deg,#d0640a,#bf5700 55%,#8f4100);opacity:0}
 .mw-tfglow{position:absolute;inset:0;pointer-events:none;opacity:0;
   background:radial-gradient(62% 58% at 50% 50%,rgba(191,87,0,.38),transparent 72%)}
 /* TOUCHDOWN wall ride: giant chrome-silver letters slide across the whole wall */
@@ -5562,6 +5597,7 @@ function mwFireWall(msgType,extra){                  // true = handled as a wall
   else if(msgType==="wp")mwStartWpLinked(T0,members,msg.seed,msg.grid,msg.dur);
   else if(msgType==="td")mwStartTdLinked(T0,members,msg.grid,msg.dur);
   else if(msgType==="tf")mwStartTfLinked(T0,members,msg.grid,msg.dur);
+  else if(msgType==="cue")mwStartCueLinked(T0,members,msg.grid,msg);
   return true;                                       // unjoined dashboard: broadcast only, stays a control surface
 }
 function mwGridGeom(members,grid){ // free-form cell map (uniform cells, min member size); null = no slot
@@ -5612,6 +5648,7 @@ function mwOnMsg(e){ const d=e.data||{};
   else if(d.type==="wp"&&MWL.idx){ mwStartWpLinked(T0,d.members,d.seed,d.grid,d.dur); }
   else if(d.type==="td"&&MWL.idx){ mwStartTdLinked(T0,d.members,d.grid,d.dur); }
   else if(d.type==="tf"&&MWL.idx){ mwStartTfLinked(T0,d.members,d.grid,d.dur); }
+  else if(d.type==="cue"&&MWL.idx){ mwStartCueLinked(T0,d.members,d.grid,d); }
   else if(d.type==="stop"){ if(MW.live){MW.live=false; endBallCross();} }
 }
 /* -- WIN PROBABILITY WALL: the Live Odds STORM WIN BAR engine, ported 1:1 from mlb-betting.
@@ -5824,15 +5861,19 @@ function mwStartTdLinked(T0,members,grid,dur){
       holds ~1s, fades; the instant it clears, FIGHT! (white, burnt-orange rim) answers on the
       remaining screens. Only ONE word is ever on the wall. 3 cycles; solo screen voices both. -- */
 function mwTfDom(){
+  const TXT={t:"TEXAS",f:"FIGHT!",o:"OU SUCKS"},
+        RIM={t:"rgba(255,255,255,.85)",f:"rgba(191,87,0,.95)",o:"rgba(120,40,0,.9)"};
   mwPanelBox.innerHTML=MW.panels.map(r=>{
     const fs=Math.round(Math.min(r.h*.34,r.w*.20)), st=Math.max(2,Math.round(fs*.014));
     return mwPanelOpen(r)
-     +`<div class="mw-tfglow"></div>`
-     +["t","f"].map(w=>`<div class="mw-tf ${w}" data-w="${w}" style="font-size:${fs}px;-webkit-text-stroke:${st}px ${w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)"}">${w==="t"?"TEXAS":"FIGHT!"}</div>`).join("")
+     +`<div class="mw-tfbright"></div><div class="mw-tfglow"></div>`
+     +["t","f","o"].map(w=>{const s=w==="o"?Math.round(fs*.62):fs;
+        return `<div class="mw-tf ${w}" data-w="${w}" style="font-size:${s}px;-webkit-text-stroke:${Math.max(2,Math.round(s*.014))}px ${RIM[w]}">${TXT[w]}</div>`;}).join("")
      +MW_CLOSE;}).join("");
   MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
     return {n:(MWL.idx||i+1), r:p.row||0, c:(p.col!=null?p.col:i),
-            tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow")};});
+            tf:[...el.querySelectorAll(".mw-tf")], tfg:el.querySelector(".mw-tfglow"),
+            bright:el.querySelector(".mw-tfbright")};});
   mwOvEl.classList.add("paneled");
 }
 function mwTfEnv(f){ // pop-hold-fade envelope within one beat (f: 0..1)
@@ -5848,16 +5889,20 @@ function mwTfWord(r,c,phase,many){ // CHECKERBOARD HOMES: words alternate along 
 }
 function mwTfRender(){
   const D=MW.dur||8400, el=Date.now()-MW.t0, t=Math.max(0,el);
-  const cyc=D/3, p=(t%cyc)/cyc, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
+  const B=D/TF_BEATS, b=Math.min(TF_BEATS-1,Math.floor(t/B)), e=mwTfEnv((t%B)/B);
   const many=(MW.wallN||MW.panels.length)>1;
+  const ou=((b+1)%4===0), phase=b%2;                  // §9.3: OU SUCKS punctuates every 4th beat
   MW.dom.forEach(d=>{ if(!d.tf)return;
     const mine=mwTfWord(d.r,d.c,phase,many);
     d.tf.forEach(w=>{
-      const active=mine!==null&&w.dataset.w===mine;
+      const active=ou?(w.dataset.w==="o"):(mine!==null&&w.dataset.w===mine);
       w.style.opacity=active?e.a.toFixed(3):"0";
       w.style.transform=`translate(-50%,-50%) scale(${active?e.s.toFixed(3):1})`;
     });
-    if(d.tfg)d.tfg.style.opacity=mine!==null?(e.a*.55).toFixed(3):"0";
+    // the QUIET side holds BRIGHT (§9.3) — burnt orange field instead of going dark
+    if(d.bright)d.bright.style.opacity=ou?(0.88*e.a).toFixed(3)
+      :(mine===null?(0.9*Math.max(.6,e.a)).toFixed(3):"0");
+    if(d.tfg)d.tfg.style.opacity=(mine!==null||ou)?(e.a*.55).toFixed(3):"0";
   });
   if(el<D)MW.raf=requestAnimationFrame(mwTfRender); else MW.raf=0;
 }
@@ -5881,11 +5926,307 @@ function mwStartTfLinked(T0,members,grid,dur){
   MW.live=false;                                     // superseding quietly — no stop broadcast
   skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
   MW.geom=gg.geom; MW.panels=[gg.panel]; MW.dur=dur||8400;
-  MW.wallN=(members||[]).length;
+  MW.wallN=(members||[]).length; MW.grid=grid;
   mwTfDom();
   MW.live=true;
   mwShowTf(T0);
 }
+/* ==================== SPEC CUE ENGINE (barboards-spec.md §9) ====================
+   One registry + one message type ("cue" + id) so every new cue is just its own dom()/
+   render(); transport, shared clock, grid mapping, preview and FIRE all come for free.
+   Each entry: {name, tier, dur (number|fn), dom(), render(t,el), prev(ctx,W,H,t), opts?, pick?} */
+const MW_CUE={};
+function mwCueDur(id){const c=MW_CUE[id]||{}, d=(typeof c.dur==="function")?c.dur():c.dur;
+  return Math.round((d||6000)/(MWD.spd||1));}
+function mwGridNow(){return {rows:MWD.rows,cols:MWD.cols,cells:mwCells()};}
+/* during a cue use the FIRING grid (a receiver's own dashboard may differ); in the dashboard
+   preview use the live dashboard grid */
+function mwCueLive(){return !!(MW.live||mwPlaying);}
+function mwCellsOf(){ if(mwCueLive()){const g=MW.grid||{}; if(g.cells&&g.cells.length)return g.cells;}
+  return mwCells(); }
+function mwGridRC(){ const g=mwCueLive()?(MW.grid||{}):{};
+  return {rows:g.rows||MWD.rows,cols:g.cols||MWD.cols}; }
+function mwCueRender(){
+  const D=MW.dur||6000, el=Date.now()-MW.t0, t=Math.max(0,Math.min(el/D,1));
+  const c=MW_CUE[MW.cue]; if(c&&c.render)c.render(t,el);
+  if(el<D)MW.raf=requestAnimationFrame(mwCueRender); else MW.raf=0;
+}
+function mwShowCue(T0){
+  mwOvEl.classList.remove("cal");
+  mwOvEl.classList.remove("show"); void mwOvEl.offsetWidth; mwOvEl.classList.add("show");
+  cancelAnimationFrame(MW.raf); MW.t0=T0; MW.raf=requestAnimationFrame(mwCueRender);
+  clearTimeout(triggerBallCross._t);
+  triggerBallCross._t=setTimeout(endBallCross,Math.max(0,T0-Date.now())+(MW.dur||6000)+600);
+}
+function mwFireCue(id){
+  const c=MW_CUE[id]; if(!c||takeoverBusy())return;
+  const extra={id,dur:mwCueDur(id)};
+  if(c.pick)extra.pick=c.pick();
+  if(mwFireWall("cue",extra))return;                 // wall fire when screens are linked
+  mwPlaying=true; hideWalkup(); houseWipe();
+  MW.cue=id; MW.dur=extra.dur; MW.pick=extra.pick; MW.grid=mwGridNow();
+  mwBuildPanels(); c.dom();
+  mwShowCue(Date.now());
+}
+function mwStartCueLinked(T0,members,grid,d){
+  const c=MW_CUE[d.id]; if(!c)return;
+  const gg=mwGridGeom(members,grid); if(!gg)return;
+  MW.live=false;                                     // superseding quietly — no stop broadcast
+  skipTakeover(); mwPlaying=true; hideWalkup(); houseWipe();
+  MW.geom=gg.geom; MW.panels=[gg.panel]; MW.grid=grid||mwGridNow();
+  MW.cue=d.id; MW.dur=d.dur||mwCueDur(d.id); MW.pick=d.pick; MW.wallN=(members||[]).length;
+  c.dom();
+  MW.live=true;
+  mwShowCue(T0);
+}
+/* ---- THE HOLD (§9.2) — the spec's showpiece. Tense register only: subtractive by design.
+        Per-receiver stagger means it needs NO cross-screen frame lock. ---- */
+MW_CUE.hold={name:"🤫 The Hold", tier:"T2 · tense only",
+  dur:()=>(MWD.hold==="convert"?7000:8000),
+  opts:[{k:"hold",v:"stop",label:"→ Stop (loud)"},{k:"hold",v:"convert",label:"→ Convert (silent)"}],
+  pick:()=>MWD.hold||"stop",
+  dom(){
+    const g=MW.geom;
+    mwPanelBox.innerHTML=MW.panels.map(p=>mwPanelOpen(p)
+      +`<div class="mwh-veil"></div><div class="mwh-line"></div>`
+      +`<div class="mwh-flood"></div><div class="mwh-flash"></div>`
+      +`<div class="mwh-word" style="font-size:${Math.round(Math.min(p.h*.26,p.w*.17))}px">HELD</div>`
+      +MW_CLOSE).join("");
+    MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
+      return {n:(MWL.idx||i+1),veil:el.querySelector(".mwh-veil"),line:el.querySelector(".mwh-line"),
+              flood:el.querySelector(".mwh-flood"),flash:el.querySelector(".mwh-flash"),
+              word:el.querySelector(".mwh-word")};});
+    mwOvEl.classList.add("paneled");
+  },
+  render(t){
+    const stop=(MW.pick!=="convert");
+    MW.dom.forEach(d=>{
+      const lag=((d.n*7)%5)*0.028;                    // out of step ON PURPOSE (a room isn't synced)
+      const p=Math.max(0,Math.min((t-lag)/0.5,1));
+      d.line.style.width=(100-95*p).toFixed(2)+"%";
+      let veil=Math.min(1,t/0.18)*0.84;
+      if(stop){
+        const fl=(t>=0.56&&t<0.62)?1-(t-0.56)/0.06:0; // 500ms flash, never longer (§10)
+        d.flash.style.opacity=Math.max(0,fl).toFixed(3);
+        const fo=t>0.60?Math.min(1,(t-0.60)/0.07):0;  // ~2s flood — the payoff outlasts the setup
+        d.flood.style.opacity=(fo*0.9).toFixed(3);
+        d.word.style.opacity=fo.toFixed(3);
+        d.word.style.transform=`translate(-50%,-50%) scale(${(0.86+0.14*fo).toFixed(3)})`;
+        d.line.style.opacity=t<0.56?"1":"0";
+        if(t>0.60)veil=Math.max(0,0.84-(t-0.60)*2.2);
+      }else{                                          // convert: nothing is rendered, it just clears
+        const out=t>0.55?Math.min(1,(t-0.55)/0.35):0;
+        d.line.style.opacity=(1-out).toFixed(3);
+        veil=veil*(1-out);
+        d.flash.style.opacity="0"; d.flood.style.opacity="0"; d.word.style.opacity="0";
+      }
+      d.veil.style.opacity=veil.toFixed(3);
+    });
+  },
+  prev(ctx,W,H,t){
+    const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, stop=(MWD.hold!=="convert");
+    ctx.fillStyle="rgba(5,7,12,"+(Math.min(1,t/0.18)*0.84).toFixed(2)+")"; ctx.fillRect(0,0,W,H);
+    cells.forEach((cell,i)=>{
+      const lag=(((i+1)*7)%5)*0.028, p=Math.max(0,Math.min((t-lag)/0.5,1));
+      const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2, w=(cw*.86)*(1-0.95*p);
+      if(stop&&t>=0.56&&t<0.62){ctx.fillStyle="rgba(255,255,255,"+(1-(t-0.56)/0.06).toFixed(2)+")";
+        ctx.fillRect(cell[1]*cw,cell[0]*ch,cw,ch);}
+      if(stop&&t>0.60){const fo=Math.min(1,(t-0.60)/0.07);
+        const g=ctx.createRadialGradient(cx,cy,2,cx,cy,cw*.6);
+        g.addColorStop(0,"rgba(90,190,255,"+(0.5*fo).toFixed(2)+")"); g.addColorStop(1,"rgba(90,190,255,0)");
+        ctx.fillStyle=g; ctx.fillRect(cell[1]*cw,cell[0]*ch,cw,ch);
+        const f=Math.max(9,Math.round(ch*.22));
+        ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.globalAlpha=fo; ctx.fillStyle="#fff"; ctx.fillText("HELD",cx,cy); ctx.globalAlpha=1;
+      }else if(!(stop&&t>0.62)){
+        const a=(!stop&&t>0.55)?Math.max(0,1-(t-0.55)/0.35):1;
+        ctx.strokeStyle="rgba(255,255,255,"+(0.95*a).toFixed(2)+")"; ctx.lineWidth=Math.max(1,ch*.012);
+        ctx.beginPath(); ctx.moveTo(cx-w/2,cy); ctx.lineTo(cx+w/2,cy); ctx.stroke();
+      }
+    });
+  }};
+/* ---- LOOK LEFT · cross-game promote (§9.4) — every DEAD screen becomes an arrow pointing at
+        the screens carrying the play; those are never taken. Then scoreline, then replay. ---- */
+function mwLookTarget(){                              // deterministic on every screen: most central cell
+  const cells=mwCellsOf(), rc=mwGridRC(), cr=(rc.rows-1)/2, cc=(rc.cols-1)/2;
+  let best=cells[0], bd=1e9;
+  cells.forEach(p=>{const d=Math.pow(p[0]-cr,2)+Math.pow(p[1]-cc,2); if(d<bd){bd=d;best=p;}});
+  return best;
+}
+MW_CUE.look={name:"👉 Look Left", tier:"T3 · cross-game promote", dur:8500,
+  dom(){
+    const tgt=mwLookTarget();
+    mwPanelBox.innerHTML=MW.panels.map(p=>{
+      const isT=(p.row===tgt[0]&&p.col===tgt[1]);
+      const ang=Math.atan2(tgt[0]-(p.row||0),tgt[1]-(p.col||0))*180/Math.PI;
+      const aw=Math.round(Math.min(p.w*.62,p.h*.62)), ah=Math.round(aw*.62);
+      const cf=Math.round(Math.min(p.h*.15,p.w*.10));
+      return mwPanelOpen(p)+(isT?"":
+        `<div class="mwl-arrow" style="width:${aw}px;height:${ah}px;transform:translate(-50%,-50%) rotate(${ang.toFixed(1)}deg)"></div>
+         <div class="mwl-card" style="font-size:${cf}px"><small style="font-size:${Math.round(cf*.32)}px">LOOK LEFT</small><span class="ln1"></span></div>`)
+        +MW_CLOSE;}).join("");
+    MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
+      return {arrow:el.querySelector(".mwl-arrow"),card:el.querySelector(".mwl-card"),
+              ln:el.querySelector(".ln1"),ang:Math.atan2(tgt[0]-(p.row||0),tgt[1]-(p.col||0))};});
+    mwOvEl.classList.add("paneled");
+  },
+  render(t){
+    const aw=(MW.away&&MW.away)||((G.away&&G.away.abbr)||"AWAY"), hm=(G.home&&G.home.abbr)||"HOME";
+    MW.dom.forEach(d=>{ if(!d.arrow)return;
+      let a=0,push=0,sc=1;
+      if(t<0.10){a=t/0.10;}                            // arrows in
+      else if(t<0.50){a=1; push=6*Math.sin((t-0.10)/0.4*Math.PI*4); sc=1+0.05*Math.sin((t-0.10)/0.4*Math.PI*4);}
+      else if(t<0.58){a=1-(t-0.50)/0.08;}
+      d.arrow.style.opacity=Math.max(0,a).toFixed(3);
+      const dx=Math.cos(d.ang)*push, dy=Math.sin(d.ang)*push;
+      d.arrow.style.transform=`translate(calc(-50% + ${dx.toFixed(1)}px),calc(-50% + ${dy.toFixed(1)}px)) rotate(${(d.ang*180/Math.PI).toFixed(1)}deg) scale(${sc.toFixed(3)})`;
+      let c=0;                                         // scoreline (≥1.2s), then the replay card
+      if(t>=0.56&&t<0.80){c=Math.min(1,(t-0.56)/0.06); d.ln.textContent=`${aw} 24 — 21 ${hm}`;}
+      else if(t>=0.80){c=Math.min(1,(t-0.80)/0.06); d.ln.textContent="REPLAY · PICK SIX";}
+      if(t>=0.94)c=Math.max(0,1-(t-0.94)/0.06);
+      d.card.style.opacity=c.toFixed(3);
+    });
+  },
+  prev(ctx,W,H,t){
+    const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, tgt=mwLookTarget();
+    cells.forEach(cell=>{
+      const isT=(cell[0]===tgt[0]&&cell[1]===tgt[1]); if(isT)return;
+      const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
+      const ang=Math.atan2(tgt[0]-cell[0],tgt[1]-cell[1]);
+      let a=t<0.10?t/0.10:(t<0.50?1:(t<0.58?1-(t-0.50)/0.08:0));
+      if(a>0){ const L=Math.min(cw,ch)*0.3;
+        ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang); ctx.globalAlpha=Math.max(0,a);
+        ctx.fillStyle="#ffcf7a"; ctx.beginPath();
+        ctx.moveTo(-L,-L*.18); ctx.lineTo(L*.25,-L*.18); ctx.lineTo(L*.25,-L*.5);
+        ctx.lineTo(L,0); ctx.lineTo(L*.25,L*.5); ctx.lineTo(L*.25,L*.18); ctx.lineTo(-L,L*.18);
+        ctx.closePath(); ctx.fill(); ctx.restore(); ctx.globalAlpha=1; }
+      let c=0,txt="";
+      if(t>=0.56&&t<0.80){c=Math.min(1,(t-0.56)/0.06); txt="24 — 21";}
+      else if(t>=0.80){c=Math.min(1,(t-0.80)/0.06); txt="REPLAY";}
+      if(t>=0.94)c=Math.max(0,1-(t-0.94)/0.06);
+      if(c>0){const f=Math.max(9,Math.round(ch*.16));
+        ctx.font="900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.globalAlpha=c; ctx.fillStyle="#fff"; ctx.fillText(txt,cx,cy); ctx.globalAlpha=1;}
+    });
+  }};
+/* ---- TOUCHDOWN TEXAS (§9.3, T3, 8.0s): TOUCHDOWN runs the canvas → TEXAS → flash →
+        burnt orange racing out from the feature wall to both corners ---- */
+MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000,
+  dom(){
+    const g=MW.geom, f=Math.round(g.sh*.5), tf=Math.round(g.sh*.62);
+    mwPanelBox.innerHTML=MW.panels.map(p=>mwPanelOpen(p)
+      +`<div class="mwx-wash"></div>`
+      +`<div class="mw-tdwrap" style="left:${-(p.off||0)}px;bottom:${-mwBotOff(g,p)}px;width:${g.total}px">
+          <div class="mwx-word" style="font-size:${f}px;transform:translate(${g.total}px,${-Math.round((g.wallH||g.sh)/2-f*.54)}px)">TOUCHDOWN</div>
+        </div>`
+      +`<div class="mwx-tex" style="font-size:${tf}px">TEXAS</div>`
+      +`<div class="mwx-flash"></div>`
+      +MW_CLOSE).join("");
+    MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i];
+      return {col:p.col||0,word:el.querySelector(".mwx-word"),tex:el.querySelector(".mwx-tex"),
+              flash:el.querySelector(".mwx-flash"),wash:el.querySelector(".mwx-wash")};});
+    const w=MW.dom[0]&&MW.dom[0].word?MW.dom[0].word.offsetWidth:0;
+    MW.tdW=(w&&w>10)?w:Math.round(g.sh*.5*5.6);
+    MW.tdF=Math.round(g.sh*.5);
+    mwOvEl.classList.add("paneled");
+  },
+  render(t){
+    const g=MW.geom, tgt=mwLookTarget(), cols=Math.max(1,mwGridRC().cols||1);
+    const runEnd=0.34;                                 // run-across: 1.2–2.0s per screen-width (§10)
+    const x=(g.total+g.m)-(g.total+MW.tdW+2*g.m)*Math.min(1,t/runEnd);
+    const up=Math.round((g.wallH||g.sh)/2-MW.tdF*.54);
+    MW.dom.forEach(d=>{
+      d.word.style.transform=`translate(${x.toFixed(1)}px,${-up}px)`;
+      d.word.style.opacity=t<runEnd?"1":"0";
+      // TEXAS holds (readable ≥1.2s), then the flash, then the orange race-out
+      let te=0,sc=.8;
+      if(t>=runEnd&&t<0.62){te=Math.min(1,(t-runEnd)/0.05); sc=.8+.2*te;}
+      d.tex.style.opacity=te.toFixed(3);
+      d.tex.style.transform=`translate(-50%,-50%) scale(${sc.toFixed(3)})`;
+      const fl=(t>=0.60&&t<0.66)?1-(t-0.60)/0.06:0;    // 250–500ms flash
+      d.flash.style.opacity=Math.max(0,fl).toFixed(3);
+      // burnt orange races out from the feature wall to BOTH corners, by column distance
+      const dist=Math.abs((d.col||0)-tgt[1])/Math.max(1,cols-1||1);
+      const w0=0.64+dist*0.16, wp=t>w0?Math.min(1,(t-w0)/0.10):0;
+      d.wash.style.opacity=(wp*(t>0.93?Math.max(0,1-(t-0.93)/0.07):1)).toFixed(3);
+    });
+  },
+  prev(ctx,W,H,t){
+    const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, tgt=mwLookTarget();
+    const runEnd=0.34, f=Math.max(11,Math.round(ch*.45));
+    ctx.textBaseline="middle";
+    if(t<runEnd){
+      ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="left";
+      const tw=ctx.measureText("TOUCHDOWN").width, x=W-(W+tw)*(t/runEnd);
+      ctx.fillStyle="#fff"; ctx.fillText("TOUCHDOWN",x,H/2);
+    }
+    if(t>=runEnd&&t<0.62){const a=Math.min(1,(t-runEnd)/0.05);
+      ctx.font="italic 900 "+Math.round(ch*.5)+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center";
+      ctx.globalAlpha=a; ctx.fillStyle="#bf5700";
+      cells.forEach(c=>ctx.fillText("TEXAS",c[1]*cw+cw/2,c[0]*ch+ch/2)); ctx.globalAlpha=1;}
+    if(t>=0.60&&t<0.66){ctx.fillStyle="rgba(255,255,255,"+(1-(t-0.60)/0.06).toFixed(2)+")";ctx.fillRect(0,0,W,H);}
+    cells.forEach(c=>{
+      const dist=Math.abs(c[1]-tgt[1])/Math.max(1,(MWD.cols-1)||1);
+      const w0=0.64+dist*0.16, wp=t>w0?Math.min(1,(t-w0)/0.10):0;
+      if(wp>0){ctx.fillStyle="rgba(191,87,0,"+(wp*(t>0.93?Math.max(0,1-(t-0.93)/0.07):1)).toFixed(2)+")";
+        ctx.fillRect(c[1]*cw,c[0]*ch,cw,ch);}
+    });
+  }};
+/* ---- FILM: any mp4 on the wall. SLICE = one film stretched across the whole canvas (each
+        screen shows its slice); SWEEP = each screen plays a different SECOND of the film in
+        turn, so the action travels the wall (works with ordinary 16:9 clips). Playback is
+        seeded from the shared clock and re-nudged if a decoder drifts >80ms. ---- */
+const MW_FILMS=[{f:"field.mp4",n:"Field"},{f:"steal.mp4",n:"Light sweep"},{f:"arena.mp4",n:"Arena"}];
+MW_CUE.film={name:"🎬 Film", tier:"T3 · video canvas", dur:9000,
+  opts:[{k:"filmMode",v:"slice",label:"⬌ Slice (one wide film)"},{k:"filmMode",v:"sweep",label:"⇥ Sweep (travels)"},
+        {k:"film",v:"field.mp4",label:"Field"},{k:"film",v:"steal.mp4",label:"Sweep clip"},{k:"film",v:"arena.mp4",label:"Arena"}],
+  pick:()=>({mode:MWD.filmMode||"slice",src:MWD.film||"field.mp4"}),
+  dom(){
+    const g=MW.geom, pk=MW.pick||{mode:"slice",src:"field.mp4"};
+    mwPanelBox.innerHTML=MW.panels.map(p=>{
+      const slice=(pk.mode!=="sweep");
+      const st=slice
+        ? `left:${-(p.off||0)}px;top:${-(p.offY||0)}px;width:${g.total}px;height:${g.wallH||g.sh}px`
+        : `left:0;top:0;width:${p.w}px;height:${p.h}px`;
+      return mwPanelOpen(p)
+        +`<video class="mwf-vid" muted playsinline preload="auto" style="position:absolute;${st};object-fit:cover"></video>`
+        +MW_CLOSE;}).join("");
+    MW.dom=MW.panels.map((p,i)=>({vid:mwPanelBox.children[i].querySelector(".mwf-vid"),
+      n:(MWL.idx||i+1)}));
+    const src=(MW.pick&&MW.pick.src)||"field.mp4";
+    MW.dom.forEach(d=>{ if(d.vid.getAttribute("src")!==src)d.vid.src=src; });
+    mwOvEl.classList.add("paneled");
+  },
+  render(t,el){
+    const pk=MW.pick||{}, n=Math.max(1,MW.wallN||MW.panels.length), secs=(MW.dur||9000)/1000;
+    MW.dom.forEach(d=>{ const v=d.vid; if(!v)return;
+      // SWEEP: this screen owns the (n-th) slice of the clip's timeline
+      const base=(pk.mode==="sweep")?((d.n-1)/n)*secs:0;
+      const want=base+(el/1000)*(pk.mode==="sweep"?(1/n):1);
+      if(v.readyState>=1&&isFinite(v.duration)&&v.duration>0){
+        const w=Math.min(want,v.duration-0.05);
+        if(Math.abs(v.currentTime-w)>0.08){try{v.currentTime=w;}catch(e){}}   // drift nudge
+      }
+      if(v.paused){const p=v.play(); if(p&&p.catch)p.catch(()=>{});}
+    });
+  },
+  prev(ctx,W,H,t){                                    // preview draws the slicing, not the footage
+    const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, sweep=(MWD.filmMode==="sweep");
+    const g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,"#12233a"); g.addColorStop(1,"#0a1626");
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const lit=sweep?Math.floor(t*cells.length):-1;
+    cells.forEach((c,i)=>{
+      const x=c[1]*cw,y=c[0]*ch;
+      if(sweep&&i===lit){const gg=ctx.createLinearGradient(x,y,x+cw,y+ch);
+        gg.addColorStop(0,"rgba(120,210,255,.55)"); gg.addColorStop(1,"rgba(60,140,220,.15)");
+        ctx.fillStyle=gg; ctx.fillRect(x,y,cw,ch);}
+      ctx.fillStyle="rgba(255,255,255,.55)";
+      const f=Math.max(8,Math.round(ch*.15));
+      ctx.font="900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(sweep?("▶ "+(i+1)):"▣",x+cw/2,y+ch/2);
+    });
+    if(!sweep){ctx.strokeStyle="rgba(120,210,255,.5)"; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);}
+  }};
 function mwStartWpLinked(T0,members,seed,grid,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
@@ -5903,6 +6244,9 @@ const MWD={rows:Math.min(6,Math.max(1,parseInt(localStorage.getItem("hrcam-wall-
   cells:(()=>{try{const j=JSON.parse(localStorage.getItem("hrcam-wall-cells"));
     if(Array.isArray(j)&&j.length)return j;}catch(e){} return null;})(),
   edit:false, drag:0, sel:localStorage.getItem("hrcam-wall-sel")||"wp",
+  hold:localStorage.getItem("hrcam-wall-hold")||"stop",              // The Hold: stop | convert
+  filmMode:localStorage.getItem("hrcam-wall-filmMode")||"slice",     // Film: slice | sweep
+  film:localStorage.getItem("hrcam-wall-film")||"field.mp4",
   move:localStorage.getItem("hrcam-wall-move")||"bounce",
   spd:(()=>{const v=parseFloat(localStorage.getItem("hrcam-wall-spd"));   // speed factor: 1 = normal, 2 = 2× faster
     if(v>0)return Math.min(3,Math.max(.3,v));
@@ -5928,10 +6272,14 @@ function mwCount(){return mwCells().length;}
 function mwSaveGrid(){mwCells();  // crop cells to the canvas before persisting
   localStorage.setItem("hrcam-wall-rows",MWD.rows);localStorage.setItem("hrcam-wall-cols",MWD.cols);
   localStorage.setItem("hrcam-wall-cells",JSON.stringify(MWD.cells));}
-const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"},{id:"td",name:"🏈 Touchdown"},{id:"tf",name:"🤘 Texas Fight"}];
+const MW_CONTENT=[{id:"wp",name:"⚡ Win Probability"},{id:"ball",name:"⚪ Ball Cross"},
+    {id:"td",name:"🏈 Touchdown"},{id:"tf",name:"🤘 Texas Fight"}]
+  .concat(Object.keys(MW_CUE).map(id=>({id,name:MW_CUE[id].name})));   // + the spec cue library
 function mwTdDur(){return Math.round(5500*Math.max(1,MWD.rows)/(MWD.spd||1));}  // one crossing per row
-function mwTfDur(){return Math.round(8400/(MWD.spd||1));}   // 3 full TEXAS→FIGHT! cycles
-function mwSelDur(){return MWD.sel==="wp"?mwWpDur():MWD.sel==="td"?mwTdDur():MWD.sel==="tf"?mwTfDur():mwBallDur();}
+const TF_BEATS=16;                                          // §9.3: 700ms beats, 11.2s of chant
+function mwTfDur(){return Math.round(TF_BEATS*700/(MWD.spd||1));}
+function mwSelDur(){ if(MW_CUE[MWD.sel])return mwCueDur(MWD.sel);
+  return MWD.sel==="wp"?mwWpDur():MWD.sel==="td"?mwTdDur():MWD.sel==="tf"?mwTfDur():mwBallDur();}
 function mwDashRender(){
   if(!$("#mwRowNum"))return;
   $("#mwRowNum").textContent=MWD.rows; $("#mwColNum").textContent=MWD.cols;
@@ -5966,6 +6314,10 @@ function mwDashRender(){
     [["bounce","🏀 Bounce"],["glide","➡️ Glide"],["lob","🌈 Lob"]].forEach(p=>
       opts.push(`<div class="mwd-opt${MWD.move===p[0]?" sel":""}" data-o="move" data-v="${p[0]}">${p[1]}</div>`));
   }
+  const cue=MW_CUE[MWD.sel];                          // registry cues declare their own options
+  if(cue&&cue.opts){ const L={hold:"BRANCH",filmMode:"MODE",film:"CLIP"}; let lastK=null;
+    cue.opts.forEach(o=>{ if(o.k!==lastK){opts.push('<span class="mwd-ol">'+(L[o.k]||o.k.toUpperCase())+'</span>');lastK=o.k;}
+      opts.push(`<div class="mwd-opt${(MWD[o.k]||"")===o.v?" sel":""}" data-o="${o.k}" data-v="${o.v}">${o.label}</div>`);});}
   opts.push('<span class="mwd-ol">SPEED</span>');
   [[.6,"🐢 Slow"],[1,"▶ Normal"],[1.7,"⚡ Fast"]].forEach(p=>
     opts.push(`<div class="mwd-opt${Math.abs(MWD.spd-p[0])<.01?" sel":""}" data-o="spd" data-v="${p[0]}">${p[1]}</div>`));
@@ -6006,7 +6358,8 @@ function mwPrevFrame(ts){
   const wx=Math.round((W-ww)/2), wy=Math.round((H-wh)/2);
   ctx.save(); ctx.translate(wx,wy);
   ctx.beginPath(); ctx.rect(0,0,ww,wh); ctx.clip();
-  if(MWD.sel==="wp")mwPrevWp(ctx,ww,wh,t,dpr,ts);
+  if(MW_CUE[MWD.sel]&&MW_CUE[MWD.sel].prev)MW_CUE[MWD.sel].prev(ctx,ww,wh,t);
+  else if(MWD.sel==="wp")mwPrevWp(ctx,ww,wh,t,dpr,ts);
   else if(MWD.sel==="td")mwPrevTd(ctx,ww,wh,t);
   else if(MWD.sel==="tf")mwPrevTf(ctx,ww,wh,t);
   else mwPrevBall(ctx,ww,wh,t);
@@ -6079,21 +6432,21 @@ function mwPrevTd(ctx,W,H,t){
 }
 function mwPrevTf(ctx,W,H,t){
   const cells=mwCells(), many=cells.length>1;
-  const p=(t*3)%1, phase=p<.5?0:1, e=mwTfEnv((p%.5)/.5);
+  const b=Math.min(TF_BEATS-1,Math.floor(t*TF_BEATS)), e=mwTfEnv((t*TF_BEATS)%1);
+  const ou=((b+1)%4===0), phase=b%2;
   const cw=W/MWD.cols, ch=H/MWD.rows, f=Math.max(10,Math.round(ch*.3));
-  ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial";
   ctx.textAlign="center"; ctx.textBaseline="middle";
-  cells.forEach((cell,i)=>{
-    const w=mwTfWord(cell[0],cell[1],phase,many); if(w===null)return;   // not this screen's beat
-    const word=w==="t"?"TEXAS":"FIGHT!";
-    const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2;
-    ctx.save(); ctx.globalAlpha=e.a;
-    ctx.translate(cx,cy); ctx.scale(e.s,e.s);
-    const gl=ctx.createRadialGradient(0,0,4,0,0,ch*.5);
-    gl.addColorStop(0,"rgba(191,87,0,.4)"); gl.addColorStop(1,"rgba(191,87,0,0)");
-    ctx.fillStyle=gl; ctx.fillRect(-cw/2,-ch/2,cw,ch);
-    ctx.lineJoin="round"; ctx.lineWidth=Math.max(1.5,f*.06);
-    ctx.strokeStyle=w==="t"?"rgba(255,255,255,.85)":"rgba(191,87,0,.95)";
+  cells.forEach(cell=>{
+    const mine=mwTfWord(cell[0],cell[1],phase,many);
+    const cx=cell[1]*cw+cw/2, cy=cell[0]*ch+ch/2, x0=cell[1]*cw, y0=cell[0]*ch;
+    const bright=ou?(0.88*e.a):(mine===null?0.9*Math.max(.6,e.a):0);
+    if(bright>0){ctx.fillStyle="rgba(191,87,0,"+bright.toFixed(2)+")"; ctx.fillRect(x0,y0,cw,ch);}
+    const w=ou?"o":mine; if(!w)return;
+    const word=w==="t"?"TEXAS":w==="f"?"FIGHT!":"OU SUCKS", fs=w==="o"?Math.round(f*.62):f;
+    ctx.font="italic 900 "+fs+"px system-ui,Segoe UI,Arial";
+    ctx.save(); ctx.globalAlpha=e.a; ctx.translate(cx,cy); ctx.scale(e.s,e.s);
+    ctx.lineJoin="round"; ctx.lineWidth=Math.max(1.5,fs*.06);
+    ctx.strokeStyle=w==="t"?"rgba(255,255,255,.85)":w==="f"?"rgba(191,87,0,.95)":"rgba(120,40,0,.9)";
     ctx.strokeText(word,0,0);
     ctx.fillStyle=w==="t"?"#bf5700":"#ffffff";
     ctx.fillText(word,0,0);
@@ -6156,7 +6509,8 @@ $("#mwRowMinus").onclick=()=>{MWD.rows=Math.max(1,MWD.rows-1); mwSaveGrid(); mwD
 $("#mwRowPlus").onclick=()=>{if(MWD.rows<6){MWD.rows++; mwFillRow(MWD.rows-1);} mwSaveGrid(); mwDashRender();};
 $("#mwColMinus").onclick=()=>{MWD.cols=Math.max(1,MWD.cols-1); mwSaveGrid(); mwDashRender();};
 $("#mwColPlus").onclick=()=>{if(MWD.cols<12){MWD.cols++; mwFillCol(MWD.cols-1);} mwSaveGrid(); mwDashRender();};
-$("#mwFireBtn").onclick=()=>{ if(MWD.sel==="wp")triggerWinProbWall();
+$("#mwFireBtn").onclick=()=>{ if(MW_CUE[MWD.sel])mwFireCue(MWD.sel);
+  else if(MWD.sel==="wp")triggerWinProbWall();
   else if(MWD.sel==="td")triggerTdWall();
   else if(MWD.sel==="tf")triggerTfWall(); else triggerBallCross(); };
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
