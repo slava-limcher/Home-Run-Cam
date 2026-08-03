@@ -1656,7 +1656,9 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 .mwd-grid{display:flex;align-items:center;gap:6px}
 .mwd-x{color:var(--dim);font-weight:900;padding:0 4px}
 .mwd-tiles{flex:1;display:grid;gap:6px;min-width:220px;grid-template-columns:repeat(var(--mwCols,4),1fr)}
-.mwd-tile{flex:1;min-width:52px;height:56px;border-radius:10px;border:1px dashed rgba(255,255,255,.3);
+.mwd-cp{position:absolute;top:2px;right:5px;font-size:10px;font-style:normal;opacity:.5;cursor:copy}
+.mwd-cp:hover{opacity:1}
+.mwd-tile{position:relative;flex:1;min-width:52px;height:56px;border-radius:10px;border:1px dashed rgba(255,255,255,.3);
   display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
   color:var(--dim);font-weight:900;gap:2px}
 .mwd-tile b{font-size:16px;color:#fff}
@@ -1690,6 +1692,40 @@ body.multi #mwDash{display:flex;flex-direction:column;gap:14px;max-width:1100px;
 #mwSpd{width:150px;accent-color:var(--gold,#e8c34a);margin-left:4px}
 .mwd-spdv{color:var(--gold,#e8c34a);font-weight:900;font-size:12px;min-width:44px}
 .mwd-fire{width:100%}
+/* ===== SPEC CUE LIBRARY (barboards-spec.md §9) — wall cues on the shared canvas =====
+   Shared primitives so every cue is a few lines: a colour field, a centred word, a sub, a
+   card, a meter, an edge tint, a run-across word in wall coords, a flash. */
+.cq-field{position:absolute;inset:0;opacity:0}
+.cq-word{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:0;white-space:nowrap;
+  font-weight:900;font-style:italic;letter-spacing:.02em;color:#fff;text-align:center;
+  text-shadow:0 8px 30px rgba(0,0,0,.6)}
+.cq-sub{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);opacity:0;white-space:nowrap;
+  font-weight:900;letter-spacing:6px;color:#cfe0f0;text-shadow:0 4px 16px rgba(0,0,0,.7)}
+.cq-flash{position:absolute;inset:0;background:#fff;opacity:0}
+.cq-edge{position:absolute;inset:0;opacity:0;pointer-events:none}
+.cq-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);opacity:0;text-align:center;
+  background:linear-gradient(180deg,rgba(12,20,34,.96),rgba(8,14,24,.96));border:1px solid rgba(255,255,255,.18);
+  border-radius:16px;padding:3.5% 6%;color:#fff;font-weight:900;white-space:nowrap;
+  box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.cq-card i{display:block;font-style:normal;color:#9fd9f2;letter-spacing:6px;font-weight:900}
+.cq-card u{display:block;text-decoration:none;color:var(--gold,#e8c34a)}
+.cq-bar{position:absolute;left:8%;right:8%;bottom:15%;height:9%;border:2px solid rgba(255,255,255,.4);
+  border-radius:999px;overflow:hidden;opacity:0;background:rgba(0,0,0,.45)}
+.cq-bar>b{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ff8a3a,#ffd76a,#fff)}
+.cq-run{position:absolute;left:0;bottom:0;white-space:nowrap;font-weight:900;font-style:italic;color:#fff;
+  text-shadow:0 6px 0 rgba(10,14,22,.7),0 16px 40px rgba(0,0,0,.55)}
+.cq-rows{position:absolute;left:6%;right:6%;top:8%;bottom:8%;display:flex;flex-direction:column;gap:2%}
+.cq-row{flex:1;display:flex;align-items:center;justify-content:space-between;padding:0 4%;
+  background:linear-gradient(90deg,rgba(20,34,54,.9),rgba(12,22,38,.9));border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;color:#dce9f5;font-weight:900;opacity:0}
+.cq-row s{text-decoration:none;color:var(--gold,#e8c34a)}
+.cq-grid{position:absolute;left:8%;top:8%;right:8%;bottom:8%;display:grid;gap:1.5%;opacity:0}
+.cq-cell{border:1px solid rgba(255,255,255,.2);border-radius:6px;display:grid;place-items:center;
+  background:rgba(14,26,44,.8);color:#9fd9f2;font-weight:900}
+.cq-cell.daub{background:linear-gradient(180deg,#1f7a4d,#12563a);color:#fff;
+  box-shadow:0 0 18px rgba(60,220,140,.45)}
+.cq-tick{position:absolute;left:0;bottom:6%;white-space:nowrap;font-weight:900;letter-spacing:2px;
+  color:#dce9f5;text-shadow:0 4px 14px rgba(0,0,0,.7)}
 /* ===== SPEC CUE LIBRARY (barboards-spec.md §9) — wall cues on the shared canvas ===== */
 /* THE HOLD (§9.2, T2, tense only): wall desaturates, one hairline contracts toward each
    screen's OWN centre deliberately out of step, then either a 500ms flash + flood (stop)
@@ -6133,8 +6169,8 @@ MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000,
   render(t){
     const g=MW.geom, tgt=mwLookTarget(), cols=Math.max(1,mwGridRC().cols||1);
     const runEnd=0.34;                                 // run-across: 1.2–2.0s per screen-width (§10)
-    const x=(g.total+g.m)-(g.total+MW.tdW+2*g.m)*Math.min(1,t/runEnd);
-    const up=Math.round((g.wallH||g.sh)/2-MW.tdF*.54);
+    const ride=cqRowRide(Math.min(1,t/runEnd),MW.tdW,MW.tdF);   // row by row, never on a seam
+    const x=ride.x, up=ride.up;
     MW.dom.forEach(d=>{
       d.word.style.transform=`translate(${x.toFixed(1)}px,${-up}px)`;
       d.word.style.opacity=t<runEnd?"1":"0";
@@ -6155,10 +6191,12 @@ MW_CUE.tdtex={name:"🤘 Touchdown Texas", tier:"T3 · celebratory", dur:8000,
     const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, tgt=mwLookTarget();
     const runEnd=0.34, f=Math.max(11,Math.round(ch*.45));
     ctx.textBaseline="middle";
-    if(t<runEnd){
+    if(t<runEnd){                                     // rides row by row, never across a seam
+      const rows=MWD.rows, legF=Math.min((t/runEnd)*rows,rows),
+            leg=Math.min(rows-1,Math.floor(legF)), tl=legF-leg;
       ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="left";
-      const tw=ctx.measureText("TOUCHDOWN").width, x=W-(W+tw)*(t/runEnd);
-      ctx.fillStyle="#fff"; ctx.fillText("TOUCHDOWN",x,H/2);
+      const tw=ctx.measureText("TOUCHDOWN").width, x=W-(W+tw)*tl;
+      ctx.fillStyle="#fff"; ctx.fillText("TOUCHDOWN",x,leg*ch+ch/2);
     }
     if(t>=runEnd&&t<0.62){const a=Math.min(1,(t-runEnd)/0.05);
       ctx.font="italic 900 "+Math.round(ch*.5)+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center";
@@ -6227,6 +6265,217 @@ MW_CUE.film={name:"🎬 Film", tier:"T3 · video canvas", dur:9000,
     });
     if(!sweep){ctx.strokeStyle="rgba(120,210,255,.5)"; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);}
   }};
+/* ---------- cue primitives: envelopes, per-panel DOM, generic canvas preview ---------- */
+function cqIn(t,a,d){return t<=a?0:Math.min(1,(t-a)/(d||0.04));}
+function cqOut(t,b,d){return t<b?1:Math.max(0,1-(t-b)/(d||0.04));}
+function cqBand(t,a,b,fi,fo){return Math.max(0,Math.min(cqIn(t,a,fi),cqOut(t,b,fo)));}
+function cqDom(html,refs){
+  mwPanelBox.innerHTML=MW.panels.map((p,i)=>mwPanelOpen(p)+html(p,i)+MW_CLOSE).join("");
+  MW.dom=MW.panels.map((p,i)=>{const el=mwPanelBox.children[i],
+    o={p,el,i,n:(MWL.idx||i+1),r:p.row||0,c:(p.col!=null?p.col:i)};
+    for(const k in (refs||{}))o[k]=el.querySelector(refs[k]);
+    return o;});
+  mwOvEl.classList.add("paneled");
+}
+function cqSet(el,op,tr){ if(!el)return; el.style.opacity=(op||0).toFixed(3); if(tr)el.style.transform=tr; }
+function cqFs(p,frac,len){return Math.round(Math.min(p.h*frac,(p.w*.88)/Math.max(1,(len||5)*.56)));}
+function cqSeat(d){const cells=mwCellsOf(),k=cells.findIndex(p=>p[0]===d.r&&p[1]===d.c);return k<0?d.i:k;}
+function cqN(){return Math.max(1,mwCellsOf().length);}
+function cqWrap(p,inner){return `<div class="mw-tdwrap" style="left:${-(p.off||0)}px;bottom:${-mwBotOff(MW.geom,p)}px;width:${MW.geom.total}px;height:0">${inner}</div>`;}
+/* anything that RUNS ACROSS the wall rides ONE ROW AT A TIME (top row first, then the next) —
+   never centred on a bezel seam where it would be sliced in half */
+function cqRowRide(t,textW,fs){
+  const g=MW.geom, rows=Math.max(1,g.rows||Math.round((g.wallH||g.sh)/g.sh));
+  const legF=Math.min(Math.max(0,t)*rows,rows), leg=Math.min(rows-1,Math.floor(legF)), tl=legF-leg;
+  const cy=(g.wallH||g.sh)-(leg+.5)*g.sh;
+  return {x:(g.total+g.m)-(g.total+textW+2*g.m)*tl, up:Math.round(cy-fs*.54), leg, tl, rows};
+}
+/* generic OUTPUT preview: a cue supplies pv(t,seat,cell,n) -> {bg,flash,word,wf,color,bar} */
+function cqPrev(ctx,W,H,t){
+  const cells=mwCellsOf(), cw=W/MWD.cols, ch=H/MWD.rows, c=MW_CUE[MWD.sel]||{};
+  cells.forEach((cell,i)=>{
+    const s=(c.pv?c.pv(t,i,cell,cells.length):null)||{}, x=cell[1]*cw, y=cell[0]*ch;
+    if(s.bg){ctx.fillStyle=s.bg; ctx.fillRect(x,y,cw,ch);}
+    if(s.bar!=null){const bw=cw*.8,bh=Math.max(4,ch*.1),bx=x+cw*.1,by=y+ch*.72;
+      ctx.strokeStyle="rgba(255,255,255,.45)"; ctx.lineWidth=1.5; ctx.strokeRect(bx,by,bw,bh);
+      ctx.fillStyle="#ffcf7a"; ctx.fillRect(bx,by,bw*Math.max(0,Math.min(1,s.bar)),bh);}
+    if(s.word&&(s.wf==null||s.wf>0.02)){
+      const f=Math.max(8,Math.round(Math.min(ch*.3,(cw*.86)/Math.max(1,s.word.length*.56))));
+      ctx.font="italic 900 "+f+"px system-ui,Segoe UI,Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.globalAlpha=(s.wf==null?1:s.wf); ctx.fillStyle=s.color||"#fff";
+      ctx.fillText(s.word,x+cw/2,y+ch/2); ctx.globalAlpha=1;}
+    if(s.flash){ctx.fillStyle="rgba(255,255,255,"+Math.min(1,s.flash).toFixed(2)+")"; ctx.fillRect(x,y,cw,ch);}
+  });
+}
+const CQ_SLATE=[["TEXAS","OKLAHOMA","31–28"],["ALABAMA","LSU","24–21"],["OHIO ST","PENN ST","17–14"],
+  ["MICHIGAN","MICH ST","28–10"],["GEORGIA","TENNESSEE","21–17"],["OREGON","WASHINGTON","14–13"],
+  ["TCU","BAYLOR","3–38"],["UTAH","ARIZONA ST","27–24"]];
+/* ---------- T0 · ambient (canvas floor: costs no window, ever) ---------- */
+MW_CUE.rail={name:"▬ Rail", tier:"T0 · ambient", dur:12000,
+  dom(){ const g=MW.geom, tick=CQ_SLATE.map(s=>s[0]+" "+s[2].split("–")[0]+" — "+s[2].split("–")[1]+" "+s[1]).join("   ·   ")+"   ·   ";
+    cqDom(p=>cqWrap(p,`<div class="cq-tick" style="font-size:${Math.round(g.sh*.075)}px">${tick+tick}</div>`)
+      +`<div class="cq-sub" style="bottom:auto;top:8%;font-size:${Math.round(p.h*.05)}px;opacity:.5">BARBOARDS · JOIN ${MWN.room||"----"}</div>`,
+      {tick:".cq-tick"}); MW.railW=MW.dom[0].tick.offsetWidth/2||MW.geom.total; },
+  render(t){ const g=MW.geom, span=MW.railW||g.total, x=-(t*span*2)%span;
+    MW.dom.forEach(d=>{ if(d.tick)d.tick.style.transform=`translateX(${x.toFixed(1)}px)`; }); },
+  pv(t,i,cell,n){return {bg:"rgba(8,14,26,.92)",word:(i===Math.floor(t*n*2)%n)?"▬":null,color:"#7fd8ff"};}};
+MW_CUE.board={name:"▦ Board", tier:"T0 · ambient", dur:10000,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0d1a2e,#081221)"></div>`
+      +`<div class="cq-rows" style="font-size:${Math.round(p.h*.072)}px">`
+      +CQ_SLATE.slice(0,5).map(s=>`<div class="cq-row"><span>${s[0]} @ ${s[1]}</span><s>${s[2]}</s></div>`).join("")
+      +`</div>`, {field:".cq-field",rows:".cq-rows"});
+    MW.dom.forEach(d=>{d.rowEls=[...d.el.querySelectorAll(".cq-row")];}); },
+  render(t){ MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.94,.06,.06));
+    cqSet(d.rows,1); d.rowEls.forEach((r,k)=>cqSet(r,cqBand(t,.04+k*.05,.94,.05,.06))); }); },
+  pv(t){return {bg:"rgba(10,18,32,.94)",word:"BOARD",wf:cqBand(t,.05,.92,.08,.06),color:"#9fd9f2"};}};
+MW_CUE.tomorrow={name:"🗓 Tomorrow's Board", tier:"T0 · ambient", dur:4500,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0c1728,#070f1c)"></div>`
+      +`<div class="cq-card" style="font-size:${cqFs(p,.13,10)}px"><i style="font-size:.34em">TOMORROW</i><u class="ln"></u></div>`,
+      {field:".cq-field",card:".cq-card",ln:".ln"}); },
+  render(t){ const ph=Math.min(2,Math.floor(t*3)), TXT=["SUNDAY'S CARD","STANDINGS","NEXT SATURDAY"];
+    MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.95,.05,.05));
+      d.ln.textContent=TXT[ph];
+      const f=(t*3)%1; cqSet(d.card,Math.min(cqIn(f,0,.12),cqOut(f,.82,.14)),"translate(-50%,-50%) scale(1)"); }); },
+  pv(t){const ph=Math.min(2,Math.floor(t*3)),f=(t*3)%1;
+    return {bg:"rgba(12,23,40,.95)",word:["SUNDAY","STANDINGS","NEXT SAT"][ph],
+      wf:Math.min(cqIn(f,0,.12),cqOut(f,.82,.14)),color:"#e8c34a"};}};
+MW_CUE.squares={name:"▩ Squares Sweep", tier:"T0 · ambient", dur:8500,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0b1626,#070f1b)"></div>`
+      +`<div class="cq-grid" style="grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);font-size:${Math.round(p.h*.05)}px">`
+      +Array.from({length:25},(_,k)=>`<div class="cq-cell">${(k%10)}</div>`).join("")+`</div>`,
+      {field:".cq-field",grid:".cq-grid"});
+    MW.dom.forEach(d=>{d.cells=[...d.el.querySelectorAll(".cq-cell")];}); },
+  render(t){ const DAUB=[7,13,4,21,16], AT=[.22,.36,.50,.64,.78];
+    MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.95,.05,.05)); cqSet(d.grid,cqBand(t,.03,.95,.06,.05));
+      DAUB.forEach((k,j)=>{ const on=t>=AT[j]; if(d.cells[k])d.cells[k].classList.toggle("daub",on); }); }); },
+  pv(t){const done=[.22,.36,.50,.64,.78].filter(a=>t>=a).length;
+    return {bg:"rgba(11,22,38,.95)",word:"▩ "+done+"/5",wf:cqBand(t,.03,.94,.06,.05),color:"#7fe0a8"};}};
+MW_CUE.reclaim={name:"♻ Reclaim", tier:"T0 · one output", dur:6000,
+  dom(){ const last=mwCellsOf().length-1;
+    cqDom((p,i)=>{ const seat=(MWL.idx?MWL.idx-1:i); if(seat!==last)return "";
+      return `<div class="cq-field" style="background:linear-gradient(180deg,#231208,#12060a)"></div>`
+        +`<div class="cq-word" style="font-size:${cqFs(p,.17,12)}px">TCU 3 — 38 BAYLOR</div>`
+        +`<div class="cq-sub" style="font-size:${Math.round(p.h*.045)}px">GARBAGE TIME · λ 25</div>`
+        +`<div class="cq-card" style="font-size:${cqFs(p,.13,10)}px"><i style="font-size:.34em">RECLAIMED</i><u>BARBOARDS CONTENT</u></div>`;},
+      {field:".cq-field",word:".cq-word",sub:".cq-sub",card:".cq-card"}); },
+  render(t){ MW.dom.forEach(d=>{ if(!d.field)return;
+    cqSet(d.field,cqBand(t,0,.95,.06,.06));
+    cqSet(d.word,cqBand(t,.04,.42,.06,.08)); cqSet(d.sub,cqBand(t,.10,.42,.08,.08));
+    cqSet(d.card,cqBand(t,.50,.92,.06,.08),"translate(-50%,-50%) scale(1)"); }); },
+  pv(t,i,cell,n){ if(i!==n-1)return {};
+    return {bg:"rgba(35,18,8,.95)",word:t<.46?"TCU 3—38":"BARBOARDS",
+      wf:t<.46?cqBand(t,.04,.42,.06,.08):cqBand(t,.5,.92,.06,.08),color:t<.46?"#ffb27a":"#7fd8ff"};}};
+/* ---------- T1 · accent (overlay grammar, feed stays up, ≤2s) ---------- */
+MW_CUE.chain={name:"⛓ Chain", tier:"T1 · accent", dur:1400,
+  dom(){ const g=MW.geom, h=g.wallH||g.sh;
+    cqDom(p=>cqWrap(p,`<div class="cq-cl" style="position:absolute;bottom:0;height:${h}px;width:${Math.max(6,Math.round(g.sh*.014))}px;background:linear-gradient(180deg,rgba(255,215,120,.15),#ffe6a8 45%,#fff 55%,rgba(255,215,120,.15));box-shadow:0 0 26px rgba(255,210,120,.85),0 0 70px rgba(255,190,80,.45)"></div>`)
+      +`<div class="cq-edge" style="box-shadow:inset 0 0 0 ${Math.max(2,Math.round(p.h*.012))}px rgba(255,215,120,.55)"></div>`,
+      {cl:".cq-cl",edge:".cq-edge"}); },
+  render(t){ const g=MW.geom, x=-20+(g.total+40)*t;
+    MW.dom.forEach(d=>{ if(d.cl)d.cl.style.transform=`translateX(${x.toFixed(1)}px)`;
+      cqSet(d.edge,cqBand(t,.05,.7,.1,.3)*.8); }); },
+  pv(t,i,cell,n){const lit=Math.floor(t*n); return {bg:i===lit?"rgba(255,214,120,.5)":"rgba(255,214,120,.07)"};}};
+MW_CUE.redzone={name:"🟥 Red Zone", tier:"T1 · state", dur:6000,
+  dom(){ cqDom(p=>`<div class="cq-edge" style="box-shadow:inset 0 0 ${Math.round(p.h*.16)}px ${Math.round(p.h*.05)}px rgba(214,38,38,.75)"></div>`
+      +`<div class="cq-field" style="background:linear-gradient(180deg,rgba(150,16,16,.30),transparent 38%,transparent 62%,rgba(150,16,16,.30))"></div>`,
+      {edge:".cq-edge",field:".cq-field"}); },
+  render(t){ const pulse=.62+.38*Math.sin(t*Math.PI*6);
+    MW.dom.forEach(d=>{ const a=cqBand(t,0,.9,.08,.1);
+      cqSet(d.edge,a*pulse); cqSet(d.field,a*(.5+.5*pulse)); }); },
+  pv(t){const pulse=.6+.4*Math.sin(t*Math.PI*6);
+    return {bg:"rgba(160,20,20,"+(0.42*pulse*cqBand(t,0,.9,.08,.1)).toFixed(2)+")"};}};
+MW_CUE.burst={name:"✳ Burst", tier:"T1 · accent", dur:1800,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:radial-gradient(120% 120% at 50% 50%,rgba(255,255,255,.85),rgba(120,200,255,.35) 45%,transparent 72%)"></div>`,
+      {field:".cq-field"}); },
+  render(t){ const tgt=mwLookTarget(), cols=Math.max(1,mwGridRC().cols);
+    MW.dom.forEach(d=>{ const dist=Math.abs((d.c||0)-tgt[1])/Math.max(1,cols-1||1);
+      cqSet(d.field,cqBand(t,dist*.42,dist*.42+.20,.10,.30)); }); },
+  pv(t,i,cell){const tgt=mwLookTarget(),dist=Math.abs(cell[1]-tgt[1])/Math.max(1,(MWD.cols-1)||1);
+    return {flash:cqBand(t,dist*.42,dist*.42+.2,.1,.3)*.85};}};
+/* ---------- T2 · feature (wall claim, ducked audio, ~2min refractory) ---------- */
+MW_CUE.steal={name:"🧤 Steal", tier:"T2 · feature", dur:2600,
+  dom(){ const g=MW.geom;
+    cqDom(p=>cqWrap(p,`<div class="cq-wipe" style="position:absolute;bottom:0;height:${g.wallH||g.sh}px;width:0;background:linear-gradient(90deg,rgba(30,139,255,.15),rgba(30,139,255,.85) 70%,#eaf6ff);box-shadow:0 0 60px rgba(40,150,255,.6)"></div>`)
+      +`<div class="cq-word" style="font-size:${cqFs(p,.22,8)}px">TURNOVER</div>`,
+      {wipe:".cq-wipe",word:".cq-word"}); },
+  render(t){ const g=MW.geom, e=Math.min(1,t/.42), w=g.total*(e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2);
+    MW.dom.forEach(d=>{ if(d.wipe){d.wipe.style.width=w.toFixed(1)+"px";
+        d.wipe.style.opacity=cqOut(t,.62,.22).toFixed(3);}
+      cqSet(d.word,cqBand(t,.38,.90,.06,.08)); }); },
+  pv(t,i,cell,n){const e=Math.min(1,t/.42), front=e*n;
+    return {bg:(cell[1]+1)<=front?"rgba(30,139,255,"+(0.6*cqOut(t,.62,.22)).toFixed(2)+")":null,
+      word:"TURNOVER",wf:cqBand(t,.38,.9,.06,.08)};}};
+MW_CUE.flip={name:"⇄ Flip", tier:"T2 · lead change", dur:4000,
+  dom(){ const g=MW.geom;
+    cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#5a1020,#33060f)"></div>`
+      +cqWrap(p,`<div class="cq-side" style="position:absolute;bottom:0;height:${g.wallH||g.sh}px;width:0;background:linear-gradient(180deg,#0d3a5c,#07203a);box-shadow:6px 0 40px rgba(0,0,0,.6)"></div>`)
+      +`<div class="cq-card" style="font-size:${cqFs(p,.14,11)}px"><i style="font-size:.32em">LEAD CHANGE</i><u class="ln"></u></div>`,
+      {field:".cq-field",side:".cq-side",card:".cq-card",ln:".ln"}); },
+  render(t){ const g=MW.geom, e=t<.55?(t/.55):1, k=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2;
+    const w=g.total*(0.62-0.24*k);                    // the boundary slides — opposition grammar
+    MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.93,.06,.07));
+      if(d.side){d.side.style.width=w.toFixed(1)+"px"; d.side.style.opacity=cqBand(t,0,.93,.06,.07).toFixed(3);}
+      d.ln.textContent=((G.away&&G.away.abbr)||"AWAY")+" 28 — 31 "+((G.home&&G.home.abbr)||"HOME");
+      cqSet(d.card,cqBand(t,.52,.92,.06,.08),"translate(-50%,-50%) scale(1)"); }); },
+  pv(t,i,cell,n){const e=t<.55?(t/.55):1,k=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2, b=(0.62-0.24*k)*n;
+    return {bg:(cell[1]+1)<=b?"rgba(13,58,92,.92)":"rgba(90,16,32,.92)",
+      word:t>.52?"28 — 31":null,wf:cqBand(t,.52,.92,.06,.08),color:"#fff"};}};
+MW_CUE.clock={name:"⏱ Clock", tier:"T2 · tense only", dur:4600,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:#070a10"></div>`
+      +`<div class="cq-word" style="font-size:${cqFs(p,.30,4)}px;font-style:normal;color:#c9d6e4;text-shadow:none;letter-spacing:.06em">2:00</div>`
+      +`<div class="cq-sub" style="font-size:${Math.round(p.h*.05)}px">TWO MINUTE WARNING</div>`,
+      {field:".cq-field",word:".cq-word",sub:".cq-sub"}); },
+  render(t){ MW.dom.forEach(d=>{                       // subtractive: no colour, no flash, no motion
+      cqSet(d.field,cqBand(t,0,.88,.10,.10)*.86);
+      cqSet(d.word,cqBand(t,.10,.86,.08,.10)); cqSet(d.sub,cqBand(t,.20,.86,.08,.10)); }); },
+  pv(t){return {bg:"rgba(7,10,16,"+(0.86*cqBand(t,0,.88,.1,.1)).toFixed(2)+")",
+    word:"2:00",wf:cqBand(t,.1,.86,.08,.1),color:"#c9d6e4"};}};
+MW_CUE.third={name:"3️⃣ Third Down Stand", tier:"T2 · feature", dur:9000,
+  dom(){ cqDom(p=>`<div class="cq-field" style="background:linear-gradient(180deg,#0e1c30,#070f1c)"></div>`
+      +`<div class="cq-word wA" style="font-size:${cqFs(p,.26,5)}px">THIRD</div>`
+      +`<div class="cq-word wB" style="font-size:${cqFs(p,.26,4)}px">DOWN</div>`
+      +`<div class="cq-word wC" style="font-size:${cqFs(p,.30,4)}px;color:#ffd76a">SACK</div>`
+      +`<div class="cq-bar"><b></b></div>`
+      +`<div class="cq-sub" style="font-size:${Math.round(p.h*.05)}px">GET LOUD</div>`
+      +`<div class="cq-flash"></div>`,
+      {field:".cq-field",wA:".wA",wB:".wB",wC:".wC",bar:".cq-bar",fill:".cq-bar>b",sub:".cq-sub",flash:".cq-flash"}); },
+  render(t,el){ const rc=mwGridRC(), half=(rc.cols||1)/2, B=700*(MWD.spd?1:1);
+    const b=Math.floor(el/700), e=mwTfEnv((el%700)/700);
+    MW.dom.forEach(d=>{ cqSet(d.field,cqBand(t,0,.95,.05,.05));
+      const left=(d.c||0)<half;                        // left wall calls, right wall answers
+      const callA=(t<.45)&&(b%2===0)&&left, callB=(t<.45)&&(b%2===1)&&!left;
+      cqSet(d.wA,callA?e.a:0,`translate(-50%,-50%) scale(${callA?e.s:1})`);
+      cqSet(d.wB,callB?e.a:0,`translate(-50%,-50%) scale(${callB?e.s:1})`);
+      const mo=cqBand(t,.45,.80,.05,.04);              // patron GET LOUD meter
+      cqSet(d.bar,mo); cqSet(d.sub,mo);
+      if(d.fill)d.fill.style.width=(Math.min(1,Math.max(0,(t-.45)/.33)*1.02)*100).toFixed(1)+"%";
+      cqSet(d.flash,cqBand(t,.80,.83,.01,.03)*.9);
+      cqSet(d.wC,cqBand(t,.82,.96,.03,.05),`translate(-50%,-50%) scale(${(1+.06*cqIn(t,.82,.05)).toFixed(3)})`); }); },
+  pv(t,i,cell){const rc=mwGridRC(),half=(rc.cols||1)/2,left=cell[1]<half;
+    const b=Math.floor(t*12.85), e=mwTfEnv((t*12.85)%1);
+    if(t<.45)return {bg:"rgba(14,28,48,.95)",word:(b%2===0&&left)?"THIRD":((b%2===1&&!left)?"DOWN":null),wf:e.a};
+    if(t<.80)return {bg:"rgba(14,28,48,.95)",bar:(t-.45)/.33,word:"GET LOUD",wf:.9,color:"#cfe0f0"};
+    return {bg:"rgba(14,28,48,.95)",word:"SACK",wf:cqBand(t,.82,.96,.03,.05),color:"#ffd76a",
+      flash:cqBand(t,.80,.83,.01,.03)*.9};}};
+MW_CUE.fourthgoal={name:"🥅 Fourth & Goal", tier:"T2 · tense only", dur:8500,
+  dom(){ cqDom(p=>`<div class="mwh-veil"></div><div class="mwh-line"></div><div class="mwh-flood"></div>`
+      +`<div class="cq-word wT" style="font-size:${cqFs(p,.20,11)}px">4TH & GOAL</div>`
+      +`<div class="mwh-word" style="font-size:${cqFs(p,.24,6)}px">HELD</div><div class="cq-flash"></div>`,
+      {veil:".mwh-veil",line:".mwh-line",flood:".mwh-flood",wT:".wT",word:".mwh-word",flash:".cq-flash"}); },
+  render(t){ MW.dom.forEach(d=>{
+      cqSet(d.wT,cqBand(t,.02,.15,.04,.05));           // name the situation, then subtract
+      const lag=((d.n*7)%5)*0.026, p=Math.max(0,Math.min((t-.17-lag)/.42,1));
+      cqSet(d.veil,t>.60?Math.max(0,.84-(t-.60)*2.4):Math.min(1,cqIn(t,.15,.10))*.84);
+      if(d.line){d.line.style.width=(100-95*p).toFixed(2)+"%"; cqSet(d.line,cqBand(t,.17,.60,.05,.03));}
+      cqSet(d.flash,cqBand(t,.61,.645,.008,.035)*.95);
+      const fo=cqIn(t,.645,.06)*cqOut(t,.94,.06);
+      cqSet(d.flood,fo*.9); cqSet(d.word,fo,`translate(-50%,-50%) scale(${(.88+.12*fo).toFixed(3)})`); }); },
+  pv(t,i){const lag=(((i+1)*7)%5)*0.026;
+    if(t<.15)return {bg:"rgba(5,7,12,.7)",word:"4TH & GOAL",wf:cqBand(t,.02,.15,.04,.05)};
+    if(t<.61)return {bg:"rgba(5,7,12,.84)",bar:null,word:null,flash:0,
+      color:"#fff"};
+    return {bg:"rgba(9,30,60,.8)",word:"HELD",wf:cqIn(t,.645,.06)*cqOut(t,.94,.06),
+      flash:cqBand(t,.61,.645,.008,.035)*.95};}};
 function mwStartWpLinked(T0,members,seed,grid,dur){
   const gg=mwGridGeom(members,grid); if(!gg)return;
   MW.live=false;                                     // superseding quietly — no stop broadcast
@@ -6303,7 +6552,7 @@ function mwDashRender(){
     if(!n){tiles.push(`<div class="mwd-tile off${MWD.edit?" edit":""}" data-rc="${r},${c}"><b>＋</b><small>ADD SCREEN</small></div>`);continue;}
     const me=(MWL.idx===n), rr=MWL.roster[n], live=me||(rr&&now-rr.ts<9000);
     const sub=MWD.edit?"REMOVE":(me?"THIS SCREEN":(live?(rr.net?"🌐 ":"")+rr.w+"×"+rr.h:"WAITING"));
-    tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" draggable="true" data-rc="${r},${c}" data-n="${n}"><b>${n}</b><small>${sub}</small></div>`);
+    tiles.push(`<div class="mwd-tile${live?" live":""}${me?" me":""}${MWD.edit?" edit":""}" draggable="true" data-rc="${r},${c}" data-n="${n}"><em class="mwd-cp" title="copy this screen's link">🔗</em><b>${n}</b><small>${sub}</small></div>`);
   }
   $("#mwTiles").innerHTML=tiles.join("");
   $("#mwContent").innerHTML=MW_CONTENT.map(c=>
@@ -6453,7 +6702,14 @@ function mwPrevTf(ctx,W,H,t){
     ctx.restore();
   });
 }
-$("#mwTiles").onclick=e=>{const el=e.target.closest(".mwd-tile"); if(!el)return;
+$("#mwTiles").onclick=async e=>{
+  const cp=e.target.closest(".mwd-cp");               // 🔗 per-screen link: URL + room + screen no.
+  if(cp){ const el0=cp.closest(".mwd-tile"), n=+el0.dataset.n||0; if(!n)return;
+    mwnCode(); const link=mwTvLink(n);
+    try{await navigator.clipboard.writeText(link);}catch(err){}
+    $("#boardHint").textContent=`SCREEN ${n} link copied → ${link}  ·  open it on that TV and it joins as screen ${n} automatically.`;
+    return; }
+  const el=e.target.closest(".mwd-tile"); if(!el)return;
   if(MWD.edit){                                       // sculpt the wall: toggle cells on/off
     const rc=el.dataset.rc.split(",").map(Number);
     const i=MWD.cells.findIndex(p=>p[0]===rc[0]&&p[1]===rc[1]);
@@ -6516,11 +6772,14 @@ $("#mwFireBtn").onclick=()=>{ if(MW_CUE[MWD.sel])mwFireCue(MWD.sel);
 $("#mwScanBtn").onclick=()=>mwAnalyzeScreens();
 $("#mwNetBtn").onclick=()=>mwnGo(!MWN.on);
 $("#mwRoomNew").onclick=()=>{mwnCode("new"); if(MWN.on)mwnGo(true); else mwDashRender();};
-$("#mwLinkBtn").onclick=async e=>{ mwnCode(); const link=mwTvLink();
-  try{await navigator.clipboard.writeText(link);}catch(err){}
-  const b=e.currentTarget, t=b.textContent; b.textContent="✅ "+link;
-  clearTimeout(b._t); b._t=setTimeout(()=>{b.textContent=t;},4000);
-  $("#boardHint").textContent="Open that link on each TV (any device, any network), then tap the screen number it should be. Same ROOM code = same wall.";};
+$("#mwLinkBtn").onclick=async e=>{ mwnCode();
+  const n=mwCount(), lines=[];                        // ONE PRE-ASSIGNED LINK PER TV
+  for(let i=1;i<=n;i++)lines.push("SCREEN "+i+"  "+mwTvLink(i));
+  const txt=lines.join("\n");
+  try{await navigator.clipboard.writeText(txt);}catch(err){}
+  const b=e.currentTarget, lbl=b.textContent; b.textContent="✅ "+n+" links copied";
+  clearTimeout(b._t); b._t=setTimeout(()=>{b.textContent=lbl;},4000);
+  $("#boardHint").textContent=`${n} per-screen links copied (room ${MWN.room}) — pattern: <url>?room=${MWN.room}&wallscreen=N. Open screen N's link on that TV and it joins as screen N by itself, no tapping. 🔗 on a tile copies just that one.`;};
 $("#dashMulti").onclick=()=>startMultiScreen();
 $("#dashSingle").onclick=()=>{ if(LEAGUE==="multi")setLeague("mlb"); };
 $("#lgMLB").onclick=()=>setLeague("mlb");
